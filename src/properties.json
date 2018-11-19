@@ -1,4 +1,5 @@
 {
   "realm": "ClientFhirServer",
-  "client": "app-login"
+  "client": "app-login",
+  "auth": "http://localhost:8180/auth"
 }
