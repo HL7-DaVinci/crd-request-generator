@@ -33,15 +33,14 @@ export default class RequestBuilder extends Component{
             oauth:false,
             loading:false,
             logs:[],
-            keypair:KEYUTIL.generateKeypair('RSA',2048)
+            keypair:null
         };
         this.validateMap={
             age:(foo=>{return isNaN(foo)}),
             gender:(foo=>{return foo!=="male" && foo!=="female"}),
             code:(foo=>{return !foo.match(/^[a-z0-9]+$/i)})
         };
-        console.log(this.state.keypair);
-
+ 
 
 
 
@@ -50,8 +49,13 @@ export default class RequestBuilder extends Component{
     this.startLoading = this.startLoading.bind(this);
     this.submit_info = this.submit_info.bind(this);
     this.consoleLog = this.consoleLog.bind(this);
-
     }
+
+  
+    componentDidMount() {
+      this.setState({keypair: KEYUTIL.generateKeypair('RSA',2048)});
+    }
+
   
     makeid() {
       var text = [];
@@ -68,7 +72,7 @@ export default class RequestBuilder extends Component{
     
       const jwkPrv2 = KEYUTIL.getJWKFromKey(this.state.keypair.prvKeyObj);
       const jwkPub2 = KEYUTIL.getJWKFromKey(this.state.keypair.pubKeyObj);
-      console.log(pubKey);
+
       const currentTime = KJUR.jws.IntDate.get('now');
       const endTime = KJUR.jws.IntDate.get('now + 1day');
       const kid = KJUR.jws.JWS.getJWKthumbprint(jwkPub2)

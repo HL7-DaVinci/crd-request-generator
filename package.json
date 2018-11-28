@@ -15,6 +15,7 @@
     "jsrsasign": "^8.0.12",
     "keypair": "^1.0.1",
     "merge": "^1.2.1",
+    "openid-client": "^2.4.5",
     "popper.js": "^1.14.4",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
@@ -38,6 +39,7 @@
   },
   "devDependencies": {
     "fs": "0.0.1-security",
-    "jju": "^1.4.0"
+    "jju": "^1.4.0",
+    "keycloak-js": "^4.6.0"
   }
 }

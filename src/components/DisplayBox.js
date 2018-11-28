@@ -7,7 +7,7 @@ import Text from 'terra-text';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
 import axios from 'axios';
-
+import SMARTBox from './SMARTBox';
 
 const propTypes = {
     /**
@@ -45,9 +45,10 @@ export default class DisplayBox extends Component{
         this.renderSource = this.renderSource.bind(this);
         this.modifySmartLaunchUrls = this.modifySmartLaunchUrls.bind(this);
         this.retrieveLaunchContext = this.retrieveLaunchContext.bind(this);
-
+        this.exitSmart = this.exitSmart.bind(this);
         this.state={
-            value: ""
+            value: "",
+            smartLink: ""
         };
     }
   /**
@@ -81,6 +82,9 @@ export default class DisplayBox extends Component{
     e.preventDefault();
   }
 
+  exitSmart(e) {
+    this.setState({"smartLink":""});
+  }
   /**
    * Open the absolute or SMART link in a new tab and display an error if a SMART link does not have
    * appropriate launch context if used against a secured FHIR endpoint.
@@ -94,7 +98,7 @@ export default class DisplayBox extends Component{
         // TODO: Create an error modal to display for SMART link that cannot be launched securely
         return;
       }
-      window.open(link.url, '_blank');
+      this.setState({"smartLink":link.url});
     }
   }
 
@@ -122,8 +126,8 @@ export default class DisplayBox extends Component{
           } else {
             linkCopy.url += '&';
           }
-          linkCopy.url += `fhirServiceUrl=${this.props.fhirServerUrl}`;
-          linkCopy.url += `&patientId=${this.props.patientId}`;
+          //linkCopy.url += `fhirServiceUrl=${this.props.fhirServerUrl}`;
+          //linkCopy.url += `&patientId=${this.props.patientId}`;
         }
         return linkCopy;
       });
@@ -220,6 +224,7 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
         );
       }
     render() {
+      console.log(this.state.smartLink);
         const indicators = {
             info: 0,
             warning: 1,
@@ -295,6 +300,13 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
           }
 
           if (renderedCards.length === 0) { return <div><div className='decision-card alert-warning'>No Cards</div></div>; }
-          return <div>{renderedCards}</div>;
+          return <div>
+                  <div>
+                  {renderedCards}
+                  </div>
+                  <div>
+                    <SMARTBox link={this.state.smartLink} exitSmart={this.exitSmart}/>
+                  </div>
+                </div>;
         }
       }
