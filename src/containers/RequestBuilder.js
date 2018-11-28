@@ -130,7 +130,7 @@ export default class RequestBuilder extends Component{
 
     async login(){
 
-      const tokenUrl = "http://localhost:8180/auth/realms/"+config.realm+"/protocol/openid-connect/token"
+      const tokenUrl = config.auth+"/realms/"+config.realm+"/protocol/openid-connect/token"
       this.consoleLog("Retrieving OAuth token from "+tokenUrl,types.info);
       let params = {
           grant_type:"password",
@@ -200,9 +200,9 @@ export default class RequestBuilder extends Component{
         "Content-Type": "application/json",
         "authorization": jwt
       });
-            this.consoleLog("Fetching response from http://localhost:8090/r4/cds-services/order-review-crd/",types.info)
+            this.consoleLog("Fetching response from " + config.cds_service_enpoint,types.info)
           try{
-            const fhirResponse= await fetch("http://localhost:8090/r4/cds-services/order-review-crd",{
+            const fhirResponse= await fetch(config.cds_service_enpoint,{
                 method: "POST",
                 headers: myHeaders,
                 body: JSON.stringify(json_request)
