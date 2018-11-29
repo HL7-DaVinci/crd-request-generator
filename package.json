@@ -32,7 +32,7 @@
     "terra-text": "^2.18.0"
   },
   "scripts": {
-    "start": "json-server --watch src/db.json -p 3001 & react-scripts start",
+    "start": "json-server --watch src/db.json -p 3001 && react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
