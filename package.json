@@ -32,12 +32,13 @@
     "terra-text": "^2.18.0"
   },
   "scripts": {
-    "start": "json-server --watch src/db.json -p 3001 && react-scripts start",
+    "start": "concurrently --kill-others \"json-server --watch src/db.json -p 3001\" \"react-scripts start\"",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
   "devDependencies": {
+    "concurrently": "^4.1.0",
     "fs": "0.0.1-security",
     "jju": "^1.4.0",
     "keycloak-js": "^4.6.0"
