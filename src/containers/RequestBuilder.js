@@ -41,10 +41,6 @@ export default class RequestBuilder extends Component{
             code:(foo=>{return !foo.match(/^[a-z0-9]+$/i)})
         };
  
-
-
-
-        
     this.updateStateElement = this.updateStateElement.bind(this);
     this.startLoading = this.startLoading.bind(this);
     this.submit_info = this.submit_info.bind(this);
@@ -56,14 +52,13 @@ export default class RequestBuilder extends Component{
       this.setState({keypair: KEYUTIL.generateKeypair('RSA',2048)});
     }
 
-  
     makeid() {
       var text = [];
       var possible = "---ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     
       for (var i = 0; i < 25; i++)
         text.push(possible.charAt(Math.floor(Math.random() * possible.length)));
-    
+
       return text.join('');
     }
 
@@ -135,7 +130,7 @@ export default class RequestBuilder extends Component{
 
     async login(){
 
-      const tokenUrl = "http://localhost:8180/auth/realms/"+config.realm+"/protocol/openid-connect/token"
+      const tokenUrl = config.auth+"/realms/"+config.realm+"/protocol/openid-connect/token"
       this.consoleLog("Retrieving OAuth token from "+tokenUrl,types.info);
       let params = {
           grant_type:"password",
@@ -199,17 +194,15 @@ export default class RequestBuilder extends Component{
         const token = await this.login();
       }
       let json_request = this.getJson();
-      console.log(json_request);
       let jwt = await this.createJwt();
-      //console.log(jwt);
       jwt = "Bearer " + jwt;
       var myHeaders = new Headers({
         "Content-Type": "application/json",
         "authorization": jwt
       });
-            this.consoleLog("Fetching response from http://localhost:8090/r4/cds-services/order-review-crd/",types.info)
+            this.consoleLog("Fetching response from " + config.cds_service_enpoint,types.info)
           try{
-            const fhirResponse= await fetch("http://localhost:8090/r4/cds-services/order-review-crd",{
+            const fhirResponse= await fetch(config.cds_service_enpoint,{
                 method: "POST",
                 headers: myHeaders,
                 body: JSON.stringify(json_request)
@@ -219,7 +212,6 @@ export default class RequestBuilder extends Component{
             }).catch(reason => this.consoleLog("No response recieved from the server", types.error));
 
             if(fhirResponse && fhirResponse.status){
-              console.log(fhirResponse);
               this.consoleLog("Server returned status " 
                               + fhirResponse.status + ": " 
                               + fhirResponse.error,types.error);

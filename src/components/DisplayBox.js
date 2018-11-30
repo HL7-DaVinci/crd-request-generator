@@ -224,7 +224,6 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
         );
       }
     render() {
-      console.log(this.state.smartLink);
         const indicators = {
             info: 0,
             warning: 1,
@@ -240,7 +239,7 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
           };
           const renderedCards = [];
           // Iterate over each card in the cards array
-          if(this.props.response!=null){
+          if(this.props.response!=null && this.props.response.cards!=null){
             this.props.response.cards
             .sort((b, a) => indicators[a.indicator] - indicators[b.indicator])
             .forEach((c, cardInd) => {

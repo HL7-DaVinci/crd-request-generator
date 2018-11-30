@@ -1,5 +1,7 @@
 {
   "realm": "ClientFhirServer",
   "client": "app-login",
-  "auth": "http://localhost:8180/auth"
+  "auth": "http://localhost:8180/auth",
+  "server": "http://localhost:8090",
+  "cds_service_enpoint":"http://localhost:8090/r4/cds-services/order-review-crd"
 }
