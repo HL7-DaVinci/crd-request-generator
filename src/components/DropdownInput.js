@@ -38,7 +38,7 @@ export default class DropdownInput extends Component {
 
 
   render() {
-    const { currentValue } = this.state
+    const { currentValue } = this.props
     if(currentValue){
         blackBorder = "blackBorder";
     }else{

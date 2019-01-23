@@ -23,9 +23,10 @@ export default class RequestBuilder extends Component{
     constructor(props){
         super(props);
         this.state = { 
-            age: null,
+            age: "",
             gender: null,
             code: null,
+            codeSystem:null,
             patientState: null,
             practitionerState: null,
             response:null,
@@ -45,6 +46,7 @@ export default class RequestBuilder extends Component{
     this.startLoading = this.startLoading.bind(this);
     this.submit_info = this.submit_info.bind(this);
     this.consoleLog = this.consoleLog.bind(this);
+    this.setDara = this.setDara.bind(this);
     }
 
   
@@ -52,6 +54,15 @@ export default class RequestBuilder extends Component{
       this.setState({keypair: KEYUTIL.generateKeypair('RSA',2048)});
     }
 
+    setDara() {
+        this.setState({age: 79,
+            gender: "female",
+            code: "E0424",
+            codeSystem:"https://bluebutton.cms.gov/resources/codesystem/hcpcs",
+            patientState: "MA",
+            practitionerState: "MA"});
+
+    }
     makeid() {
       var text = [];
       var possible = "---ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -272,6 +283,7 @@ export default class RequestBuilder extends Component{
         return (
             <div>
             <div className="form-group container left-form">
+            <button className="dara-button btn btn-class" onClick={this.setDara}>Dara</button>
                 {Object.keys(this.validateMap)
                 .map((key) => {
 
@@ -286,6 +298,7 @@ export default class RequestBuilder extends Component{
                           Gender
                         </div>
                         <Toggle
+                        value = {this.state.gender}
                         elementName={key}
                         updateCB={this.updateStateElement}
                         options={options}
@@ -300,6 +313,7 @@ export default class RequestBuilder extends Component{
                           Code
                         </div>
                         <DropdownInput
+                            currentValue={this.state.code}
                             elementName={key}
                             updateCB={this.updateStateElement}
                             />
@@ -312,6 +326,7 @@ export default class RequestBuilder extends Component{
                           Age
                         </div>
                         <InputBox
+                            value={this.state.age}
                             elementName={key}
                             updateCB={this.updateStateElement}
                             extraClass={!validationResult[key] ? "error-border" : "regular-border"}/>
@@ -327,6 +342,7 @@ export default class RequestBuilder extends Component{
                   <DropdownState 
                     elementName="patientState"
                     updateCB={this.updateStateElement}
+                    currentValue={this.state.patientState}
                   />
                   </div>
                   <div className="rightStateInput">
@@ -336,6 +352,7 @@ export default class RequestBuilder extends Component{
                   <DropdownState 
                     elementName="practitionerState"
                     updateCB={this.updateStateElement}
+                    currentValue={this.state.practitionerState}
                   />
                   </div>
                 </div>
