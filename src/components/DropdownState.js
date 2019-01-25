@@ -60,7 +60,7 @@ let blackBorder = "blackBorder";
 export default class DropdownState extends Component {
   constructor(props){
     super(props);
-    this.state = { currentValue: ""}
+    this.state = { currentValue: "MA"}
   };
 
   handleChange = (e, { value }) => {
@@ -69,7 +69,7 @@ export default class DropdownState extends Component {
   }
 
   render() {
-    const { currentValue } = this.state
+    const { currentValue } = this.props;
     if(currentValue){
         blackBorder = "blackBorder";
     }else{
@@ -84,6 +84,7 @@ export default class DropdownState extends Component {
         selection
         fluid
         onChange={this.handleChange}
+        value={currentValue}
       />
     )
   }

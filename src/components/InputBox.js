@@ -22,7 +22,7 @@ export default class InputBox extends Component {
             <input
             className={"form-control input-text " + this.props.extraClass}
             name={this.props.elementName}
-            value={this.state.value}
+            value={this.props.value}
             onChange={this.onInputChange}
 
             ></input>

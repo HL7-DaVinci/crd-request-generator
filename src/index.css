@@ -239,3 +239,14 @@ input:not(:focus):not([value=""]):valid ~ .floating-label{
   float:left;
   margin-bottom:25px;
 }
+
+.dara-button{
+    border-width:1px 3px 3px 3px;
+    border-style: solid solid solid solid;
+    border-color: black;
+    background: linear-gradient(white,white)
+}
+.dara-button:hover{
+    background: black;
+    color: white;
+}
