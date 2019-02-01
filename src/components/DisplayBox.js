@@ -246,7 +246,10 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
               const card = JSON.parse(JSON.stringify(c));
       
               // -- Summary --
-              const summarySection = <Text fontSize={18} weight={700} color={summaryColors[card.indicator]}>{card.summary}</Text>;
+              const summarySection = <Text fontSize={18} weight={700} color={summaryColors[card.indicator]}>
+                                       <p>SUMMARY:<br />{card.summary}</p>
+                                       <p>DETAILS:<pre>{card.detail}</pre></p>
+                                     </Text>;
       
               // -- Source --
               const sourceSection = card.source && Object.keys(card.source).length ? this.renderSource(card.source) : '';
