@@ -254,7 +254,7 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
               const sourceSection = card.source && Object.keys(card.source).length ? this.renderSource(card.source) : '';
 
               // -- Detail (ReactMarkdown supports Github-flavored markdown) --
-              const detailSection = card.detail ? <div style={{color: summaryColors.info}}><ReactMarkdown source={card.detail} /></div> : '';
+              const detailSection = card.detail ? <div style={{color: summaryColors.info}}><ReactMarkdown source={card.detail} /></div> : <Text color='grey'>None</Text>;
       
               // -- Suggestions --
               let suggestionsSection;
@@ -288,13 +288,13 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
               const builtCard = (
                 <TerraCard key={cardInd} className='decision-card alert-info'>
                   <h4 style={cardSectionHeaderStyle}>Summary</h4>
-                  <p>{summarySection}</p>
+                  <div>{summarySection}</div>
 
                   <h4 style={cardSectionHeaderStyle}>Details</h4>
-                  <p>{detailSection}</p>
+                  <div>{detailSection}</div>
 
                   <br/>
-                  <p>{sourceSection}</p>
+                  <div>{sourceSection}</div>
 
                   <div className={styles['suggestions-section']}>
                     {suggestionsSection}
