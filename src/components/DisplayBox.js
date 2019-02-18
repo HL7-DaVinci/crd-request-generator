@@ -8,6 +8,8 @@ import cx from 'classnames';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import SMARTBox from './SMARTBox';
+import ReactMarkdown from 'react-markdown';
+import './displayBox.css';
 
 const propTypes = {
     /**
@@ -251,12 +253,12 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
       
               // -- Summary --
               const summarySection = <Text fontSize={18} weight={700} color={summaryColors[card.indicator]}>{card.summary}</Text>;
-      
+
               // -- Source --
               const sourceSection = card.source && Object.keys(card.source).length ? this.renderSource(card.source) : '';
-      
+
               // -- Detail (ReactMarkdown supports Github-flavored markdown) --
-              const detailSection = '';
+              const detailSection = card.detail ? <div style={{color: summaryColors.info}}><ReactMarkdown source={card.detail} /></div> : <Text color='grey'>None</Text>;
       
               // -- Suggestions --
               let suggestionsSection;
@@ -285,11 +287,19 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
                 ));
               }
     
+              const cardSectionHeaderStyle = { marginBottom: '2px', color: 'black' };
+
               const builtCard = (
                 <TerraCard key={cardInd} className='decision-card alert-info'>
-                  {summarySection}
-                  {sourceSection}
-                  {detailSection}
+                  <h4 style={cardSectionHeaderStyle}>Summary</h4>
+                  <div>{summarySection}</div>
+
+                  <h4 style={cardSectionHeaderStyle}>Details</h4>
+                  <div>{detailSection}</div>
+
+                  <br/>
+                  <div>{sourceSection}</div>
+
                   <div className={styles['suggestions-section']}>
                     {suggestionsSection}
                   </div>
