@@ -3,5 +3,8 @@
   "client": "app-login",
   "auth": "http://localhost:8180/auth",
   "server": "http://localhost:8090",
-  "cds_service_enpoint":"http://localhost:8090/r4/cds-services/order-review-crd"
+  "ehr_server": "http://localhost:8080/ehr-server/r4/",
+  "cds_service":"http://localhost:8090/r4/cds-services/order-review-crd",
+  "ehr_server_stu3":"http://localhost:8080/ehr-server/stu3/",
+  "cds_service_stu3": "http://localhost:8090/stu3/cds-services/order-review-crd"
 }
