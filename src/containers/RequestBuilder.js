@@ -217,7 +217,6 @@ export default class RequestBuilder extends Component {
             const token = await this.login();
         }
         let json_request = this.getJson();
-        console.log(json_request);
         let jwt = await this.createJwt();
         jwt = "Bearer " + jwt;
         var myHeaders = new Headers({
@@ -309,84 +308,64 @@ export default class RequestBuilder extends Component {
                             headers={headers}
                             updateCB={this.updateVersionedStateElement}
                         />:null}
-
-                    {Object.keys(this.validateMap)
-                        .map((key) => {
-
-                            // Make type of input and the associated options available in some
-                            // top level json instead of hard-coding the if-else per key
-                            // e.g., gender should have a "toggle" attribute and the options
-                            // it wants should be written in the JSON.  This way if we want more
-                            // options later they're easy to add.
-                            if (key === "gender") {
-                                return <div key={key}>
-                                    <div className="header">
-                                        Gender
-                        </div>
-                                    <Toggle
-                                        value={this.state.gender}
-                                        elementName={key}
-                                        updateCB={this.updateStateElement}
-                                        options={options}
-                                        extraClass={!validationResult[key] ? "error-border" : "regular-border"}
-                                    ></Toggle>
-                                    <br />
-                                </div>
-
-                            } else if (key === "code") {
-                                return <div key={key}>
-                                    <div className="header">
-                                        Code
-                        </div>
-                                    <DropdownInput
-                                        currentValue={this.state.code}
-                                        elementName={key}
-                                        updateCB={this.updateStateElement}
-                                    />
-
-                                    <br />
-                                </div>
-                            } else {
-                                return <div key={key}>
-                                    <div className="header">
-                                        Age
-                        </div>
-                                    <InputBox
-                                        value={this.state.age}
-                                        elementName={key}
-                                        updateCB={this.updateStateElement}
-                                        extraClass={!validationResult[key] ? "error-border" : "regular-border"} />
-                                    <br />
-                                </div>
-                            }
-                        })}
-                    <div>
-                        <div className="leftStateInput">
+                        <div>
                             <div className="header">
-                                Patient State
-                  </div>
-                            <DropdownState
-                                elementName="patientState"
-                                updateCB={this.updateStateElement}
-                                currentValue={this.state.patientState}
-                            />
+                                Age
+                            </div>
+                            <InputBox
+                                value={this.state.age}
+                                elementName="age"
+                                updateCB={this.updateStateElement} />
+                            <br />
                         </div>
-                        <div className="rightStateInput">
+                        <div>
                             <div className="header">
-                                Practitioner State
+                                Gender
+                            </div>
+                                <Toggle
+                                    value={this.state.gender}
+                                    elementName="gender"
+                                    updateCB={this.updateStateElement}
+                                    options={options}
+                                ></Toggle>
+                            <br />
                         </div>
-                            <DropdownState
-                                elementName="practitionerState"
-                                updateCB={this.updateStateElement}
-                                currentValue={this.state.practitionerState}
-                            />
+                        <div>
+                            <div className="header">
+                                Code
+                            </div>
+                                <DropdownInput
+                                    currentValue={this.state.code}
+                                    elementName="code"
+                                    updateCB={this.updateStateElement}
+                                />
+                            <br />
                         </div>
-                    </div>
 
-
-                    <br />
+                        <div>
+                            <div className="leftStateInput">
+                                <div className="header">
+                                    Patient State
+                                </div>
+                                <DropdownState
+                                    elementName="patientState"
+                                    updateCB={this.updateStateElement}
+                                    currentValue={this.state.patientState}
+                                />
+                            </div>
+                            <div className="rightStateInput">
+                                <div className="header">
+                                    Practitioner State
+                                </div>
+                                <DropdownState
+                                    elementName="practitionerState"
+                                    updateCB={this.updateStateElement}
+                                    currentValue={this.state.practitionerState}
+                                />
+                            </div>
+                        </div>
+                        <br />
                     <button className={"submit-btn btn btn-class " + (!total ? "button-error" : total === 1 ? "button-ready" : "button-empty-fields")} onClick={this.startLoading}>Submit
-    
                 </button>
 
 

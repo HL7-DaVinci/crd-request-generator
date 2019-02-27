@@ -7,7 +7,7 @@ import Text from 'terra-text';
 import cx from 'classnames';
 import PropTypes from 'prop-types';
 import axios from 'axios';
-import SMARTBox from './SMARTBox';
+import SMARTBox from '../SMARTBox/SMARTBox';
 import ReactMarkdown from 'react-markdown';
 import './displayBox.css';
 

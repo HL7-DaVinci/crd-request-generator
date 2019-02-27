@@ -18,9 +18,6 @@ export default class SettingsBox extends Component {
 
     updateCB(elementName, value) {
         this.props.updateCB(elementName, value);
-        console.log(value);
-        console.log(elementName);
-
         this.setState(prevState => ({
                 ...prevState,
                 headers: {
@@ -47,7 +44,7 @@ export default class SettingsBox extends Component {
                     return <div key={header}>
                         <p className="setting-header">{headers[header].display}</p>
                         <InputBox 
-                            extraClass = "skadingle"
+                            extraClass = "setting-input"
                             value = {value}
                             updateCB = {this.updateCB}
                             elementName = {header}/>
