@@ -143,8 +143,11 @@ export default class RequestBuilder extends Component {
     updateVersionedStateElement = (elementName, text) => {
         this.setState(prevState => ({
             ...prevState,
-            [this.state.version]: text
+            [elementName]: {
+                ...prevState[elementName],
+                [this.state.version]: text
             }
+        }
         ))
     }
 
@@ -212,7 +215,7 @@ export default class RequestBuilder extends Component {
     }
     async submit_info() {
         this.consoleLog("Initiating form submission", types.info);
-
+        console.log(this.state);
         if (this.state.oauth) {
             const token = await this.login();
         }
