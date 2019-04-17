@@ -88,18 +88,26 @@ export default class RequestBuilder extends Component {
         const endTime = KJUR.jws.IntDate.get('now + 1day');
         const kid = KJUR.jws.JWS.getJWKthumbprint(jwkPub2)
         // const pubPem = {"pem":KEYUTIL.getPEM(pubKey),"id":kid};
-        const pubPem = { "pem": jwkPub2, "id": kid };
+        const pubPem = jwkPub2;
+        pubPem.id = kid;
 
         // Check if the public key is already in the db
-        const checkForPublic = await fetch("http://localhost:3001/public_keys?id=" + kid, {
+        const checkForPublic = await fetch("/public/" + kid, {
             "headers": {
                 "Content-Type": "application/json"
             },
             "method": "GET"
-        }).then(response => { return response.json() });
-        if (!checkForPublic.length) {
+        }).then((response) => {
+            if(response.status !==200) {
+                // problem!
+                return false;
+            }else{
+                return response.json();
+            }
+        }).catch(response => {console.log(response)});
+        if (!checkForPublic) {
             // POST key to db if it's not already there
-            const alag = await fetch("http://localhost:3001/public_keys", {
+            const alag = await fetch("/public/", {
                 "body": JSON.stringify(pubPem),
                 "headers": {
                     "Content-Type": "application/json"
@@ -111,7 +119,7 @@ export default class RequestBuilder extends Component {
             "alg": "RS256",
             "typ": "JWT",
             "kid": kid,
-            "jku": "http://localhost:3001/public_keys"
+            "jku": window.location.href + "/public"
         };
         const body = {
             "iss": "localhost:3000",
