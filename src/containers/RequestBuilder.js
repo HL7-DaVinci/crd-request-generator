@@ -92,7 +92,7 @@ export default class RequestBuilder extends Component {
         pubPem.id = kid;
 
         // Check if the public key is already in the db
-        const checkForPublic = await fetch("./public/" + kid, {
+        const checkForPublic = await fetch("./reqgen/public/" + kid, {
             "headers": {
                 "Content-Type": "application/json"
             },
@@ -107,7 +107,7 @@ export default class RequestBuilder extends Component {
         }).catch(response => {console.log(response)});
         if (!checkForPublic) {
             // POST key to db if it's not already there
-            const alag = await fetch("./public/", {
+            const alag = await fetch("./reqgen/public/", {
                 "body": JSON.stringify(pubPem),
                 "headers": {
                     "Content-Type": "application/json"
