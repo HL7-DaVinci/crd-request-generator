@@ -42,3 +42,6 @@ iframe{
     padding: 2px;
     margin-left: 10px;
 }
+.hideSmartBox {
+    display:none;
+}

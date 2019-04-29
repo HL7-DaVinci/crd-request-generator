@@ -4,7 +4,7 @@ export default class SMARTBox extends Component {
     constructor(props){
         super(props);
         this.state={
-            minimized: true
+            minimized: false
         };
 
         this.minimizeSmart = this.minimizeSmart.bind(this);
@@ -16,28 +16,30 @@ export default class SMARTBox extends Component {
 
 
     render() {
-
+        console.log(this.props.link);
         return (
             <div>
-                {this.props.link?this.state.minimized?
-                            <div className="smartBox">
-                            <div className="smartHeader">
-                            <button 
-                            className="smartExit"
-                            onClick={this.props.exitSmart}>X</button>
-                            <button 
-                            className="smartMinimize"
-                            onClick={this.minimizeSmart}>-</button>
-                            </div>
-                            
-                            <iframe src={this.props.link}></iframe>
+                {this.props.link?
+                <div>
+                            <div className={"smartBox " + (this.state.minimized?"hideSmartBox":"")}>
+                                <div className="smartHeader">
+                                    <button 
+                                    className="smartExit"
+                                    onClick={this.props.exitSmart}>X</button>
+                                    <button 
+                                    className="smartMinimize"
+                                    onClick={this.minimizeSmart}>-</button>
+                                    </div>
+                                    
+                                    <iframe src={this.props.link}></iframe>
 
-                            </div>
-                            :
+                                </div>
+
                             <div>
                                 <a 
                                 onClick={this.minimizeSmart}
                                 className="minimizedFrame">Smart App</a>
+                            </div>
                             </div>
                             :
                             ""

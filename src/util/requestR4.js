@@ -199,7 +199,7 @@ export default function getRequest(state) {
               {
                 "resource": {
                   "resourceType": "DeviceRequest",
-                  "id": "123",
+                  "id": "devreq013",
                   "meta": {
                     "profile": [
                       "http://hl7.org/fhir/us/davinci-crd/STU3/StructureDefinition/profile-devicerequest-stu3"
@@ -332,7 +332,7 @@ export default function getRequest(state) {
                 {
                     "resource": {
                     "resourceType": "DeviceRequest",
-                    "id": "123",
+                    "id": "devreq013",
                     "meta": {
                         "profile": [
                         "http://hl7.org/fhir/us/davinci-crd/STU3/StructureDefinition/profile-devicerequest-stu3"
