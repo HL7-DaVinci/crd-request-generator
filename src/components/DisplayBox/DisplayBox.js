@@ -50,8 +50,25 @@ export default class DisplayBox extends Component{
         this.exitSmart = this.exitSmart.bind(this);
         this.state={
             value: "",
-            smartLink: ""
+            smartLink: "",
+            response: {}
         };
+    }
+
+    static getDerivedStateFromProps(nextProps, prevState) {
+        if(JSON.stringify(nextProps.response) !== JSON.stringify(prevState.response)) {
+            return {"response":nextProps.response}
+        }else{ 
+            return null;
+        }
+    }
+
+    shouldComponentUpdate(nextProps, prevState) {
+        if(JSON.stringify(nextProps.response) !== JSON.stringify(this.state.response) || this.state.smartLink !== prevState.smartLink) {
+            return true;
+        }else{
+            return false;
+        }
     }
   /**
    * Take a suggestion from a CDS service based on action on from a card. Also pings the analytics endpoint (if any) of the
@@ -118,7 +135,8 @@ export default class DisplayBox extends Component{
     if (!this.props.isDemoCard) {
       return card.links.map((link) => {
         let linkCopy = Object.assign({}, link);
-        if (link.type === 'smart' && this.props.fhirAccessToken) {
+
+        if (link.type === 'smart' && (this.props.fhirAccessToken || this.props.ehrLaunch) && !this.state.smartLink) {
           this.retrieveLaunchContext(
             linkCopy, this.props.fhirAccessToken,
             this.props.patientId, this.props.fhirServerUrl,
@@ -153,13 +171,17 @@ export default class DisplayBox extends Component{
  */
 retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
     return new Promise((resolve, reject) => {
-      const headers = {
-        Accept: 'application/json',
-        Authorization: `Bearer ${accessToken.access_token}`,
+      const headers = accessToken ?
+      {
+        "Accept": 'application/json',
+        "Authorization": `Bearer ${accessToken.access_token}`
+      }
+      :
+      {        
+        "Accept": 'application/json'
       };
-  
       const launchParameters = {
-        patient: patientId,
+        patientId: patientId,
       };
   
       if (link.appContext) {
@@ -176,14 +198,14 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
           parameters: launchParameters,
         },
       }).then((result) => {
-        if (result.data && Object.prototype.hasOwnProperty.call(result.data, 'launch_id')) {
+        if (result.data && Object.prototype.hasOwnProperty.call(result.data, 'launchId')) {
           if (link.url.indexOf('?') < 0) {
             link.url += '?';
           } else {
             link.url += '&';
           }
-          link.url += `launch=${result.data.launch_id}`;
-          link.url += `&iss=${fhirBaseUrl}`;
+          link.url += `launch=${result.data.launchId}`;
+        //   link.url += `&iss=${fhirBaseUrl}`;
           return resolve(link);
         }
         console.error('FHIR server endpoint did not return a launch_id to launch the SMART app. See network calls to the Launch endpoint for more details');
@@ -245,8 +267,8 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
           };
           const renderedCards = [];
           // Iterate over each card in the cards array
-          if(this.props.response!=null && this.props.response.cards!=null){
-            this.props.response.cards
+          if(this.state.response!=null && this.state.response.cards!=null){
+            this.state.response.cards
             .sort((b, a) => indicators[a.indicator] - indicators[b.indicator])
             .forEach((c, cardInd) => {
               const card = JSON.parse(JSON.stringify(c));
@@ -311,7 +333,6 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
               renderedCards.push(builtCard);
             });
           }
-
           if (renderedCards.length === 0) { return <div><div className='decision-card alert-warning'>No Cards</div></div>; }
           return <div>
                   <div>

@@ -61,12 +61,12 @@ export default class RequestBuilder extends Component {
 
     setDara() {
         this.setState({
-            age: 79,
-            gender: "female",
+            age: 54,
+            gender: "male",
             code: "E0424",
             codeSystem: "https://bluebutton.cms.gov/resources/codesystem/hcpcs",
-            patientState: "MA",
-            practitionerState: "MA"
+            patientState: "TX",
+            practitionerState: "TX"
         });
     }
 
@@ -88,18 +88,26 @@ export default class RequestBuilder extends Component {
         const endTime = KJUR.jws.IntDate.get('now + 1day');
         const kid = KJUR.jws.JWS.getJWKthumbprint(jwkPub2)
         // const pubPem = {"pem":KEYUTIL.getPEM(pubKey),"id":kid};
-        const pubPem = { "pem": jwkPub2, "id": kid };
+        const pubPem = jwkPub2;
+        pubPem.id = kid;
 
         // Check if the public key is already in the db
-        const checkForPublic = await fetch("http://localhost:3001/public_keys?id=" + kid, {
+        const checkForPublic = await fetch("http://localhost:8080/ehr-server/reqgen/public/" + kid, {
             "headers": {
                 "Content-Type": "application/json"
             },
             "method": "GET"
-        }).then(response => { return response.json() });
-        if (!checkForPublic.length) {
+        }).then((response) => {
+            if(response.status !==200) {
+                // problem!
+                return false;
+            }else{
+                return response.json();
+            }
+        }).catch(response => {console.log(response)});
+        if (!checkForPublic) {
             // POST key to db if it's not already there
-            const alag = await fetch("http://localhost:3001/public_keys", {
+            const alag = await fetch("http://localhost:8080/ehr-server/reqgen/public/", {
                 "body": JSON.stringify(pubPem),
                 "headers": {
                     "Content-Type": "application/json"
@@ -111,7 +119,7 @@ export default class RequestBuilder extends Component {
             "alg": "RS256",
             "typ": "JWT",
             "kid": kid,
-            "jku": "http://localhost:3001/public_keys"
+            "jku": window.location.href + "/public"
         };
         const body = {
             "iss": "localhost:3000",
@@ -143,8 +151,11 @@ export default class RequestBuilder extends Component {
     updateVersionedStateElement = (elementName, text) => {
         this.setState(prevState => ({
             ...prevState,
-            [this.state.version]: text
+            [elementName]: {
+                ...prevState[elementName],
+                [this.state.version]: text
             }
+        }
         ))
     }
 
@@ -212,7 +223,6 @@ export default class RequestBuilder extends Component {
     }
     async submit_info() {
         this.consoleLog("Initiating form submission", types.info);
-
         if (this.state.oauth) {
             const token = await this.login();
         }
@@ -240,6 +250,9 @@ export default class RequestBuilder extends Component {
                     + fhirResponse.error, types.error);
                 this.consoleLog(fhirResponse.message, types.error);
             } else {
+                console.log("-----");
+                console.log(fhirResponse);
+                console.log("----")
                 this.setState({ response: fhirResponse });
             }
             this.setState({ loading: false });
@@ -385,7 +398,10 @@ export default class RequestBuilder extends Component {
 
                 <div className="right-form">
                     <DisplayBox
-                        response={this.state.response} />
+                        response={this.state.response} 
+                        patientId = "pat013"
+                        ehrLaunch = {true}
+                        fhirServerUrl = "http://localhost:8080/ehr-server/"/>
                 </div>
 
             </div>
