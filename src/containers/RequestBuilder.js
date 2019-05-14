@@ -401,7 +401,7 @@ export default class RequestBuilder extends Component {
                         response={this.state.response} 
                         patientId = "pat013"
                         ehrLaunch = {true}
-                        fhirServerUrl = "http://localhost:8080/ehr-server/"/>
+                        fhirServerUrl = "http://localhost:8080/ehr-server"/>
                 </div>
 
             </div>
