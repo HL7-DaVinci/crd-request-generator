@@ -80,7 +80,7 @@ export default function getRequest(state) {
                                 }
                             ],
                             "performer": {
-                                "reference": "PractitionerRole/prarol1234"
+                                "reference": "Practitioner/pra1234"
                             }
                         }
                     },
@@ -190,7 +190,7 @@ export default function getRequest(state) {
         "fhirAuthorization": null,
         "user": "Practitioner/1234",
         "context": {
-          "patientId": "f31500e8-15cb-4e8e-8c6e-a001edc6604e",
+          "patientId": "pat013",
           "encounterId": null,
           "services": null,
           "orders": {
@@ -209,7 +209,7 @@ export default function getRequest(state) {
                     {
                       "url": "http://build.fhir.org/ig/HL7/davinci-crd/STU3/ext-insurance.html",
                       "valueReference": {
-                        "reference": "Coverage/0f58e588-eecd-4ab3-9316-f3d02a3ba39d"
+                        "reference": "Coverage/cov013"
                       }
                     }
                   ],
@@ -224,10 +224,10 @@ export default function getRequest(state) {
                     ]
                   },
                   "subject": {
-                    "reference": "Patient/f31500e8-15cb-4e8e-8c6e-a001edc6604e"
+                    "reference": "Patient/pat013"
                   },
                   "performer": {
-                    "reference": "PractitionerRole/f0b0cf14-4066-403f-b217-e92e73c350eb"
+                    "reference": "Practitioner/pra1234"
                   }
                 }
               }
@@ -245,7 +245,7 @@ export default function getRequest(state) {
                 {
                     "resource": {
                     "resourceType": "Patient",
-                    "id": "f31500e8-15cb-4e8e-8c6e-a001edc6604e",
+                    "id": "pat013",
                     "gender": state.gender,
                     "birthDate": birthYear + "-07-04",
                     "address": [
@@ -260,7 +260,7 @@ export default function getRequest(state) {
                 {
                     "resource": {
                     "resourceType": "Practitioner",
-                    "id": "0fab22ec-49a2-4465-bd62-33b53283de21",
+                    "id": "pra1234",
                     "identifier": [
                         {
                         "system": "http://hl7.org/fhir/sid/us-npi",
@@ -269,9 +269,10 @@ export default function getRequest(state) {
                     ],
                     "name": [
                         {
+                            "use": "official",
                         "family": "Doe",
                         "given": [
-                            "Jane"
+                            "Jane", "Betty"
                         ],
                         "prefix": [
                             "Dr."
@@ -304,9 +305,9 @@ export default function getRequest(state) {
                 {
                     "resource": {
                     "resourceType": "PractitionerRole",
-                    "id": "f0b0cf14-4066-403f-b217-e92e73c350eb",
+                    "id": "prarol1234",
                     "practitioner": {
-                        "reference": "Practitioner/0fab22ec-49a2-4465-bd62-33b53283de21"
+                        "reference": "Practitioner/pra1234"
                     },
                     "location": [
                         {
@@ -318,7 +319,7 @@ export default function getRequest(state) {
                 {
                     "resource": {
                     "resourceType": "Coverage",
-                    "id": "0f58e588-eecd-4ab3-9316-f3d02a3ba39d",
+                    "id": "cov013",
                     "payor": [
                         {
                         "reference": "Organization/75f39025-65db-43c8-9127-693cdf75e712"
@@ -342,7 +343,7 @@ export default function getRequest(state) {
                         {
                         "url": "http://build.fhir.org/ig/HL7/davinci-crd/STU3/ext-insurance.html",
                         "valueReference": {
-                            "reference": "Coverage/0f58e588-eecd-4ab3-9316-f3d02a3ba39d"
+                            "reference": "Coverage/cov013"
                         }
                         }
                     ],
@@ -357,10 +358,10 @@ export default function getRequest(state) {
                         ]
                     },
                     "subject": {
-                        "reference": "Patient/f31500e8-15cb-4e8e-8c6e-a001edc6604e"
+                        "reference": "Patient/pat013"
                     },
                     "performer": {
-                        "reference": "PractitionerRole/f0b0cf14-4066-403f-b217-e92e73c350eb"
+                        "reference": "Practitioner/pra1234"
                     }
                     }
                 },
