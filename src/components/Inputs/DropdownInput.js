@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {Dropdown} from 'semantic-ui-react';
 
 const defaultValues = [
-    { key: 'CPAP', text: '94660', value: '94660', codeSystem: 'http://www.ama-assn.org/go/cpt' },
+    { key: 'CPAP', text: 'E0601', value: 'E0601', codeSystem: 'https://bluebutton.cms.gov/resources/codesystem/hcpcs' },
     { key: 'Wheelchair', text: '97542', value: '97542', codeSystem: 'http://www.ama-assn.org/go/cpt' },
     { key: 'Crutches', text: 'E0110', value: 'E0110', codeSystem: 'https://bluebutton.cms.gov/resources/codesystem/hcpcs' },
     { key: 'Hospital Bed', text: 'E0250', value: 'E0250', codeSystem: 'https://bluebutton.cms.gov/resources/codesystem/hcpcs' },
