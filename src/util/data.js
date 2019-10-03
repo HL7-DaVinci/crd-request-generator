@@ -35,6 +35,17 @@ const headers = {
     }
 }
 
+const genderOptions = {
+    option1: {
+        text: "Male",
+        value: "male"
+    },
+    option2: {
+        text: "Female",
+        value: "female"
+    }
+}
+
 const stateOptions = [
     { key: 'AL', value: 'AL', text: 'Alabama' },
     { key: 'AK', value: 'AK', text: 'Alaska' },
@@ -92,5 +103,6 @@ const stateOptions = [
   export {
       types,
       headers,
-      stateOptions
+      stateOptions,
+      genderOptions
   }
