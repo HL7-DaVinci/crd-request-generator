@@ -1,6 +1,17 @@
 import KJUR, { KEYUTIL } from 'jsrsasign';
 
+function makeid() {
+    var text = [];
+    var possible = "---ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for (var i = 0; i < 25; i++)
+        text.push(possible.charAt(Math.floor(Math.random() * possible.length)));
+
+    return text.join('');
+}
+
 async function createJwt(prvKeyObj, pubKeyObj) {
+    console.log("creating jwt");
     const jwkPrv2 = KEYUTIL.getJWKFromKey(prvKeyObj);
     const jwkPub2 = KEYUTIL.getJWKFromKey(pubKeyObj);
 
@@ -10,7 +21,6 @@ async function createJwt(prvKeyObj, pubKeyObj) {
     // const pubPem = {"pem":KEYUTIL.getPEM(pubKey),"id":kid};
     const pubPem = jwkPub2;
     pubPem.id = kid;
-
     // Check if the public key is already in the db
     const checkForPublic = await fetch("http://localhost:8080/ehr-server/reqgen/public/" + kid, {
         "headers": {
@@ -46,11 +56,10 @@ async function createJwt(prvKeyObj, pubKeyObj) {
         "aud": "r4/order-review-services",
         "iat": currentTime,
         "exp": endTime,
-        "jti": this.makeid()
+        "jti": makeid()
     }
 
     var sJWT = KJUR.jws.JWS.sign("RS256", JSON.stringify(header), JSON.stringify(body), jwkPrv2)
-
     return sJWT;
 }
 

@@ -109,7 +109,7 @@ export default class RequestBuilder extends Component {
     async submit_info() {
         this.consoleLog("Initiating form submission", types.info);
         let json_request = this.getJson();
-        let jwt = await createJwt();
+        let jwt = await createJwt(this.state.keypair.prvKeyObj,this.state.keypair.pubKeyObj);
         jwt = "Bearer " + jwt;
         var myHeaders = new Headers({
             "Content-Type": "application/json",
