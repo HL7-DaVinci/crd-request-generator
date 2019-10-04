@@ -61,6 +61,12 @@ export default class RequestBuilder extends Component {
     }
 
     setDara() {
+        fetch(this.state.ehrUrl[this.state.version] + "Patient", {
+            method: "GET",
+        }).then(response => {
+            return response.json();
+        }).then(json =>{console.log(json)});
+
         this.setState({
             age: 54,
             gender: "male",

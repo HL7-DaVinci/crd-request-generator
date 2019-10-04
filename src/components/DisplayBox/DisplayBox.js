@@ -1,10 +1,8 @@
 import React, {Component} from 'react';
-import { connect } from 'react-redux';
 import styles from './card-list.css';
 import Button from 'terra-button';
 import TerraCard from 'terra-card';
 import Text from 'terra-text';
-import cx from 'classnames';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import SMARTBox from '../SMARTBox/SMARTBox';
