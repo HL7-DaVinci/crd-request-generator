@@ -117,11 +117,8 @@ export default class DisplayBox extends Component{
         // TODO: Create an error modal to display for SMART link that cannot be launched securely
         return;
       }
-      if(link.type === "smart"){
-        this.setState({"smartLink":link.url});
-      }else{
         window.open(link.url, '_blank');
-      }
+
     }
   }
 

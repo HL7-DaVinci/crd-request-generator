@@ -13,8 +13,9 @@ import Loader from 'react-loader-spinner';
 import config from '../properties.json';
 import KJUR, { KEYUTIL } from 'jsrsasign';
 import SettingsBox from '../components/SettingsBox/SettingsBox';
-import requestR4 from '../util/requestR4.js'
-import {types, headers} from '../util/data.js'
+import requestR4 from '../util/requestR4.js';
+import {types, headers, genderOptions} from '../util/data.js';
+import {createJwt} from '../util/auth';
 
 export default class RequestBuilder extends Component {
     constructor(props) {
@@ -70,70 +71,6 @@ export default class RequestBuilder extends Component {
         });
     }
 
-    makeid() {
-        var text = [];
-        var possible = "---ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-        for (var i = 0; i < 25; i++)
-            text.push(possible.charAt(Math.floor(Math.random() * possible.length)));
-
-        return text.join('');
-    }
-
-    async createJwt() {
-        const jwkPrv2 = KEYUTIL.getJWKFromKey(this.state.keypair.prvKeyObj);
-        const jwkPub2 = KEYUTIL.getJWKFromKey(this.state.keypair.pubKeyObj);
-
-        const currentTime = KJUR.jws.IntDate.get('now');
-        const endTime = KJUR.jws.IntDate.get('now + 1day');
-        const kid = KJUR.jws.JWS.getJWKthumbprint(jwkPub2)
-        // const pubPem = {"pem":KEYUTIL.getPEM(pubKey),"id":kid};
-        const pubPem = jwkPub2;
-        pubPem.id = kid;
-
-        // Check if the public key is already in the db
-        const checkForPublic = await fetch("http://localhost:8080/ehr-server/reqgen/public/" + kid, {
-            "headers": {
-                "Content-Type": "application/json"
-            },
-            "method": "GET"
-        }).then((response) => {
-            if(response.status !==200) {
-                // problem!
-                return false;
-            }else{
-                return response.json();
-            }
-        }).catch(response => {console.log(response)});
-        if (!checkForPublic) {
-            // POST key to db if it's not already there
-            const alag = await fetch("http://localhost:8080/ehr-server/reqgen/public/", {
-                "body": JSON.stringify(pubPem),
-                "headers": {
-                    "Content-Type": "application/json"
-                },
-                "method": "POST"
-            });
-        }
-        const header = {
-            "alg": "RS256",
-            "typ": "JWT",
-            "kid": kid,
-            "jku": window.location.href + "/public"
-        };
-        const body = {
-            "iss": "localhost:3000",
-            "aud": "r4/order-review-services",
-            "iat": currentTime,
-            "exp": endTime,
-            "jti": this.makeid()
-        }
-
-        var sJWT = KJUR.jws.JWS.sign("RS256", JSON.stringify(header), JSON.stringify(body), jwkPrv2)
-
-        return sJWT;
-    }
-
     consoleLog(content, type) {
         let jsonContent = {
             content: content,
@@ -163,58 +100,6 @@ export default class RequestBuilder extends Component {
         this.setState({ [event.target.name]: event.target.value });
     }
 
-    async login() {
-
-        const tokenUrl = this.state.config.auth + "/realms/" + this.state.config.realm + "/protocol/openid-connect/token"
-        this.consoleLog("Retrieving OAuth token from " + tokenUrl, types.info);
-        let params = {
-            grant_type: "password",
-            username: "user1",
-            password: "password",
-            client_id: this.state.config.client
-        }
-        if (this.state.config.client) {
-            this.consoleLog("Using client {" + this.state.config.client + "}", types.info)
-        } else {
-            this.consoleLog("No client id provided in properties.json", this.warning);
-        }
-
-        // Encodes the params to be compliant with
-        // x-www-form-urlencoded content type.
-        const searchParams = Object.keys(params).map((key) => {
-            return encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
-        }).join('&');
-        // We get the token from the url
-        const tokenResponse = await fetch(tokenUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
-            body: searchParams
-        }).then((response) => {
-            return response.json();
-        }).then(response => {
-            console.log(response);
-            const token = response ? response.access_token : null;
-            if (token) {
-                this.consoleLog("Successfully retrieved token", types.info);
-            } else {
-                this.consoleLog("Failed to get token", types.warning);
-                if (response.error_description) {
-                    this.consoleLog(response.error_description, types.error);
-                }
-            }
-
-            this.setState({ token })
-            return token;
-
-        }).catch(reason => {
-            this.consoleLog("Failed to get token", types.error);
-            this.consoleLog("Bad request");
-        });
-
-        return tokenResponse;
-    }
     startLoading() {
         this.setState({ loading: true }, () => {
             this.submit_info();
@@ -223,11 +108,8 @@ export default class RequestBuilder extends Component {
     }
     async submit_info() {
         this.consoleLog("Initiating form submission", types.info);
-        if (this.state.oauth) {
-            const token = await this.login();
-        }
         let json_request = this.getJson();
-        let jwt = await this.createJwt();
+        let jwt = await createJwt(this.state.keypair.prvKeyObj,this.state.keypair.pubKeyObj);
         jwt = "Bearer " + jwt;
         var myHeaders = new Headers({
             "Content-Type": "application/json",
@@ -290,16 +172,7 @@ export default class RequestBuilder extends Component {
     }
 
     render() {
-        const options = {
-            option1: {
-                text: "Male",
-                value: "male"
-            },
-            option2: {
-                text: "Female",
-                value: "female"
-            }
-        }
+
         const validationResult = this.validateState();
         const total = Object.keys(validationResult).reduce((previous, current) => {
             return validationResult[current] * previous
@@ -339,7 +212,7 @@ export default class RequestBuilder extends Component {
                                     value={this.state.gender}
                                     elementName="gender"
                                     updateCB={this.updateStateElement}
-                                    options={options}
+                                    options={genderOptions}
                                 ></Toggle>
                             <br />
                         </div>
