@@ -333,9 +333,6 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
                   <div>
                   {renderedCards}
                   </div>
-                  <div>
-                    <SMARTBox link={this.state.smartLink} exitSmart={this.exitSmart}/>
-                  </div>
                 </div>;
         }
       }

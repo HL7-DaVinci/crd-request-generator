@@ -6,9 +6,11 @@
     display:block;
     height:70%;
     width:70%;
-
+    z-index:1;
     font-size:14px;
-    background-color: white;
+    overflow: scroll;
+    background-color: #f9f9f9;
+    border: 1px solid black;
 }
 
 iframe{
@@ -16,14 +18,28 @@ iframe{
     height:100%;
 }
 
+.patient-selection-box{
+    width:100%;
+    height:100px;
+    padding:10px;
+    flex:.5;
+    border-bottom:3px solid black;
+    background-color:#f2f2f2;
+}
+
+.patient-selection-box:hover{
+    background-color:white;
+}
+
 .smartExit{
 
     border-style: solid;
-    border-color:gray;
+    border-color:black;
     border-width: 2px 2px 2px 2px;
     position:absolute;
-    right:-25px;
+    right:-27px;
     width:27px;
+    top:-1px;
 
 }
 
@@ -44,4 +60,24 @@ iframe{
 }
 .hideSmartBox {
     display:none;
+}
+
+.more-info {
+    float:right;
+}
+
+.patient-info {
+    display:inline-block;
+    width: 300px;
+}
+
+.request-info {
+    display: inline-block;
+    width:200px;
+    vertical-align: top; /* here */
+
+}
+
+.ehr-setting {
+    margin: 10px;
 }
