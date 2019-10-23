@@ -1,4 +1,10 @@
+
+
 export default function getRequest(state) {
+    const {patient, deviceRequest} = modifyPatient(state);
+    console.log(patient);
+    console.log(deviceRequest);
+    const patId = patient.id;
     const type = state.version;
     const year = new Date().getFullYear();
     const birthYear =  parseInt(year) - parseInt(state.age,10);
@@ -15,7 +21,7 @@ export default function getRequest(state) {
         },
         "user": "Practitioner/example",
         "context": {
-            "patientId": "pat1234",
+            "patientId": patId,
             "encounterId": "enc89284",
             "orders": {
                 "resourceType": "Bundle",
@@ -34,7 +40,7 @@ export default function getRequest(state) {
                                 ]
                             },
                             "subject": {
-                                "reference": "Patient/pat1234"
+                                "reference": "Patient/" + patId
                             },
                             "authoredOn": "2018-08-08",
                             "insurance": [
@@ -71,7 +77,7 @@ export default function getRequest(state) {
                                 ]
                             },
                             "subject": {
-                                "reference": "Patient/pat1234"
+                                "reference": "Patient/" + patId
                             },
                             "authoredOn": "2018-08-08",
                             "insurance": [
@@ -84,21 +90,7 @@ export default function getRequest(state) {
                             }
                         }
                     },
-                    {
-                        "resource": {
-                            "resourceType": "Patient",
-                            "id": "pat1234",
-                            "gender": state.gender,
-                            "birthDate": birthYear+"-12-23",
-                            "address": [
-                                {
-                                    "use": "home",
-                                    "type": "both",
-                                    "state": state.patientState
-                                }
-                            ]
-                        }
-                    },
+                    patient,
                     {
                         "resource": {
                             "resourceType": "Coverage",
@@ -182,6 +174,7 @@ export default function getRequest(state) {
         }
     }
 
+    console.log(state);
     // stu3 //
     const stu3json = {
         "hook": "order-review",
@@ -190,7 +183,7 @@ export default function getRequest(state) {
         "fhirAuthorization": null,
         "user": "Practitioner/1234",
         "context": {
-          "patientId": "pat013",
+          "patientId": patId,
           "encounterId": null,
           "services": null,
           "orders": {
@@ -224,7 +217,7 @@ export default function getRequest(state) {
                     ]
                   },
                   "subject": {
-                    "reference": "Patient/pat013"
+                    "reference": "Patient/"+patId
                   },
                   "performer": {
                     "reference": "Practitioner/pra1234"
@@ -243,19 +236,7 @@ export default function getRequest(state) {
                 "type": "collection",
                 "entry": [
                 {
-                    "resource": {
-                    "resourceType": "Patient",
-                    "id": "pat013",
-                    "gender": state.gender,
-                    "birthDate": birthYear + "-07-04",
-                    "address": [
-                        {
-                        "use": "home",
-                        "type": "both",
-                        "state": state.patientState
-                        }
-                    ]
-                    }
+                        "resource": patient,
                 },
                 {
                     "resource": {
@@ -358,7 +339,7 @@ export default function getRequest(state) {
                         ]
                     },
                     "subject": {
-                        "reference": "Patient/pat013"
+                        "reference": "Patient/" + patId
                     },
                     "performer": {
                         "reference": "Practitioner/pra1234"
@@ -385,8 +366,54 @@ export default function getRequest(state) {
       }
 
     if (type==="stu3") {
+        console.log(stu3json);
+        console.log("---------");
         return stu3json;
     } else if (type==="r4") {
         return r4json;
     }
+}
+
+function modifyPatient(state){
+    console.log(state);
+    let patient = {};
+    const year = new Date().getFullYear();
+    const birthYear =  parseInt(year) - parseInt(state.age,10);
+    if(state.patient.id) {
+        patient = state.patient;
+        patient.gender = state.gender;
+        if(patient.address) {
+            console.log("patient state");
+            console.log(patient.address[0].state);
+            patient.address[0].state = state.patientState;
+        } else {
+            patient.address = [
+                {
+                "use": "home",
+                "type": "both",
+                "state": state.patientState
+                }
+            ]
+        }
+        if(patient.birthDate) {
+            patient.birthDate = birthYear + "-07-04";
+        }
+    } else {
+        patient =  {
+            "resource": {
+            "resourceType": "Patient",
+            "id": "pat013",
+            "gender": state.gender,
+            "birthDate": birthYear + "-07-04",
+            "address": [
+                {
+                "use": "home",
+                "type": "both",
+                "state": state.patientState
+                }
+            ]
+            }
+        }
+    }
+    return {patient: patient, deviceRequest: 2}
 }

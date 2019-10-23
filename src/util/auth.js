@@ -1,4 +1,5 @@
 import KJUR, { KEYUTIL } from 'jsrsasign';
+import config from '../properties.json';
 
 function makeid() {
     var text = [];
@@ -8,6 +9,31 @@ function makeid() {
         text.push(possible.charAt(Math.floor(Math.random() * possible.length)));
 
     return text.join('');
+}
+
+function login() {
+
+    const tokenUrl = config.auth + "/realms/" + config.realm + "/protocol/openid-connect/token"
+    let params = {
+        grant_type: "password",
+        username: config.user,
+        password: config.password,
+        client_id: config.client
+    }
+
+    // Encodes the params to be compliant with
+    // x-www-form-urlencoded content type.
+    const searchParams = Object.keys(params).map((key) => {
+        return encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
+    }).join('&');
+    // We get the token from the url
+    return fetch(tokenUrl, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: searchParams
+    });
 }
 
 async function createJwt(prvKeyObj, pubKeyObj) {
@@ -64,5 +90,6 @@ async function createJwt(prvKeyObj, pubKeyObj) {
 }
 
 export {
-    createJwt
+    createJwt,
+    login
 }
