@@ -111,10 +111,17 @@ const stateOptions = [
     { key: 'Oxygen Therapy', text: 'E0424', value:'E0424', codeSystem:'https://bluebutton.cms.gov/resources/codesystem/hcpcs' }
 ]
 
+const shortNameMap = {
+    "http://www.ama-assn.org/go/cpt":"CPT",
+    "https://bluebutton.cms.gov/resources/codesystem/hcpcs": "HCPCS",
+    "http://www.nlm.nih.gov/research/umls/rxnorm": "RxNorm"
+}
+
   export {
       defaultValues,
       genderOptions,
       headers,
+      shortNameMap,
       stateOptions,
       types,
   }

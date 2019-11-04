@@ -33,11 +33,10 @@ export default class RequestBuilder extends Component {
             gender: null,
             code: null,
             codeSystem: null,
-            patientState: null,
-            practitionerState: null,
             response: null,
             token: null,
             oauth: false,
+            prefetch: true,
             loading: false,
             logs: [],
             keypair: null,
@@ -90,7 +89,6 @@ export default class RequestBuilder extends Component {
                         graph: false,
                         flat: true})
                         .then((result)=>{
-                            console.log(result);
                             this.setState(prevState=>({
                                 deviceRequests: {
                                     ...prevState.deviceRequests,
@@ -135,10 +133,10 @@ export default class RequestBuilder extends Component {
         });
 
     }
-    async submit_info() {
+    async submit_info(prefetch, deviceRequest, patient) {
         this.consoleLog("Initiating form submission", types.info);
-        let json_request = this.getJson();
-        console.log(json_request);
+        this.setState({patient});
+        let json_request = requestR4(deviceRequest, patient, this.state.ehrUrl, this.state.token, prefetch, this.state.version, this.state.prefetch);
         let jwt = await createJwt(this.state.keypair.prvKeyObj,this.state.keypair.pubKeyObj);
         jwt = "Bearer " + jwt;
         var myHeaders = new Headers({
@@ -240,69 +238,17 @@ export default class RequestBuilder extends Component {
                         <div>
                             {/*for the ehr launch */}
                             <RequestBox
-                                ehrUrl = {this.state.ehrUrl[this.state.version]}>
+                                ehrUrl = {this.state.ehrUrl[this.state.version]}
+                                submitInfo={this.submit_info}>
 
                             </RequestBox>
-                            <div className="header">
-                                Age
-                            </div>
-                            <InputBox
-                                value={this.state.age}
-                                elementName="age"
-                                updateCB={this.updateStateElement} />
-                            <br />
-                        </div>
-                        <div>
-                            <div className="header">
-                                Gender
-                            </div>
-                                <Toggle
-                                    value={this.state.gender}
-                                    elementName="gender"
-                                    updateCB={this.updateStateElement}
-                                    options={genderOptions}
-                                ></Toggle>
-                            <br />
-                        </div>
-                        <div>
-                            <div className="header">
-                                Code
-                            </div>
-                                <DropdownInput
-                                    currentValue={this.state.code}
-                                    options={this.state.codeValues}
-                                    elementName="code"
-                                    updateCB={this.updateStateElement}
-                                />
-                            <br />
-                        </div>
 
-                        <div>
-                            <div className="leftStateInput">
-                                <div className="header">
-                                    Patient State
-                                </div>
-                                <DropdownState
-                                    elementName="patientState"
-                                    updateCB={this.updateStateElement}
-                                    currentValue={this.state.patientState}
-                                />
-                            </div>
-                            <div className="rightStateInput">
-                                <div className="header">
-                                    Practitioner State
-                                </div>
-                                <DropdownState
-                                    elementName="practitionerState"
-                                    updateCB={this.updateStateElement}
-                                    currentValue={this.state.practitionerState}
-                                />
-                            </div>
                         </div>
                         <br />
-                    <button className={"submit-btn btn btn-class " + (!total ? "button-error" : total === 1 ? "button-ready" : "button-empty-fields")} onClick={this.startLoading}>Submit
-                </button>
-
+                    {/* <button className={"submit-btn btn btn-class " + (!total ? "button-error" : total === 1 ? "button-ready" : "button-empty-fields")} onClick={this.startLoading}>
+                        Submit
+                    </button> */}
+{/* 
 
                     <CheckBox elementName="oauth" displayName="OAuth" updateCB={this.updateStateElement} />
                     <CheckBox elementName="prefetch" displayName="Include Prefetch" updateCB={this.updateStateElement} />
@@ -313,7 +259,7 @@ export default class RequestBuilder extends Component {
                             height="16"
                             width="16"
                         />
-                    </div>
+                    </div> */}
 
                     <ConsoleBox logs={this.state.logs} />
                 </div>
@@ -323,7 +269,7 @@ export default class RequestBuilder extends Component {
                         response={this.state.response} 
                         patientId = {this.state.patient.id}
                         ehrLaunch = {true}
-                        fhirServerUrl = {this.state.ehrUrl[this.state.version]}/>
+                        fhirServerUrl = {this.state.config.true_base}/>
                 </div>
 
             </div>

@@ -1,9 +1,88 @@
 .request-header{
-    border-width: 1px;
+    border-width: 1px 1px 2px 2px;
     border-style: solid;
-    border-color: white white black black;
+    border-color: transparent transparent black black;
     padding: 5px;
     display:inline-block;
     height:30px;
     width:75%;
 }
+
+.request {
+    border: 1px solid black;
+    height:500px;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: rgb(248, 248, 248)
+}
+
+.select-button{
+    padding: 5px;
+    width:25%;
+    height:30px;
+    border-width:2px 0px 2px 2px;
+    border-style: solid solid solid solid;
+    border-color: black;
+    background-image: linear-gradient(to bottom,#fff 0,#e0e0e0 100%);
+}
+.select-button:hover{
+    background: #e0e0e0;
+}
+
+.demographics {
+    width: 50%;
+    float: left;
+    padding:10px 10px 10px 0px;
+}
+
+.other-info {
+    width: 100%;
+    padding-top: 10px;
+}
+.lower-border {
+    border-style: solid;
+    border-color: black;
+    border-width: 0px 0 1px 5px;
+    padding-left: 5px;
+    margin-top: 5px;
+}
+
+.info {
+    margin-left: 15px;
+}
+
+.prefetched {
+    width: 50%;
+    float:left;
+    padding:10px 10px 10px 0px;
+    margin-top: 5px;
+}
+
+.prefetch-header{ 
+    text-align: center;
+    font-weight: bold;
+    border-bottom: 1px solid black;
+}
+
+.checkmark {
+    float: right;
+    color: #28a745;
+}
+
+.remove {
+    float: right;
+    color: #dc3545;
+}
+
+.submit-btn {
+    float: right;
+    margin-top: 6px;
+  }
+
+
+.submit-btn:hover{
+    border-width:1px 3px 1px 1px;
+    margin-left:2px;
+    margin-top:8px;
+}
+  
