@@ -36,7 +36,7 @@ function login() {
     });
 }
 
-async function createJwt(prvKeyObj, pubKeyObj) {
+async function createJwt(prvKeyObj, pubKeyObj, baseUrl) {
     console.log("creating jwt");
     const jwkPrv2 = KEYUTIL.getJWKFromKey(prvKeyObj);
     const jwkPub2 = KEYUTIL.getJWKFromKey(pubKeyObj);
@@ -48,7 +48,7 @@ async function createJwt(prvKeyObj, pubKeyObj) {
     const pubPem = jwkPub2;
     pubPem.id = kid;
     // Check if the public key is already in the db
-    const checkForPublic = await fetch("http://localhost:8080/ehr-server/reqgen/public/" + kid, {
+    const checkForPublic = await fetch(baseUrl + "/reqgen/public/" + kid, {
         "headers": {
             "Content-Type": "application/json"
         },
@@ -63,7 +63,7 @@ async function createJwt(prvKeyObj, pubKeyObj) {
     }).catch(response => {console.log(response)});
     if (!checkForPublic) {
         // POST key to db if it's not already there
-        const alag = await fetch("http://localhost:8080/ehr-server/reqgen/public/", {
+        const alag = await fetch(baseUrl + "/reqgen/public/", {
             "body": JSON.stringify(pubPem),
             "headers": {
                 "Content-Type": "application/json"

@@ -53,7 +53,8 @@ export default class RequestBuilder extends Component {
             deviceRequests: {},
             codeValues: defaultValues,
             currentPatient: null,
-            currentDeviceRequest: null
+            currentDeviceRequest: null,
+            baseUrl: null
         };
         this.validateMap = {
             age: (foo => { return isNaN(foo) }),
@@ -137,7 +138,13 @@ export default class RequestBuilder extends Component {
         this.consoleLog("Initiating form submission", types.info);
         this.setState({patient});
         let json_request = requestR4(deviceRequest, patient, this.state.ehrUrl, this.state.token, prefetch, this.state.version, this.state.prefetch);
-        let jwt = await createJwt(this.state.keypair.prvKeyObj,this.state.keypair.pubKeyObj);
+
+        // get the base url for the EHR server by stripping the FHIR version off
+        let baseUrl = this.state.ehrUrl[this.state.version];
+        baseUrl = baseUrl.substr(0, baseUrl.toLowerCase().lastIndexOf(this.state.version.toLowerCase())-1);
+        this.state.baseUrl = baseUrl;
+
+        let jwt = await createJwt(this.state.keypair.prvKeyObj,this.state.keypair.pubKeyObj,baseUrl);
         jwt = "Bearer " + jwt;
         var myHeaders = new Headers({
             "Content-Type": "application/json",
@@ -269,7 +276,7 @@ export default class RequestBuilder extends Component {
                         response={this.state.response} 
                         patientId = {this.state.patient.id}
                         ehrLaunch = {true}
-                        fhirServerUrl = {this.state.config.true_base}/>
+                        fhirServerUrl = {this.state.baseUrl}/>
                 </div>
 
             </div>
