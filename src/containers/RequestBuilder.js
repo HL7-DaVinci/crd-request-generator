@@ -54,7 +54,7 @@ export default class RequestBuilder extends Component {
             codeValues: defaultValues,
             currentPatient: null,
             currentDeviceRequest: null,
-            baseUrl: null
+            baseUrl: null,
         };
         this.validateMap = {
             age: (foo => { return isNaN(foo) }),
@@ -212,6 +212,24 @@ export default class RequestBuilder extends Component {
 
     render() {
         const validationResult = this.validateState();
+        const header =     
+        {
+            "ehrUrl": {
+                "display": "EHR Server",
+                "value": this.state.ehrUrl,
+                "key": "ehrUrl"
+            },
+            "cdsUrl": {
+                "display": "CRD Server",
+                "value": this.state.cdsUrl,
+                "key":"cdsUrl"
+            },
+            "authUrl": {
+                "display": "Auth Server",
+                "value": this.state.authUrl,
+                "key": "authUrl"
+            }
+        }
         const total = Object.keys(validationResult).reduce((previous, current) => {
             return validationResult[current] * previous
         }, 1);
@@ -239,7 +257,7 @@ export default class RequestBuilder extends Component {
                     {this.state.showSettings?
                         <SettingsBox
                             version={this.state.version}
-                            headers={headers}
+                            headers={header}
                             updateCB={this.updateVersionedStateElement}
                         />:null}
                         <div>

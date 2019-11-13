@@ -85,4 +85,8 @@
     margin-left:2px;
     margin-top:8px;
 }
+
+.patient-box {
+    overflow-y:scroll;
+} 
   

@@ -13,6 +13,7 @@ export default class RequestBox extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            openPatient: false,
             access_token: "",
             patientList: [],
             patient: {},
@@ -32,6 +33,10 @@ export default class RequestBox extends Component {
 
     componentDidMount(){
 
+    }
+
+    exitSmart = () => {
+        this.setState({openPatient: false})
     }
 
     submit = () => {
@@ -255,18 +260,21 @@ export default class RequestBox extends Component {
             <div className = "request">
                 {this.state.openPatient?<div>
                             <SMARTBox exitSmart={this.exitSmart}>
-                                {this.state.patientList.map((patient)=>{
-                                    return <PatientBox
-                                    key = {patient.id}
-                                    patient = {patient}
-                                    deviceRequests = {this.state.deviceRequests[patient.id]}
-                                    callback={this.updateStateElement}
-                                    updateCallback={this.gatherResources}
-                                    clearCallback={this.clearState}
-                                    ehrUrl={this.props.ehrUrl}
-                                    options={this.state.codeValues}
-                                    />
-                                })}
+                                <div className="patient-box">
+                                    {this.state.patientList.map((patient)=>{
+                                        return <PatientBox
+                                        key = {patient.id}
+                                        patient = {patient}
+                                        deviceRequests = {this.state.deviceRequests[patient.id]}
+                                        callback={this.updateStateElement}
+                                        updateCallback={this.gatherResources}
+                                        clearCallback={this.clearState}
+                                        ehrUrl={this.props.ehrUrl}
+                                        options={this.state.codeValues}
+                                        />
+                                    })}
+                                </div>
+ 
 
                             </SMARTBox>
                 </div>:""}

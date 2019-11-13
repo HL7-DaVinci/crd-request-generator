@@ -20,15 +20,15 @@ export default class SMARTBox extends Component {
         return (
             <div>
                 <div>
-                            <div className="smartBox">
-                                <div className="smartHeader">
-                                    <button 
-                                    className="smartExit"
-                                    onClick={this.props.exitSmart}>X</button>
-                                </div>
 
-                                {this.props.children}
-                            </div>
+                    <div className="smartBox">
+                        <div className="smartHeader">
+                            <button 
+                            className="smartExit"
+                            onClick={this.props.exitSmart}>X</button>
+                        </div>
+                        {this.props.children}
+                    </div>
                 </div>
             </div>
 
