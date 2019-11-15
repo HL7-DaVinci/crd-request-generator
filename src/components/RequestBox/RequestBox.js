@@ -150,12 +150,17 @@ export default class RequestBox extends Component {
                 access_token: this.state.access_token
             }
         });
+
         client.request("Patient",{flat:true}).then((result)=>{
             this.setState({
                 patientList: result
             });
             result.map((e)=>{
                 this.getDeviceRequest(e.id, client);
+            });
+        }).catch((e)=>{
+            this.setState({
+                patientList: e
             });
         });
     }
@@ -254,6 +259,10 @@ export default class RequestBox extends Component {
         return value
     }
 
+    renderError() {
+        return <span className ="patient-error">{this.state.patientList.message}</span>
+    }
+
     render() {
         return (
             <div>
@@ -261,7 +270,7 @@ export default class RequestBox extends Component {
                 {this.state.openPatient?<div>
                             <SMARTBox exitSmart={this.exitSmart}>
                                 <div className="patient-box">
-                                    {this.state.patientList.map((patient)=>{
+                                    {this.state.patientList instanceof Error? this.renderError():this.state.patientList.map((patient)=>{
                                         return <PatientBox
                                         key = {patient.id}
                                         patient = {patient}

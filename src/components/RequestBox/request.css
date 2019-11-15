@@ -88,5 +88,15 @@
 
 .patient-box {
     overflow-y:scroll;
+    height:800px;
 } 
   
+.patient-error {
+    white-space:pre-wrap;
+    padding: 5px;
+    font-weight: bold;
+    border-left:3px solid red;
+    background-color: #facbcbcc;
+    margin: 10px 30% 10px 30%;
+    display:block;
+}
