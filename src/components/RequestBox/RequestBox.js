@@ -14,7 +14,6 @@ export default class RequestBox extends Component {
         super(props);
         this.state = {
             openPatient: false,
-            access_token: "",
             patientList: [],
             patient: {},
             practitioner: {},
@@ -81,7 +80,7 @@ export default class RequestBox extends Component {
         const client = FHIR.client({
             serverUrl: this.props.ehrUrl,
             tokenResponse: {
-                access_token: this.state.access_token
+                access_token: this.props.access_token.access_token
             }
         });
 
@@ -143,11 +142,12 @@ export default class RequestBox extends Component {
     }
 
     getPatients = () => {
+        console.log(this.props.access_token.access_token);
         this.setState({openPatient:true});
         const client = FHIR.client({
             serverUrl: this.props.ehrUrl,
             tokenResponse: {
-                access_token: this.state.access_token
+                access_token: this.props.access_token.access_token
             }
         });
 
