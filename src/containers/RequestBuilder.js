@@ -264,7 +264,8 @@ export default class RequestBuilder extends Component {
                             {/*for the ehr launch */}
                             <RequestBox
                                 ehrUrl = {this.state.ehrUrl[this.state.version]}
-                                submitInfo={this.submit_info}>
+                                submitInfo={this.submit_info}
+                                access_token={this.state.token}>
 
                             </RequestBox>
 
