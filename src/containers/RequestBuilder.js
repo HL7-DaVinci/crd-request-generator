@@ -295,7 +295,8 @@ export default class RequestBuilder extends Component {
                         response={this.state.response} 
                         patientId = {this.state.patient.id}
                         ehrLaunch = {true}
-                        fhirServerUrl = {this.state.baseUrl}/>
+                        fhirServerUrl = {this.state.baseUrl}
+                        fhirVersion = {this.state.version}/>
                 </div>
 
             </div>
