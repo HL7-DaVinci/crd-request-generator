@@ -32,6 +32,10 @@ const propTypes = {
      */
     fhirServerUrl: PropTypes.string,
     /**
+     * The FHIR version in use
+     */
+    fhirVersion: PropTypes.string,
+    /**
      * JSON response from a CDS service containing potential cards to display
      */
     cardResponses: PropTypes.object,
@@ -134,7 +138,7 @@ export default class DisplayBox extends Component{
         if (link.type === 'smart' && (this.props.fhirAccessToken || this.props.ehrLaunch) && !this.state.smartLink) {
           this.retrieveLaunchContext(
             linkCopy, this.props.fhirAccessToken,
-            this.props.patientId, this.props.fhirServerUrl,
+            this.props.patientId, this.props.fhirServerUrl, this.props.fhirVersion
           ).then((result) => {
             linkCopy = result;
             return linkCopy;
@@ -164,7 +168,7 @@ export default class DisplayBox extends Component{
  * @param {*} patientId - The identifier of the patient in context
  * @param {*} fhirBaseUrl - The base URL of the FHIR server in context
  */
-retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
+retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
     return new Promise((resolve, reject) => {
       const headers = accessToken ?
       {
@@ -200,7 +204,7 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl) {
             link.url += '&';
           }
           link.url += `launch=${result.data.launchId}`;
-          link.url += `&iss=${fhirBaseUrl}/stu3`;
+          link.url += `&iss=${fhirBaseUrl}/${fhirVersion}`;
           return resolve(link);
         }
         console.error('FHIR server endpoint did not return a launch_id to launch the SMART app. See network calls to the Launch endpoint for more details');

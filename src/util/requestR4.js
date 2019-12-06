@@ -7,7 +7,7 @@ export default function getRequest(deviceRequest, patient, ehrUrl, token, prefet
         "fhirServer": ehrUrl.r4,
         "hook": "order-review",
         "fhirAuthorization": {
-            "access_token": token,
+            "access_token": token.access_token,
             "token_type": "Bearer",
             "expires_in": 300,
             "scope": "patient/Patient.read patient/Observation.read",
@@ -67,9 +67,11 @@ export default function getRequest(deviceRequest, patient, ehrUrl, token, prefet
 
     if (version==="stu3") {
         console.log(stu3json);
-        console.log("---------");
+        console.log("--------- stu3");
         return stu3json;
     } else if (version==="r4") {
+        console.log(r4json);
+        console.log("--------- r4");
         return r4json;
     }
 }
