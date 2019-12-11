@@ -1,4 +1,5 @@
 import KJUR, { KEYUTIL } from 'jsrsasign';
+import config from '../properties.json';
 
 function makeid() {
     var text = [];
@@ -10,7 +11,32 @@ function makeid() {
     return text.join('');
 }
 
-async function createJwt(prvKeyObj, pubKeyObj) {
+function login() {
+
+    const tokenUrl = config.auth + "/realms/" + config.realm + "/protocol/openid-connect/token"
+    let params = {
+        grant_type: "password",
+        username: config.user,
+        password: config.password,
+        client_id: config.client
+    }
+
+    // Encodes the params to be compliant with
+    // x-www-form-urlencoded content type.
+    const searchParams = Object.keys(params).map((key) => {
+        return encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
+    }).join('&');
+    // We get the token from the url
+    return fetch(tokenUrl, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: searchParams
+    });
+}
+
+async function createJwt(prvKeyObj, pubKeyObj, baseUrl) {
     console.log("creating jwt");
     const jwkPrv2 = KEYUTIL.getJWKFromKey(prvKeyObj);
     const jwkPub2 = KEYUTIL.getJWKFromKey(pubKeyObj);
@@ -22,7 +48,7 @@ async function createJwt(prvKeyObj, pubKeyObj) {
     const pubPem = jwkPub2;
     pubPem.id = kid;
     // Check if the public key is already in the db
-    const checkForPublic = await fetch("http://localhost:8080/ehr-server/reqgen/public/" + kid, {
+    const checkForPublic = await fetch(baseUrl + "/reqgen/public/" + kid, {
         "headers": {
             "Content-Type": "application/json"
         },
@@ -37,7 +63,7 @@ async function createJwt(prvKeyObj, pubKeyObj) {
     }).catch(response => {console.log(response)});
     if (!checkForPublic) {
         // POST key to db if it's not already there
-        const alag = await fetch("http://localhost:8080/ehr-server/reqgen/public/", {
+        const alag = await fetch(baseUrl + "/reqgen/public/", {
             "body": JSON.stringify(pubPem),
             "headers": {
                 "Content-Type": "application/json"
@@ -64,5 +90,6 @@ async function createJwt(prvKeyObj, pubKeyObj) {
 }
 
 export {
-    createJwt
+    createJwt,
+    login
 }

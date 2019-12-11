@@ -14,10 +14,7 @@ body {
   outline: none !important;
   box-shadow: none;
 }
-.submit-btn {
-  float: left;
 
-}
 
 
 .floating-label {
@@ -71,12 +68,6 @@ input:not(:focus):not([value=""]):valid ~ .floating-label{
   border-style: solid solid solid solid;
   border-color: black;
   background: linear-gradient(white,white)
-}
-
-.submit-btn:hover{
-  border-width:1px 3px 1px 1px;
-  margin-left:2px;
-  margin-top:2px;
 }
 
 
@@ -240,32 +231,27 @@ input:not(:focus):not([value=""]):valid ~ .floating-label{
   margin-bottom:25px;
 }
 
-.dara-button{
-    border-width:1px 3px 3px 3px;
-    border-style: solid solid solid solid;
-    border-color: black;
-    margin-right: 10px;
-    background: linear-gradient(white,white)
-}
-.dara-button:hover{
-    background: black;
-    color: white;
-}
-
 .version-button {
     width: 60px;
     border-style: solid solid solid solid;
     border-color: black;
 }
-.version-button.stu3{
+
+.launch-button {
+    border-style: solid solid solid solid;
+    border-color: black;
+    width:120px;
+}
+
+.right-button {
     border-width:1px 3px 3px 1px;
     border-radius: 0 10% 10% 0%;
-
+    margin-right: 10px;
 }
-.version-button.r4{
+
+.left-button {
     border-width:1px 1px 3px 3px;
     border-radius: 10% 0% 0% 10%;
-
 }
 
 .version-button:hover{
@@ -273,9 +259,22 @@ input:not(:focus):not([value=""]):valid ~ .floating-label{
     color:#AAA;
 }
 
+.launch-button:hover{
+    background:black;
+    color:#AAA;
+}
+
+.launch-button.not-active{
+    color:#666;
+}
+
+.launch-button.active{
+    background:black;
+    color:white;
+}
+
 .version-button.not-active{
     color:#666;
-
 }
 
 .version-button.active{
@@ -284,10 +283,10 @@ input:not(:focus):not([value=""]):valid ~ .floating-label{
 }
 
 .btn-class.settings{
-    float:right;
     border-width:1px;
     font-size:22px;
     height:36px;
+    float:right;
     
 }
 .settings:hover{
@@ -305,4 +304,11 @@ input:not(:focus):not([value=""]):valid ~ .floating-label{
 }
 #settings-header{
     margin-bottom: 10px;
+}
+
+.nav-header{
+    margin-bottom: 10px;
+    padding:10px;
+    border-bottom: 1px solid black;
+    background-color: #005B94;
 }

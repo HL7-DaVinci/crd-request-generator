@@ -4,11 +4,12 @@
     top:15%;
     margin-bottom:50px;
     display:block;
-    height:70%;
+    height:825px;
     width:70%;
-
+    z-index:1;
     font-size:14px;
-    background-color: white;
+    background-color: #f9f9f9;
+    border: 1px solid black;
 }
 
 iframe{
@@ -16,17 +17,38 @@ iframe{
     height:100%;
 }
 
-.smartExit{
-
-    border-style: solid;
-    border-color:gray;
-    border-width: 2px 2px 2px 2px;
-    position:absolute;
-    right:-25px;
-    width:27px;
-
+.patient-selection-box{
+    width:100%;
+    height:100px;
+    padding:10px;
+    flex:.5;
+    border-bottom:3px solid black;
+    background-color:#e2e2e2;
 }
 
+.patient-selection-box:hover{
+    background-color:white;
+    cursor: pointer;
+}
+
+.smartExit{
+
+    height:24px;
+    border-style: solid;
+    border-color:black;
+    background-color: #d9534f;
+    color:white;
+    font-family: 'Courier New', Courier, monospace;
+    border-width: 0px 0px 0px 1px;
+    float:right;
+}
+
+.smartHeader {
+    background-color: #5f636a;
+    display:block;
+    border-bottom: 1px solid black;
+    height:25px;
+}
 .smartMinimize{
     position:absolute;
     right:-25px;
@@ -44,4 +66,24 @@ iframe{
 }
 .hideSmartBox {
     display:none;
+}
+
+.more-info {
+    float:right;
+}
+
+.patient-info {
+    display:inline-block;
+    width: 300px;
+}
+
+.request-info {
+    display: inline-block;
+    width:200px;
+    vertical-align: top; /* here */
+
+}
+
+.ehr-setting {
+    margin: 10px;
 }
