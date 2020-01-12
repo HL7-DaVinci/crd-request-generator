@@ -1,12 +1,10 @@
 import React, { Component } from 'react';
 import FHIR from "fhirclient"
-import Loader from 'react-loader-spinner';
 import SMARTBox from '../SMARTBox/SMARTBox';
 import PatientBox from '../SMARTBox/PatientBox';
 import { defaultValues, shortNameMap } from '../../util/data';
 import { getAge } from '../../util/fhir';
-import getRequest from '../../util/requestR4.js';
-
+import _ from 'lodash';
 import './request.css';
 
 export default class RequestBox extends Component {
@@ -28,8 +26,20 @@ export default class RequestBox extends Component {
             codeSystem: null,
             display: null,
             serviceRequests: {},
-            serviceRequest: {}
+            serviceRequest: {},
+            insurance: {}
         };
+
+        this.renderRequestResources = this.renderRequestResources.bind(this);
+        this.addReferencesToList = this.addReferencesToList.bind(this);
+        this.checkForReferences = this.checkForReferences.bind(this);
+        this.getDeviceRequest = this.getDeviceRequest.bind(this);
+        this.getServiceRequest = this.getServiceRequest.bind(this);
+        this.renderPatientInfo = this.renderPatientInfo.bind(this);
+        this.renderOtherInfo = this.renderOtherInfo.bind(this);
+        this.renderResource = this.renderResource.bind(this);
+        this.renderPrefetchedResources = this.renderPrefetchedResources.bind(this);
+        this.renderError = this.renderError.bind(this);
     }
 
     componentDidMount() {
@@ -42,7 +52,7 @@ export default class RequestBox extends Component {
 
     submit = () => {
         // make the prefetch
-        const resources = [this.state.patient, this.state.practitioner, this.state.deviceRequest, this.state.coverage, ...this.state.otherResources];
+        const resources = [this.state.patient, this.state.practitioner, this.state.deviceRequest, this.state.serviceRequest, this.state.coverage, ...this.state.otherResources];
         const prefetch = resources.reduce((pre, resource) => {
             if (resource.id) {
                 pre.push({ resource: resource })
@@ -50,7 +60,11 @@ export default class RequestBox extends Component {
             return pre;
         }, [])
 
-        this.props.submitInfo(prefetch, this.state.deviceRequest, this.state.patient);
+        if (!_.isEmpty(this.state.deviceRequest)) {
+            this.props.submitInfo(prefetch, this.state.deviceRequest, this.state.patient);
+        } else if (!_.isEmpty(this.state.serviceRequest)) {
+            this.props.submitInfo(prefetch, this.state.serviceRequest, this.state.patient);
+        }
     }
 
     updateStateElement = (elementName, text) => {
@@ -69,6 +83,7 @@ export default class RequestBox extends Component {
             practitioner: {},
             deviceRequest: {},
             coverage: {},
+            serviceRequest: {}
         })
     }
 
@@ -78,7 +93,7 @@ export default class RequestBox extends Component {
         })
     }
 
-    gatherResources = (patient, deviceRequest) => {
+    gatherDeviceRequestResources = deviceRequest => {
         const client = FHIR.client({
             serverUrl: this.props.ehrUrl,
             tokenResponse: {
@@ -92,6 +107,53 @@ export default class RequestBox extends Component {
         client.request(`DeviceRequest/${deviceRequest.id}`,
             {
                 resolveReferences: ["performer", "extension.0.valueReference"],
+                graph: false,
+                flat: true
+            })
+            .then((result) => {
+                const references = result.references;
+                Object.keys(references).forEach((refKey) => {
+                    const ref = references[refKey];
+                    if (ref.resourceType === "Coverage") {
+                        client.request(`Coverage/${ref.id}`, {
+                            resolveReferences: ["payor"],
+                            graph: false,
+                            flat: true
+                        }).then((result) => {
+                            this.addReferencesToList(result.references);
+                        })
+                        this.setState({ coverage: ref });
+                    } else if (ref.resourceType === "Practitioner") {
+                        this.setState({ practitioner: ref });
+                        // find pracRoles
+                        client.request(`PractitionerRole?practitioner=${ref.id}`, {
+                            resolveReferences: ["location"],
+                            graph: false,
+                            flat: true
+                        }).then((result) => {
+                            // TODO: Better logic here
+                            this.addReferencesToList(result.references);
+                            this.addReferencesToList(result.data);
+                        })
+                    }
+                })
+            });
+
+    }
+
+    gatherServiceRequestResources = serviceRequest => {
+        const client = FHIR.client({
+            serverUrl: this.props.ehrUrl,
+            tokenResponse: {
+                access_token: this.props.access_token.access_token
+            }
+        });
+
+        // If the service request is provided it has the pertinent information.
+        // this is for R4
+        client.request(`ServiceRequest/${serviceRequest.id}`,
+            {
+                resolveReferences: ["performer", "insurance.0"],
                 graph: false,
                 flat: true
             })
@@ -241,23 +303,30 @@ export default class RequestBox extends Component {
     }
 
     renderPrefetchedResources() {
-        const resources = ["patient", "deviceRequest", "coverage", "practitioner", "serviceRequest"];
-        return <div className="prefetched">
+        const deviceRequestReources = ["patient", "deviceRequest", "coverage", "practitioner"];
+        const serviceRequestReources = ["patient", "serviceRequest", "coverage", "practitioner"];
+        if (!_.isEmpty(this.state.deviceRequest)) {
+            return this.renderRequestResources(deviceRequestReources)
+        } else if (!_.isEmpty(this.state.serviceRequest)) {
+            return this.renderRequestResources(serviceRequestReources);
+        }
+    }
+
+    renderRequestResources(requestReources) {
+        return (<div className="prefetched">
             <div className="prefetch-header">
                 Prefetched
-            </div>
-            {resources.map((resource) => {
+        </div>
+            {requestReources.map((resource) => {
                 return this.renderResource(resource)
             })}
-
             <div className="prefetch-header">
                 Other Resources
-            </div>
+        </div>
             {this.state.otherResources.map((resource) => {
                 return this.renderOtherResources(resource)
             })}
-
-        </div>
+        </div>);
     }
 
     renderResource(resourceType) {
@@ -269,7 +338,6 @@ export default class RequestBox extends Component {
         } else {
             value = <div key={resourceType}>
                 <span style={{ textTransform: "capitalize" }}>{resourceType}</span> .....<span className="remove glyphicon glyphicon-remove"></span>
-
             </div>
         }
         return value
@@ -307,7 +375,8 @@ export default class RequestBox extends Component {
                                         deviceRequests={this.state.deviceRequests[patient.id]}
                                         serviceRequests={this.state.serviceRequests[patient.id]}
                                         callback={this.updateStateElement}
-                                        updateCallback={this.gatherResources}
+                                        updateDeviceRequestCallback={this.gatherDeviceRequestResources}
+                                        updateServiceRequestCallback={this.gatherServiceRequestResources}
                                         clearCallback={this.clearState}
                                         ehrUrl={this.props.ehrUrl}
                                         options={this.state.codeValues}
