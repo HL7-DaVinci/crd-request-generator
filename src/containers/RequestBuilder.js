@@ -19,8 +19,8 @@ import EHRLaunchBox from '../components/SMARTBox/EHRLaunchBox';
 import RequestBox from '../components/RequestBox/RequestBox';
 import PatientBox from '../components/SMARTBox/PatientBox';
 import requestR4 from '../util/requestR4.js';
-import {types, headers, genderOptions, defaultValues} from '../util/data.js';
-import {createJwt, login} from '../util/auth';
+import { types, headers, genderOptions, defaultValues } from '../util/data.js';
+import { createJwt, login } from '../util/auth';
 import { fhir } from '../util/fhir';
 import FHIR from "fhirclient"
 
@@ -42,19 +42,21 @@ export default class RequestBuilder extends Component {
             keypair: null,
             version: "stu3",
             config: {},
-            ehrUrl:headers.ehrUrl.value,
-            authUrl:headers.authUrl.value,
-            cdsUrl:headers.cdsUrl.value,
+            ehrUrl: headers.ehrUrl.value,
+            authUrl: headers.authUrl.value,
+            cdsUrl: headers.cdsUrl.value,
             showSettings: false,
             ehrLaunch: false,
             patientList: [],
             openPatient: false,
-            patient:{},
+            patient: {},
             deviceRequests: {},
             codeValues: defaultValues,
             currentPatient: null,
             currentDeviceRequest: null,
             baseUrl: null,
+            serviceRequests: {},
+            currentServiceRequest: null
         };
         this.validateMap = {
             age: (foo => { return isNaN(foo) }),
@@ -72,31 +74,33 @@ export default class RequestBuilder extends Component {
 
 
     componentDidMount() {
-        this.setState({config});
+        this.setState({ config });
         this.setState({ keypair: KEYUTIL.generateKeypair('RSA', 2048) });
         const client = FHIR.client({
             serverUrl: this.state.ehrUrl[this.state.version],
         });
 
-        login().then((response)=>{return response.json()}).then((token)=>{
-            this.setState({token})
+        login().then((response) => { return response.json() }).then((token) => {
+            this.setState({ token })
         })
         // client.request("DeviceRequest/devreq1234", {resolveReferences:["subject","performer"], graph: false}).then((e)=>{console.log(e)})
     }
 
     getDeviceRequest(patientId, client) {
         client.request(`DeviceRequest?subject=Patient/${patientId}`,
-                        {resolveReferences:["subject","performer"], 
-                        graph: false,
-                        flat: true})
-                        .then((result)=>{
-                            this.setState(prevState=>({
-                                deviceRequests: {
-                                    ...prevState.deviceRequests,
-                                    [patientId]: result
-                                }
-                            }));
-                        });
+            {
+                resolveReferences: ["subject", "performer"],
+                graph: false,
+                flat: true
+            })
+            .then((result) => {
+                this.setState(prevState => ({
+                    deviceRequests: {
+                        ...prevState.deviceRequests,
+                        [patientId]: result
+                    }
+                }));
+            });
     }
 
     consoleLog(content, type) {
@@ -134,17 +138,17 @@ export default class RequestBuilder extends Component {
         });
 
     }
-    async submit_info(prefetch, deviceRequest, patient) {
+    async submit_info(prefetch, request, patient) {
         this.consoleLog("Initiating form submission", types.info);
-        this.setState({patient});
-        let json_request = requestR4(deviceRequest, patient, this.state.ehrUrl, this.state.token, prefetch, this.state.version, this.state.prefetch);
+        this.setState({ patient });
+        let json_request = requestR4(request, patient, this.state.ehrUrl, this.state.token, prefetch, this.state.version, this.state.prefetch);
 
         // get the base url for the EHR server by stripping the FHIR version off
         let baseUrl = this.state.ehrUrl[this.state.version];
-        baseUrl = baseUrl.substr(0, baseUrl.toLowerCase().lastIndexOf(this.state.version.toLowerCase())-1);
+        baseUrl = baseUrl.substr(0, baseUrl.toLowerCase().lastIndexOf(this.state.version.toLowerCase()) - 1);
         this.state.baseUrl = baseUrl;
 
-        let jwt = await createJwt(this.state.keypair.prvKeyObj,this.state.keypair.pubKeyObj,baseUrl);
+        let jwt = await createJwt(this.state.keypair.prvKeyObj, this.state.keypair.pubKeyObj, baseUrl);
         jwt = "Bearer " + jwt;
         var myHeaders = new Headers({
             "Content-Type": "application/json",
@@ -207,12 +211,12 @@ export default class RequestBuilder extends Component {
     }
 
     exitSmart() {
-        this.setState({openPatient:false})
+        this.setState({ openPatient: false })
     }
 
     render() {
         const validationResult = this.validateState();
-        const header =     
+        const header =
         {
             "ehrUrl": {
                 "display": "EHR Server",
@@ -222,7 +226,7 @@ export default class RequestBuilder extends Component {
             "cdsUrl": {
                 "display": "CRD Server",
                 "value": this.state.cdsUrl,
-                "key":"cdsUrl"
+                "key": "cdsUrl"
             },
             "authUrl": {
                 "display": "Auth Server",
@@ -237,11 +241,11 @@ export default class RequestBuilder extends Component {
         return (
             <div>
                 <div className="nav-header">
-                        <button className={"launch-button left-button btn btn-class " + (this.state.ehrLaunch ? "active" : "not-active")} onClick={() => this.updateStateElement("ehrLaunch", true)}>EHR Launch</button>
-                        <button className={"launch-button right-button btn btn-class " + (!this.state.ehrLaunch ? "active" : "not-active")} onClick={() => this.updateStateElement("ehrLaunch", false)}>Standalone</button>
-                        <button className={"version-button left-button btn btn-class " + (this.state.version==="r4" ? "active" : "not-active")} onClick={() => this.updateStateElement("version", "r4")}>r4</button>
-                        <button className={"version-button right-button btn btn-class " + (this.state.version==="stu3" ? "active" : "not-active")} onClick={() => this.updateStateElement("version", "stu3")}>stu3</button>
-                        <button className={"btn btn-class settings " + (this.state.showSettings?"active":"not-active")} onClick={() => this.updateStateElement("showSettings", !this.state.showSettings)}><span className="glyphicon glyphicon-cog settings-icon" /></button>
+                    <button className={"launch-button left-button btn btn-class " + (this.state.ehrLaunch ? "active" : "not-active")} onClick={() => this.updateStateElement("ehrLaunch", true)}>EHR Launch</button>
+                    <button className={"launch-button right-button btn btn-class " + (!this.state.ehrLaunch ? "active" : "not-active")} onClick={() => this.updateStateElement("ehrLaunch", false)}>Standalone</button>
+                    <button className={"version-button left-button btn btn-class " + (this.state.version === "r4" ? "active" : "not-active")} onClick={() => this.updateStateElement("version", "r4")}>r4</button>
+                    <button className={"version-button right-button btn btn-class " + (this.state.version === "stu3" ? "active" : "not-active")} onClick={() => this.updateStateElement("version", "stu3")}>stu3</button>
+                    <button className={"btn btn-class settings " + (this.state.showSettings ? "active" : "not-active")} onClick={() => this.updateStateElement("showSettings", !this.state.showSettings)}><span className="glyphicon glyphicon-cog settings-icon" /></button>
 
                 </div>
 
@@ -250,31 +254,31 @@ export default class RequestBuilder extends Component {
                                     <EHRLaunchBox></EHRLaunchBox>
                                 </SMARTBox>:null} */}
                 <div className="form-group container left-form">
-                    <div id = "settings-header">
+                    <div id="settings-header">
 
 
                     </div>
-                    {this.state.showSettings?
+                    {this.state.showSettings ?
                         <SettingsBox
                             version={this.state.version}
                             headers={header}
                             updateCB={this.updateVersionedStateElement}
-                        />:null}
-                        <div>
-                            {/*for the ehr launch */}
-                            <RequestBox
-                                ehrUrl = {this.state.ehrUrl[this.state.version]}
-                                submitInfo={this.submit_info}
-                                access_token={this.state.token}>
+                        /> : null}
+                    <div>
+                        {/*for the ehr launch */}
+                        <RequestBox
+                            ehrUrl={this.state.ehrUrl[this.state.version]}
+                            submitInfo={this.submit_info}
+                            access_token={this.state.token}>
 
-                            </RequestBox>
+                        </RequestBox>
 
-                        </div>
-                        <br />
+                    </div>
+                    <br />
                     {/* <button className={"submit-btn btn btn-class " + (!total ? "button-error" : total === 1 ? "button-ready" : "button-empty-fields")} onClick={this.startLoading}>
                         Submit
                     </button> */}
-{/* 
+                    {/* 
 
                     <CheckBox elementName="oauth" displayName="OAuth" updateCB={this.updateStateElement} />
                     <CheckBox elementName="prefetch" displayName="Include Prefetch" updateCB={this.updateStateElement} />
@@ -292,11 +296,11 @@ export default class RequestBuilder extends Component {
 
                 <div className="right-form">
                     <DisplayBox
-                        response={this.state.response} 
-                        patientId = {this.state.patient.id}
-                        ehrLaunch = {true}
-                        fhirServerUrl = {this.state.baseUrl}
-                        fhirVersion = {this.state.version}/>
+                        response={this.state.response}
+                        patientId={this.state.patient.id}
+                        ehrLaunch={true}
+                        fhirServerUrl={this.state.baseUrl}
+                        fhirVersion={this.state.version} />
                 </div>
 
             </div>

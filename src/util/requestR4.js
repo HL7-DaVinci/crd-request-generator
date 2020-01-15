@@ -1,6 +1,6 @@
 
 
-export default function getRequest(deviceRequest, patient, ehrUrl, token, prefetch, version, includePrefetch) {
+export default function getRequest(request, patient, ehrUrl, token, prefetch, version, includePrefetch) {
     const patId = patient.id;
     const r4json = {
         "hookInstance": "d1577c69-dfbe-44ad-ba6d-3e05e953b2ea",
@@ -20,19 +20,30 @@ export default function getRequest(deviceRequest, patient, ehrUrl, token, prefet
             "orders": {
                 "resourceType": "Bundle",
                 "entry": [
-                    deviceRequest
+                    request
                 ]
             }
         }
     };
     if(includePrefetch){
-        r4json.prefetch = {
-            "deviceRequestBundle": {
-                "resourceType": "Bundle",
-                "type": "collection",
-                "entry": prefetch
+        if(request.resourceType === 'DeviceRequest') {
+            r4json.prefetch = {
+                "deviceRequestBundle": {
+                    "resourceType": "Bundle",
+                    "type": "collection",
+                    "entry": prefetch
+                }
+            }
+        } else if(request.resourceType === 'ServiceRequest') {
+            r4json.prefetch = {
+                "serviceRequestBundle": {
+                    "resourceType": "Bundle",
+                    "type": "collection",
+                    "entry": prefetch
+                }
             }
         }
+        
     }
 
     // stu3 //
@@ -49,7 +60,7 @@ export default function getRequest(deviceRequest, patient, ehrUrl, token, prefet
           "orders": {
             "resourceType": "Bundle",
             "entry": [
-              deviceRequest
+              request
             ]
           }
         }
