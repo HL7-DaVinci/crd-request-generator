@@ -141,7 +141,6 @@ export default class SMARTBox extends Component {
 
     render() {
         const patient = this.props.patient;
-        const text = "{ }";
         let name = "";
         if (patient.name) {
             name = <span> {`${patient.name[0].given[0]} ${patient.name[0].family}`} </span>
@@ -183,10 +182,6 @@ export default class SMARTBox extends Component {
                     </div>
                 </div>
             </div>
-
-
-
-
         )
     }
 }
