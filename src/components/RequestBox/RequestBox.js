@@ -53,13 +53,24 @@ export default class RequestBox extends Component {
     submit = () => {
         // make the prefetch
         const resources = [this.state.patient, this.state.practitioner, this.state.deviceRequest, this.state.serviceRequest, this.state.coverage, ...this.state.otherResources];
-        const prefetch = resources.reduce((pre, resource) => {
-            if (resource.id) {
-                pre.push({ resource: resource })
-            }
-            return pre;
-        }, [])
-
+        const deviceRequestReources = [this.state.patient, this.state.deviceRequest, this.state.coverage, this.state.practitioner, , ...this.state.otherResources];
+        const serviceRequestReources = [this.state.patient, this.state.serviceRequest, this.state.coverage, this.state.practitioner, , ...this.state.otherResources];
+        let prefetch;
+        if (!_.isEmpty(this.state.deviceRequest)) {
+            prefetch = deviceRequestReources.reduce((pre, resource) => {
+                if (resource.id) {
+                    pre.push({ resource: resource })
+                }
+                return pre;
+            }, [])
+        } else {
+            prefetch = serviceRequestReources.reduce((pre, resource) => {
+                if (resource.id) {
+                    pre.push({ resource: resource })
+                }
+                return pre;
+            }, [])
+        }
         if (!_.isEmpty(this.state.deviceRequest)) {
             this.props.submitInfo(prefetch, this.state.deviceRequest, this.state.patient);
         } else if (!_.isEmpty(this.state.serviceRequest)) {

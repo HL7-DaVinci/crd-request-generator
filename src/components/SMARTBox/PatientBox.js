@@ -48,7 +48,7 @@ export default class SMARTBox extends Component {
     updateServiceRequest(patient) {
         const devR = JSON.parse(this.state.serviceRequest);
         this.props.callback("serviceRequest", devR);
-        this.props.updateServiceRequestCallback(patient, devR);
+        this.props.updateServiceRequestCallback(devR);
         const code = devR.code.coding[0].code;
         const system = devR.code.coding[0].system;
         let text = "Unknown";
@@ -91,7 +91,7 @@ export default class SMARTBox extends Component {
     updateDeviceRequest(patient) {
         const devR = JSON.parse(this.state.deviceRequest);
         this.props.callback("deviceRequest", devR);
-        this.props.updateDeviceRequestCallback(patient, devR);
+        this.props.updateDeviceRequestCallback(devR);
         const code = devR.codeCodeableConcept.coding[0].code;
         const system = devR.codeCodeableConcept.coding[0].system;
         let text = "Unknown";
