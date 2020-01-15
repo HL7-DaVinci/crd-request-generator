@@ -1,28 +1,16 @@
 import React, { Component } from 'react';
 
-import InputBox from '../components/Inputs/InputBox';
-
-import Toggle from '../components/Inputs/Toggle';
 import DisplayBox from '../components/DisplayBox/DisplayBox';
-import DropdownInput from '../components/Inputs/DropdownInput';
-import DropdownState from '../components/Inputs/DropdownState';
-import CheckBox from '../components/Inputs/CheckBox';
 import ConsoleBox from '../components/ConsoleBox/ConsoleBox';
-import SMARTBox from '../components/SMARTBox/SMARTBox';
 import '../index.css';
 import '../components/ConsoleBox/consoleBox.css';
-import Loader from 'react-loader-spinner';
 import config from '../properties.json';
-import KJUR, { KEYUTIL } from 'jsrsasign';
+import { KEYUTIL } from 'jsrsasign';
 import SettingsBox from '../components/SettingsBox/SettingsBox';
-import EHRLaunchBox from '../components/SMARTBox/EHRLaunchBox';
 import RequestBox from '../components/RequestBox/RequestBox';
-import PatientBox from '../components/SMARTBox/PatientBox';
 import requestR4 from '../util/requestR4.js';
-import { types, headers, genderOptions, defaultValues } from '../util/data.js';
+import { types, headers, defaultValues } from '../util/data.js';
 import { createJwt, login } from '../util/auth';
-import { fhir } from '../util/fhir';
-import FHIR from "fhirclient"
 
 
 export default class RequestBuilder extends Component {
@@ -76,9 +64,6 @@ export default class RequestBuilder extends Component {
     componentDidMount() {
         this.setState({ config });
         this.setState({ keypair: KEYUTIL.generateKeypair('RSA', 2048) });
-        const client = FHIR.client({
-            serverUrl: this.state.ehrUrl[this.state.version],
-        });
 
         login().then((response) => { return response.json() }).then((token) => {
             this.setState({ token })
@@ -163,7 +148,7 @@ export default class RequestBuilder extends Component {
             }).then(response => {
                 this.consoleLog("Recieved response", types.info);
                 return response.json();
-            }).catch(reason => this.consoleLog("No response recieved from the server", types.error));
+            }).catch(() => this.consoleLog("No response recieved from the server", types.error));
 
             if (fhirResponse && fhirResponse.status) {
                 this.consoleLog("Server returned status "
@@ -215,7 +200,6 @@ export default class RequestBuilder extends Component {
     }
 
     render() {
-        const validationResult = this.validateState();
         const header =
         {
             "ehrUrl": {
@@ -234,9 +218,6 @@ export default class RequestBuilder extends Component {
                 "key": "authUrl"
             }
         }
-        const total = Object.keys(validationResult).reduce((previous, current) => {
-            return validationResult[current] * previous
-        }, 1);
 
         return (
             <div>

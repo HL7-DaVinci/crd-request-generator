@@ -52,7 +52,6 @@ export default class RequestBox extends Component {
 
     submit = () => {
         // make the prefetch
-        const resources = [this.state.patient, this.state.practitioner, this.state.deviceRequest, this.state.serviceRequest, this.state.coverage, ...this.state.otherResources];
         const deviceRequestReources = [this.state.patient, this.state.deviceRequest, this.state.coverage, this.state.practitioner, , ...this.state.otherResources];
         const serviceRequestReources = [this.state.patient, this.state.serviceRequest, this.state.coverage, this.state.practitioner, , ...this.state.otherResources];
         let prefetch;
@@ -414,7 +413,6 @@ export default class RequestBox extends Component {
                     Submit
                 </button>
             </div>
-
         )
     }
 }
