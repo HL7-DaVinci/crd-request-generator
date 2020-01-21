@@ -8,7 +8,7 @@ import config from '../properties.json';
 import { KEYUTIL } from 'jsrsasign';
 import SettingsBox from '../components/SettingsBox/SettingsBox';
 import RequestBox from '../components/RequestBox/RequestBox';
-import requestR4 from '../util/requestR4.js';
+import buildRequest from '../util/buildRequest.js';
 import { types, headers, defaultValues } from '../util/data.js';
 import { createJwt, login } from '../util/auth';
 
@@ -28,7 +28,7 @@ export default class RequestBuilder extends Component {
             loading: false,
             logs: [],
             keypair: null,
-            version: "stu3",
+            version: "r4",
             config: {},
             ehrUrl: headers.ehrUrl.value,
             authUrl: headers.authUrl.value,
@@ -123,10 +123,28 @@ export default class RequestBuilder extends Component {
         });
 
     }
+
+    getHookType(cdsUrl, fhirVersion) {
+        var url = cdsUrl.r4;
+        if (fhirVersion === "stu3") {
+            url = cdsUrl.stu3;
+        }
+        if (url.includes("order-review")) {
+            return "order-review";
+        } else if (url.includes("order-sign")) {
+            return "order-sign";
+        } else {
+            console.log("Could not determine the CDS Hook type, defaulting to order-select.");
+            return "order-select";
+        }
+    }
+
     async submit_info(prefetch, request, patient) {
         this.consoleLog("Initiating form submission", types.info);
-        this.setState({ patient });
-        let json_request = requestR4(request, patient, this.state.ehrUrl, this.state.token, prefetch, this.state.version, this.state.prefetch);
+        this.setState({patient});
+        
+        var hook = this.getHookType(this.state.cdsUrl, this.state.version);
+        let json_request = buildRequest(request, patient, this.state.ehrUrl, this.state.token, prefetch, this.state.version, this.state.prefetch, hook);
 
         // get the base url for the EHR server by stripping the FHIR version off
         let baseUrl = this.state.ehrUrl[this.state.version];
@@ -289,7 +307,7 @@ export default class RequestBuilder extends Component {
     }
 
     getJson() {
-        return requestR4(this.state);
+        return buildRequest(this.state);
     }
 }
 
