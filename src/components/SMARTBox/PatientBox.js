@@ -6,13 +6,16 @@ export default class SMARTBox extends Component {
         super(props);
         this.state = {
             deviceRequest: "none",
-            serviceRequest: "none"
+            serviceRequest: "none",
+            medicationRequest: "none"
         };
 
         this.handleDeviceRequestChange = this.handleDeviceRequestChange.bind(this);
         this.handleServiceRequestChange = this.handleServiceRequestChange.bind(this);
+        this.handleMedicationRequestChange = this.handleMedicationRequestChange.bind(this);
         this.updateDeviceRequest = this.updateDeviceRequest.bind(this);
         this.updateServiceRequest = this.updateServiceRequest.bind(this);
+        this.updateMedicationRequest = this.updateMedicationRequest.bind(this);
     }
 
     makeOption(request) {
@@ -39,8 +42,9 @@ export default class SMARTBox extends Component {
             this.updateDeviceRequest(patient);
         } else if (this.state.serviceRequest !== "none") {
             this.updateServiceRequest(patient);
-
-        } else {
+        } else if (this.state.medicationRequest !== "none") {
+            this.updateMedicationRequest(patient);
+        }else {
             this.props.clearCallback();
         }
     }
@@ -131,12 +135,19 @@ export default class SMARTBox extends Component {
         }
     }
 
+    updateMedicationRequest(patient) {
+    }
+
     handleDeviceRequestChange(e) {
         this.setState({ deviceRequest: e.target.value, serviceRequest: "none" });
     }
 
     handleServiceRequestChange(e) {
         this.setState({ serviceRequest: e.target.value, deviceRequest: "none" });
+    }
+
+    handleMedicationRequestChange(e) {
+        this.setState({ medicationRequest: e.target.value, medicationRequest: "none" });
     }
 
     render() {
@@ -175,6 +186,16 @@ export default class SMARTBox extends Component {
                         <select value={this.state.serviceRequest} onChange={this.handleServiceRequestChange} onClick={(event) => { event.stopPropagation() }} className="request-selector">
                             {this.props.serviceRequests ?
                                 this.props.serviceRequests.data.map((e) => { return this.makeOption(e) }) : null}
+                            <option value="none">
+                                None
+                                </option>
+                        </select>
+                    </div>
+                    <div className="request-info">
+                        <span style={{ fontWeight: "bold", marginRight: "5px" }}>Medication Request:</span>
+                        <select value={this.state.medicationRequest} onChange={this.handleMedicationRequestChange} onClick={(event) => { event.stopPropagation() }} className="request-selector">
+                            {this.props.medicationRequests ?
+                                this.props.medicationRequests.data.map((e) => { return this.makeOption(e) }) : null}
                             <option value="none">
                                 None
                                 </option>
