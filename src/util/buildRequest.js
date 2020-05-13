@@ -61,6 +61,14 @@ function buildR4Request(request, patient, ehrUrl, token, prefetch, includePrefet
                     "entry": prefetch
                 }
             }
+        } else if(request.resourceType === 'MedicationRequest') {
+            r4json.prefetch = {
+                "medicationRequestBundle": {
+                    "resourceType": "Bundle",
+                    "type": "collection",
+                    "entry": prefetch
+                }
+            }
         }
     }
 

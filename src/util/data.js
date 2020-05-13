@@ -114,7 +114,8 @@ const stateOptions = [
 const shortNameMap = {
     "http://www.ama-assn.org/go/cpt":"CPT",
     "https://bluebutton.cms.gov/resources/codesystem/hcpcs": "HCPCS",
-    "http://www.nlm.nih.gov/research/umls/rxnorm": "RxNorm"
+    "http://www.nlm.nih.gov/research/umls/rxnorm": "RxNorm",
+    "http://hl7.org/fhir/sid/ndc": "NDC"
 }
 
   export {
