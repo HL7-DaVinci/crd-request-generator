@@ -53,7 +53,7 @@ export default class RequestBox extends Component {
 
   submit = () => {
     // make the prefetch
-    const deviceRequestReources = [
+    const deviceRequestResources = [
       this.state.patient,
       this.state.deviceRequest,
       this.state.coverage,
@@ -61,26 +61,38 @@ export default class RequestBox extends Component {
       ,
       ...this.state.otherResources,
     ];
-    const serviceRequestReources = [
+    const serviceRequestResources = [
       this.state.patient,
       this.state.serviceRequest,
       this.state.coverage,
       this.state.practitioner,
-      ,
+      ...this.state.otherResources,
+    ];
+    const medicationRequestResources = [
+      this.state.patient,
+      this.state.medicationRequest,
+      this.state.practitioner,
       ...this.state.otherResources,
     ];
     let prefetch;
     if (!_.isEmpty(this.state.deviceRequest)) {
-      prefetch = deviceRequestReources.reduce((pre, resource) => {
+      prefetch = deviceRequestResources.reduce((pre, resource) => {
+        if (resource.id) {
+          pre.push({ resource: resource });
+        }
+        return pre;
+      }, []);
+    } else if (!_.isEmpty(this.state.serviceRequest)) {
+      prefetch = serviceRequestResources.reduce((pre, resource) => {
         if (resource.id) {
           pre.push({ resource: resource });
         }
         return pre;
       }, []);
     } else {
-      prefetch = serviceRequestReources.reduce((pre, resource) => {
+      prefetch = medicationRequestResources.reduce((pre, resource) => {
         if (resource.id) {
-          pre.push({ resource: resource });
+          pre.push({ resource });
         }
         return pre;
       }, []);
@@ -95,6 +107,12 @@ export default class RequestBox extends Component {
       this.props.submitInfo(
         prefetch,
         this.state.serviceRequest,
+        this.state.patient
+      );
+    } else if (!_.isEmpty(this.state.medicationRequest)) {
+      this.props.submitInfo(
+        prefetch,
+        this.state.medicationRequest,
         this.state.patient
       );
     }
@@ -117,6 +135,7 @@ export default class RequestBox extends Component {
       deviceRequest: {},
       coverage: {},
       serviceRequest: {},
+      medicationRequest: {},
     });
   };
 
@@ -235,20 +254,20 @@ export default class RequestBox extends Component {
       },
     });
 
-    // If the service request is provided it has the pertinent information.
-    // this is for R4
     client
       .request(`MedicationRequest/${medicationRequest.id}`, {
-        resolveReferences: ["performer", "medicationReference"],
+        resolveReferences: ["requester"],
         graph: false,
         flat: true,
       })
       .then((result) => {
+        console.log("---gatherMedicationRequestResource result:", result);
         const references = result.references;
         Object.keys(references).forEach((refKey) => {
           const ref = references[refKey];
           if (ref.resourceType === "Practitioner") {
             this.setState({ practitioner: ref });
+            console.log("---gatherMedicaitonRequestResources ref", ref);
             // find pracRoles
             client
               .request(`PractitionerRole?practitioner=${ref.id}`, {
@@ -409,13 +428,13 @@ export default class RequestBox extends Component {
   }
 
   renderPrefetchedResources() {
-    const deviceRequestReources = [
+    const deviceRequestResources = [
       "patient",
       "deviceRequest",
       "coverage",
       "practitioner",
     ];
-    const serviceRequestReources = [
+    const serviceRequestResources = [
       "patient",
       "serviceRequest",
       "coverage",
@@ -423,12 +442,13 @@ export default class RequestBox extends Component {
     ];
     const medicationRequestResources = [
       "patient",
-      "medicationRequest"
+      "medicationRequest",
+      "practitioner",
     ];
     if (!_.isEmpty(this.state.deviceRequest)) {
-      return this.renderRequestResources(deviceRequestReources);
+      return this.renderRequestResources(deviceRequestResources);
     } else if (!_.isEmpty(this.state.serviceRequest)) {
-      return this.renderRequestResources(serviceRequestReources);
+      return this.renderRequestResources(serviceRequestResources);
     } else if (!_.isEmpty(this.state.medicationRequest)) {
       return this.renderRequestResources(medicationRequestResources);
     }
@@ -451,6 +471,7 @@ export default class RequestBox extends Component {
 
   renderResource(resourceType) {
     let value = <div>N/A</div>;
+    console.log("----- RenderResource this.state", this.state);
     if (this.state[resourceType].id) {
       value = (
         <div key={this.state[resourceType].id}>
@@ -518,8 +539,8 @@ export default class RequestBox extends Component {
                               this.state.serviceRequests[patient.id]
                             }
                             medicationRequests={
-                                this.state.medicationRequests[patient.id]
-                              }
+                              this.state.medicationRequests[patient.id]
+                            }
                             callback={this.updateStateElement}
                             updateDeviceRequestCallback={
                               this.gatherDeviceRequestResources

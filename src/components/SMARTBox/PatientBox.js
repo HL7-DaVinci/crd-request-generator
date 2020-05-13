@@ -32,8 +32,8 @@ export default class SMARTBox extends Component {
       }
     } else if (request.resourceType === "MedicationRequest") {
       console.log("MedicationRequest request", request);
-      if (request.contained && request.contained[0]) {
-        a = request.contained[0].code.coding[0].code;
+      if (request.medication) {
+        a = request.medication.codeCodeableConcept.coding[0].code;
       }
     }
     return (
@@ -160,10 +160,9 @@ export default class SMARTBox extends Component {
 
   updateMedicationRequest(patient) {
     const devR = JSON.parse(this.state.medicationRequest);
-    console.log("--- updateMedicationRequest devR", devR);
     this.props.callback("medicationRequest", devR);
     this.props.updateMedicationRequestCallback(devR);
-    const requestMedicationCode = devR.contained[0].code.coding[0];
+    const requestMedicationCode = devR.medication.codeCodeableConcept.coding[0];
     const code = requestMedicationCode.code;
     const system = requestMedicationCode.system;
     let text = "Unknown";
@@ -188,9 +187,9 @@ export default class SMARTBox extends Component {
     } else {
       this.props.callback("patientState", "");
     }
-    if (devR.performer) {
-      if (devR.performer.reference) {
-        fetch(`${this.props.ehrUrl}${devR.performer.reference}`, {
+    if (devR.requester) {
+      if (devR.requester.reference) {
+        fetch(`${this.props.ehrUrl}${devR.requester.reference}`, {
           method: "GET",
         })
           .then((response) => {
