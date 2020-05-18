@@ -32,8 +32,8 @@ export default class SMARTBox extends Component {
       }
     } else if (request.resourceType === "MedicationRequest") {
       console.log("MedicationRequest request", request);
-      if (request.medication) {
-        a = request.medication.codeCodeableConcept.coding[0].code;
+      if (request.medicationCodeableConcept) {
+        a = request.medicationCodeableConcept.coding[0].code;
       }
     }
     return (
@@ -162,7 +162,7 @@ export default class SMARTBox extends Component {
     const devR = JSON.parse(this.state.medicationRequest);
     this.props.callback("medicationRequest", devR);
     this.props.updateMedicationRequestCallback(devR);
-    const requestMedicationCode = devR.medication.codeCodeableConcept.coding[0];
+    const requestMedicationCode = devR.medicationCodeableConcept.coding[0];
     const code = requestMedicationCode.code;
     const system = requestMedicationCode.system;
     let text = "Unknown";
