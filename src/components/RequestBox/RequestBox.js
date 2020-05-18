@@ -256,16 +256,32 @@ export default class RequestBox extends Component {
 
     client
       .request(`MedicationRequest/${medicationRequest.id}`, {
-        resolveReferences: ["requester"],
+        resolveReferences: ["requester", "insurance.0"],
         graph: false,
         flat: true,
       })
       .then((result) => {
-        console.log("---gatherMedicationRequestResource result:", result);
+        console.log("--- $$$$ gatherMedicationRequestResource result:", result);
         const references = result.references;
         Object.keys(references).forEach((refKey) => {
           const ref = references[refKey];
-          if (ref.resourceType === "Practitioner") {
+          console.log('---- $$$$ MedicationRequest ref', ref);
+          if (ref.resourceType === "Coverage") {
+            client
+              .request(`Coverage/${ref.id}`, {
+                resolveReferences: ["payor"],
+                graph: false,
+                flat: true,
+              })
+              .then((result) => {
+                console.log(
+                  "---- medicationRequest instance coverage ",
+                  result.references
+                );
+                this.addReferencesToList(result.references);
+              });
+            this.setState({ coverage: ref });
+          } else if (ref.resourceType === "Practitioner") {
             this.setState({ practitioner: ref });
             console.log("---gatherMedicaitonRequestResources ref", ref);
             // find pracRoles
@@ -443,6 +459,7 @@ export default class RequestBox extends Component {
     const medicationRequestResources = [
       "patient",
       "medicationRequest",
+      "coverage",
       "practitioner",
     ];
     if (!_.isEmpty(this.state.deviceRequest)) {
