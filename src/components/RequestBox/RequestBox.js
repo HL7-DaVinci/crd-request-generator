@@ -72,6 +72,7 @@ export default class RequestBox extends Component {
       this.state.patient,
       this.state.medicationRequest,
       this.state.practitioner,
+      this.state.coverage,
       ...this.state.otherResources,
     ];
     let prefetch;
