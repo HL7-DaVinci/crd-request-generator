@@ -31,7 +31,6 @@ export default class SMARTBox extends Component {
         a = request.code.coding[0].code;
       }
     } else if (request.resourceType === "MedicationRequest") {
-      console.log("MedicationRequest request", request);
       if (request.medicationCodeableConcept) {
         a = request.medicationCodeableConcept.coding[0].code;
       }

@@ -262,11 +262,9 @@ export default class RequestBox extends Component {
         flat: true,
       })
       .then((result) => {
-        console.log("--- $$$$ gatherMedicationRequestResource result:", result);
         const references = result.references;
         Object.keys(references).forEach((refKey) => {
           const ref = references[refKey];
-          console.log('---- $$$$ MedicationRequest ref', ref);
           if (ref.resourceType === "Coverage") {
             client
               .request(`Coverage/${ref.id}`, {
@@ -275,16 +273,11 @@ export default class RequestBox extends Component {
                 flat: true,
               })
               .then((result) => {
-                console.log(
-                  "---- medicationRequest instance coverage ",
-                  result.references
-                );
                 this.addReferencesToList(result.references);
               });
             this.setState({ coverage: ref });
           } else if (ref.resourceType === "Practitioner") {
             this.setState({ practitioner: ref });
-            console.log("---gatherMedicaitonRequestResources ref", ref);
             // find pracRoles
             client
               .request(`PractitionerRole?practitioner=${ref.id}`, {
@@ -489,7 +482,6 @@ export default class RequestBox extends Component {
 
   renderResource(resourceType) {
     let value = <div>N/A</div>;
-    console.log("----- RenderResource this.state", this.state);
     if (this.state[resourceType].id) {
       value = (
         <div key={this.state[resourceType].id}>
