@@ -70,14 +70,6 @@ export default class SMARTBox extends Component {
     }
   }
 
-  updateValuesZZZZ(patient) {
-    const request = JSON.parse(this.state.request);
-    console.log(request);
-    
-    let resourceTypeCamel = request.resourceType.charAt(0).toLowerCase() + request.resourceType.substring(1);
-    this.props.callback(resourceTypeCamel, request);
-  }
-
   updateServiceRequest(patient, serviceRequest) {
     this.props.callback("serviceRequest", serviceRequest);
     this.props.updateServiceRequestCallback(serviceRequest);
