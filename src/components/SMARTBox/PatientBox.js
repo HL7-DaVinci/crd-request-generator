@@ -1,45 +1,62 @@
 import React, { Component } from "react";
+import { Dropdown, Header } from 'semantic-ui-react'
 import { getAge } from "../../util/fhir";
 import "./smart.css";
+
+
 export default class SMARTBox extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      deviceRequest: "none",
-      serviceRequest: "none",
-      medicationRequest: "none",
+      request: "none"
     };
 
-    this.handleDeviceRequestChange = this.handleDeviceRequestChange.bind(this);
-    this.handleServiceRequestChange = this.handleServiceRequestChange.bind(
-      this
-    );
-    this.handleMedicationRequestChange = this.handleMedicationRequestChange.bind(
-      this
-    );
+    this.handleRequestChange = this.handleRequestChange.bind(this);
+
     this.updateDeviceRequest = this.updateDeviceRequest.bind(this);
     this.updateServiceRequest = this.updateServiceRequest.bind(this);
     this.updateMedicationRequest = this.updateMedicationRequest.bind(this);
   }
 
-  makeOption(request) {
-    let a;
+  getCoding(request) {
+    let code = null;
     if (request.resourceType === "DeviceRequest") {
-      a = request.codeCodeableConcept.coding[0].code;
+      code = request.codeCodeableConcept.coding[0];
     } else if (request.resourceType === "ServiceRequest") {
-      if (request.code) {
-        a = request.code.coding[0].code;
-      }
+      code = request.code.coding[0];
     } else if (request.resourceType === "MedicationRequest") {
-      if (request.medicationCodeableConcept) {
-        a = request.medicationCodeableConcept.coding[0].code;
-      }
+      code = request.medicationCodeableConcept.coding[0];
     }
-    return (
-      <option value={JSON.stringify(request)} key={request.id} label={a}>
-        {a}
-      </option>
-    );
+    if (code) {
+      if (!code.code) {
+        code.code = "Unknown";
+      }
+      if (!code.display) {
+        code.display = "Unknown";
+      }
+      if (!code.system) {
+        code.system = "Unknown";
+      }
+    } else {
+      code.code = "Unknown";
+      code.display = "Unknown";
+      code.system = "Unknown";
+    }
+    return code;
+  }
+
+  makeOption(request, options) {
+    let code = this.getCoding(request);
+
+    let option = {
+      key: request.id,
+      text: "(" + code.code + ") " + code.display,
+      value: JSON.stringify(request),
+      content: (
+        <Header content={code.code + " (" + request.resourceType + ")"} subheader={code.display} />
+      )
+    }
+    options.push(option);
   }
 
   gatherResources() {}
@@ -48,27 +65,25 @@ export default class SMARTBox extends Component {
     this.props.callback("patient", patient);
     this.props.callback("openPatient", false);
     this.props.clearCallback();
-    if (this.state.deviceRequest !== "none") {
-      this.updateDeviceRequest(patient);
-    } else if (this.state.serviceRequest !== "none") {
-      this.updateServiceRequest(patient);
-    } else if (this.state.medicationRequest !== "none") {
-      this.updateMedicationRequest(patient);
+    const request = JSON.parse(this.state.request);
+    if (request.resourceType === "DeviceRequest") {
+      this.updateDeviceRequest(patient, request);
+    } else if (request.resourceType === "ServiceRequest") {
+      this.updateServiceRequest(patient, request);
+    } else if (request.resourceType === "MedicationRequest") {
+      this.updateMedicationRequest(patient, request);
     } else {
       this.props.clearCallback();
     }
   }
 
-  updateServiceRequest(patient) {
-    const devR = JSON.parse(this.state.serviceRequest);
-    this.props.callback("serviceRequest", devR);
-    this.props.updateServiceRequestCallback(devR);
-    const code = devR.code.coding[0].code;
-    const system = devR.code.coding[0].system;
-    let text = "Unknown";
-    if (devR.code.coding[0].display) {
-      text = devR.code.coding[0].display;
-    }
+  updateServiceRequest(patient, serviceRequest) {
+    this.props.callback("serviceRequest", serviceRequest);
+    this.props.updateServiceRequestCallback(serviceRequest);
+    const coding = this.getCoding(serviceRequest);
+    const code = coding.code;
+    const system = coding.system;
+    const text = coding.display;
     this.props.callback("code", code);
     this.props.callback("codeSystem", system);
     this.props.callback("display", text);
@@ -87,9 +102,9 @@ export default class SMARTBox extends Component {
     } else {
       this.props.callback("patientState", "");
     }
-    if (devR.performer) {
-      if (devR.performer[0].reference) {
-        fetch(`${this.props.ehrUrl}${devR.performer[0].reference}`, {
+    if (serviceRequest.performer) {
+      if (serviceRequest.performer[0].reference) {
+        fetch(`${this.props.ehrUrl}${serviceRequest.performer[0].reference}`, {
           method: "GET",
         })
           .then((response) => {
@@ -108,16 +123,13 @@ export default class SMARTBox extends Component {
     }
   }
 
-  updateDeviceRequest(patient) {
-    const devR = JSON.parse(this.state.deviceRequest);
-    this.props.callback("deviceRequest", devR);
-    this.props.updateDeviceRequestCallback(devR);
-    const code = devR.codeCodeableConcept.coding[0].code;
-    const system = devR.codeCodeableConcept.coding[0].system;
-    let text = "Unknown";
-    if (devR.codeCodeableConcept.coding[0].display) {
-      text = devR.codeCodeableConcept.coding[0].display;
-    }
+  updateDeviceRequest(patient, deviceRequest) {
+    this.props.callback("deviceRequest", deviceRequest);
+    this.props.updateDeviceRequestCallback(deviceRequest);
+    const coding = this.getCoding(deviceRequest);
+    const code = coding.code;
+    const system = coding.system;
+    const text = coding.display;
     this.props.callback("code", code);
     this.props.callback("codeSystem", system);
     this.props.callback("display", text);
@@ -136,9 +148,9 @@ export default class SMARTBox extends Component {
     } else {
       this.props.callback("patientState", "");
     }
-    if (devR.performer) {
-      if (devR.performer.reference) {
-        fetch(`${this.props.ehrUrl}${devR.performer.reference}`, {
+    if (deviceRequest.performer) {
+      if (deviceRequest.performer.reference) {
+        fetch(`${this.props.ehrUrl}${deviceRequest.performer.reference}`, {
           method: "GET",
         })
           .then((response) => {
@@ -157,17 +169,13 @@ export default class SMARTBox extends Component {
     }
   }
 
-  updateMedicationRequest(patient) {
-    const devR = JSON.parse(this.state.medicationRequest);
-    this.props.callback("medicationRequest", devR);
-    this.props.updateMedicationRequestCallback(devR);
-    const requestMedicationCode = devR.medicationCodeableConcept.coding[0];
-    const code = requestMedicationCode.code;
-    const system = requestMedicationCode.system;
-    let text = "Unknown";
-    if (requestMedicationCode.display) {
-      text = requestMedicationCode.display;
-    }
+  updateMedicationRequest(patient, medicationRequest) {
+    this.props.callback("medicationRequest", medicationRequest);
+    this.props.updateMedicationRequestCallback(medicationRequest);
+    const coding = this.getCoding(medicationRequest);
+    const code = coding.code;
+    const system = coding.system;
+    const text = coding.display;
     this.props.callback("code", code);
     this.props.callback("codeSystem", system);
     this.props.callback("display", text);
@@ -186,9 +194,9 @@ export default class SMARTBox extends Component {
     } else {
       this.props.callback("patientState", "");
     }
-    if (devR.requester) {
-      if (devR.requester.reference) {
-        fetch(`${this.props.ehrUrl}${devR.requester.reference}`, {
+    if (medicationRequest.requester) {
+      if (medicationRequest.requester.reference) {
+        fetch(`${this.props.ehrUrl}${medicationRequest.requester.reference}`, {
           method: "GET",
         })
           .then((response) => {
@@ -207,30 +215,21 @@ export default class SMARTBox extends Component {
     }
   }
 
-  handleDeviceRequestChange(e) {
-    this.setState({
-      deviceRequest: e.target.value,
-      serviceRequest: "none",
-      medicationRequest: "none",
-    });
+  handleRequestChange(e, data) {
+    if (data.value === "none") {
+      this.setState({
+        request: "none"
+      });
+    } else {
+      let request = JSON.parse(data.value);
+      let coding = this.getCoding(request);
+      //console.log(request.resourceType + " for code " + coding.code + " selected");
+      this.setState({
+        request: data.value
+      });
+    }
   }
-
-  handleServiceRequestChange(e) {
-    this.setState({
-      serviceRequest: e.target.value,
-      deviceRequest: "none",
-      medicationRequest: "none",
-    });
-  }
-
-  handleMedicationRequestChange(e) {
-    this.setState({
-      medicationRequest: e.target.value,
-      serviceRequest: "none",
-      deviceRequest: "none",
-    });
-  }
-
+  
   render() {
     const patient = this.props.patient;
     let name = "";
@@ -239,6 +238,25 @@ export default class SMARTBox extends Component {
         <span> {`${patient.name[0].given[0]} ${patient.name[0].family}`} </span>
       );
     }
+
+    // add all of the requests to the list of options
+    let options = []
+    if (this.props.deviceRequests) {
+      this.props.deviceRequests.data.map((e) => {
+        this.makeOption(e, options);
+      });
+    }
+    if (this.props.serviceRequests) {
+      this.props.serviceRequests.data.map((e) => {
+        this.makeOption(e, options);
+      });
+    }
+    if (this.props.medicationRequests) {
+        this.props.medicationRequests.data.map((e) => {
+        this.makeOption(e, options);
+      });
+    }
+
     return (
       <div>
         <div
@@ -268,63 +286,14 @@ export default class SMARTBox extends Component {
           </div>
           <div className="request-info">
             <span style={{ fontWeight: "bold", marginRight: "5px" }}>
-              Device Request:
+              Request:
             </span>
-            <select
-              value={this.state.deviceRequest}
-              onChange={this.handleDeviceRequestChange}
-              onClick={(event) => {
-                event.stopPropagation();
-              }}
-              className="request-selector"
-            >
-              {this.props.deviceRequests
-                ? this.props.deviceRequests.data.map((e) => {
-                    return this.makeOption(e);
-                  })
-                : null}
-              <option value="none">None</option>
-            </select>
-          </div>
-          <div className="request-info">
-            <span style={{ fontWeight: "bold", marginRight: "5px" }}>
-              Service Request:
-            </span>
-            <select
-              value={this.state.serviceRequest}
-              onChange={this.handleServiceRequestChange}
-              onClick={(event) => {
-                event.stopPropagation();
-              }}
-              className="request-selector"
-            >
-              {this.props.serviceRequests
-                ? this.props.serviceRequests.data.map((e) => {
-                    return this.makeOption(e);
-                  })
-                : null}
-              <option value="none">None</option>
-            </select>
-          </div>
-          <div className="request-info">
-            <span style={{ fontWeight: "bold", marginRight: "5px" }}>
-              Medication Request:
-            </span>
-            <select
-              value={this.state.medicationRequest}
-              onChange={this.handleMedicationRequestChange}
-              onClick={(event) => {
-                event.stopPropagation();
-              }}
-              className="request-selector"
-            >
-              {this.props.medicationRequests
-                ? this.props.medicationRequests.data.map((e) => {
-                    return this.makeOption(e);
-                  })
-                : null}
-              <option value="none">None</option>
-            </select>
+            <Dropdown 
+              search searchInput={{ type: 'text' }}
+              selection fluid options={options} 
+              placeholder='Choose an option' 
+              onChange={this.handleRequestChange}
+            />
           </div>
         </div>
       </div>
