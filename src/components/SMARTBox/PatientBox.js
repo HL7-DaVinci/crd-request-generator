@@ -1,12 +1,14 @@
 import React, { Component } from "react";
+import { Dropdown, Header } from 'semantic-ui-react'
 import { getAge } from "../../util/fhir";
 import "./smart.css";
+
+
 export default class SMARTBox extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      request: "none",
-      requestDisplay: "none"
+      request: "none"
     };
 
     this.handleRequestChange = this.handleRequestChange.bind(this);
@@ -43,13 +45,18 @@ export default class SMARTBox extends Component {
     return code;
   }
 
-  makeOption(request) {
-    let code = this.getCoding(request).code;
-    return (
-      <option value={JSON.stringify(request)} key={request.id} label={code + " (" + request.resourceType + ")"}>
-        {code}
-      </option>
-    );
+  makeOption(request, options) {
+    let code = this.getCoding(request);
+
+    let option = {
+      key: request.id,
+      text: "(" + code.code + ") " + code.display,
+      value: JSON.stringify(request),
+      content: (
+        <Header content={code.code + " (" + request.resourceType + ")"} subheader={code.display} />
+      )
+    }
+    options.push(option);
   }
 
   gatherResources() {}
@@ -208,23 +215,21 @@ export default class SMARTBox extends Component {
     }
   }
 
-  handleRequestChange(e) {
-    if (e.target.value === "none") {
+  handleRequestChange(e, data) {
+    if (data.value === "none") {
       this.setState({
-        request: "none",
-        requestDisplay: "none"
+        request: "none"
       });
     } else {
-      let request = JSON.parse(e.target.value);
+      let request = JSON.parse(data.value);
       let coding = this.getCoding(request);
       //console.log(request.resourceType + " for code " + coding.code + " selected");
       this.setState({
-        request: e.target.value,
-        requestDisplay: coding.display
+        request: data.value
       });
     }
   }
-
+  
   render() {
     const patient = this.props.patient;
     let name = "";
@@ -233,6 +238,25 @@ export default class SMARTBox extends Component {
         <span> {`${patient.name[0].given[0]} ${patient.name[0].family}`} </span>
       );
     }
+
+    // add all of the requests to the list of options
+    let options = []
+    if (this.props.deviceRequests) {
+      this.props.deviceRequests.data.map((e) => {
+        this.makeOption(e, options);
+      });
+    }
+    if (this.props.serviceRequests) {
+      this.props.serviceRequests.data.map((e) => {
+        this.makeOption(e, options);
+      });
+    }
+    if (this.props.medicationRequests) {
+        this.props.medicationRequests.data.map((e) => {
+        this.makeOption(e, options);
+      });
+    }
+
     return (
       <div>
         <div
@@ -264,35 +288,12 @@ export default class SMARTBox extends Component {
             <span style={{ fontWeight: "bold", marginRight: "5px" }}>
               Request:
             </span>
-            <select
-              value={this.state.request}
+            <Dropdown 
+              search searchInput={{ type: 'text' }}
+              selection fluid options={options} 
+              placeholder='Choose an option' 
               onChange={this.handleRequestChange}
-              onClick={(event) => {
-                event.stopPropagation();
-              }}
-              className="request-selector"
-            >
-              {this.props.deviceRequests
-                ? this.props.deviceRequests.data.map((e) => {
-                    return this.makeOption(e);
-                  })
-                : null}
-              {this.props.serviceRequests
-              ? this.props.serviceRequests.data.map((e) => {
-                  return this.makeOption(e);
-                })
-              : null}
-              {this.props.medicationRequests
-              ? this.props.medicationRequests.data.map((e) => {
-                  return this.makeOption(e);
-                })
-              : null}
-              <option value="none">None</option>
-            </select>
-            <div>
-              <span style={{ fontWeight: "bold" }}>Details</span>:{" "}
-              {this.state.requestDisplay}
-            </div>
+            />
           </div>
         </div>
       </div>

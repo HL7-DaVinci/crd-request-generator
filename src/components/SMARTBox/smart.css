@@ -79,11 +79,18 @@ iframe{
 
 .request-info {
     display: inline-block;
-    width:300px;
+    width:350px;
     vertical-align: top; /* here */
 
 }
 
 .ehr-setting {
     margin: 10px;
+}
+
+.ui.header.text, .sub.header {
+    text-align: left;
+}
+.ui.header.text {
+    font-size: 1em;
 }
