@@ -10,7 +10,7 @@ import SettingsBox from '../components/SettingsBox/SettingsBox';
 import RequestBox from '../components/RequestBox/RequestBox';
 import buildRequest from '../util/buildRequest.js';
 import { types, headers, defaultValues } from '../util/data.js';
-import { createJwt, login } from '../util/auth';
+import { createJwt, login, setupKeys } from '../util/auth';
 
 
 export default class RequestBuilder extends Component {
@@ -63,7 +63,12 @@ export default class RequestBuilder extends Component {
 
     componentDidMount() {
         this.setState({ config });
-        this.setState({ keypair: KEYUTIL.generateKeypair('RSA', 2048) });
+
+        const callback = (keypair) => {
+            this.setState({ keypair });
+        }
+
+        setupKeys(callback);
 
         login().then((response) => { return response.json() }).then((token) => {
             this.setState({ token })
@@ -71,7 +76,6 @@ export default class RequestBuilder extends Component {
             // fails when keycloak isn't running, add dummy token
             this.setState({ token: {access_token: "-"}})
         })
-        // client.request("DeviceRequest/devreq1234", {resolveReferences:["subject","performer"], graph: false}).then((e)=>{console.log(e)})
     }
 
     getDeviceRequest(patientId, client) {
@@ -142,47 +146,44 @@ export default class RequestBuilder extends Component {
         }
     }
 
-    async submit_info(prefetch, request, patient) {
+    submit_info(prefetch, request, patient) {
         this.consoleLog("Initiating form submission", types.info);
         this.setState({patient});
         
         var hook = this.getHookType(this.state.cdsUrl, this.state.version);
         let json_request = buildRequest(request, patient, this.state.ehrUrl, this.state.token, prefetch, this.state.version, this.state.prefetch, hook);
-
+        const cdsUrl = this.state.cdsUrl[this.state.version];
         // get the base url for the EHR server by stripping the FHIR version off
         let baseUrl = this.state.ehrUrl[this.state.version];
         baseUrl = baseUrl.substr(0, baseUrl.toLowerCase().lastIndexOf(this.state.version.toLowerCase()) - 1);
-        this.state.baseUrl = baseUrl;
-
-        let jwt = await createJwt(this.state.keypair.prvKeyObj, this.state.keypair.pubKeyObj, baseUrl);
-        jwt = "Bearer " + jwt;
+        this.setState({baseUrl});
+        const jwt = "Bearer " + createJwt(this.state.keypair, baseUrl, cdsUrl);
+        console.log(jwt);
         var myHeaders = new Headers({
             "Content-Type": "application/json",
             "authorization": jwt
         });
         this.consoleLog("Fetching response from " + this.state.cdsUrl[this.state.version], types.info)
         try {
-            const fhirResponse = await fetch(this.state.cdsUrl[this.state.version], {
+            fetch(this.state.cdsUrl[this.state.version], {
                 method: "POST",
                 headers: myHeaders,
                 body: JSON.stringify(json_request)
             }).then(response => {
                 this.consoleLog("Recieved response", types.info);
-                return response.json();
+                response.json().then((fhirResponse) => {
+                    console.log(fhirResponse);
+                    if (fhirResponse && fhirResponse.status) {
+                        this.consoleLog("Server returned status "
+                            + fhirResponse.status + ": "
+                            + fhirResponse.error, types.error);
+                        this.consoleLog(fhirResponse.message, types.error);
+                    } else {
+                        this.setState({ response: fhirResponse });
+                    }
+                    this.setState({ loading: false });
+                })
             }).catch(() => this.consoleLog("No response recieved from the server", types.error));
-
-            if (fhirResponse && fhirResponse.status) {
-                this.consoleLog("Server returned status "
-                    + fhirResponse.status + ": "
-                    + fhirResponse.error, types.error);
-                this.consoleLog(fhirResponse.message, types.error);
-            } else {
-                console.log("-----");
-                console.log(fhirResponse);
-                console.log("----")
-                this.setState({ response: fhirResponse });
-            }
-            this.setState({ loading: false });
         } catch (error) {
             this.setState({ loading: false });
             this.consoleLog("Unexpected error occured", types.error)
