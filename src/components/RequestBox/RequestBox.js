@@ -159,7 +159,7 @@ export default class RequestBox extends Component {
     // TODO: Update for R4
     client
       .request(`DeviceRequest/${deviceRequest.id}`, {
-        resolveReferences: ["performer", "extension.0.valueReference"],
+        resolveReferences: ["performer", "insurance.0"],
         graph: false,
         flat: true,
       })
