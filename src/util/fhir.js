@@ -26,11 +26,6 @@ function getAge(dateString) {
     return age;
 }
 
-function getReference(ehrUrl, reference) {
-    
-
-}
-
 function login() {
 
     const tokenUrl = this.state.config.auth + "/realms/" + this.state.config.realm + "/protocol/openid-connect/token"

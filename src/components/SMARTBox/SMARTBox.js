@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import PatientBox from './PatientBox';
 import './smart.css';
 export default class SMARTBox extends Component {
     constructor(props){

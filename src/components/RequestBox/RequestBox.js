@@ -58,7 +58,6 @@ export default class RequestBox extends Component {
       this.state.deviceRequest,
       this.state.coverage,
       this.state.practitioner,
-      ,
       ...this.state.otherResources,
     ];
     const serviceRequestResources = [
@@ -147,6 +146,9 @@ export default class RequestBox extends Component {
   }
 
   gatherDeviceRequestResources = (deviceRequest) => {
+    if (this.props.access_token.access_token === "-") {
+      this.props.access_token.access_token = "";
+    }
     const client = FHIR.client({
       serverUrl: this.props.ehrUrl,
       tokenResponse: {
@@ -198,6 +200,9 @@ export default class RequestBox extends Component {
   };
 
   gatherServiceRequestResources = (serviceRequest) => {
+    if (this.props.access_token.access_token === "-") {
+      this.props.access_token.access_token = "";
+    }
     const client = FHIR.client({
       serverUrl: this.props.ehrUrl,
       tokenResponse: {
@@ -248,6 +253,9 @@ export default class RequestBox extends Component {
   };
 
   gatherMedicationRequestResources = (medicationRequest) => {
+    if (this.props.access_token.access_token === "-") {
+      this.props.access_token.access_token = "";
+    }
     const client = FHIR.client({
       serverUrl: this.props.ehrUrl,
       tokenResponse: {
@@ -308,6 +316,7 @@ export default class RequestBox extends Component {
   }
 
   getDeviceRequest(patientId, client) {
+    console.log("RequestBox::getDeviceRequest() get all DeviceRequests for patient: " + patientId);
     client
       .request(`DeviceRequest?subject=Patient/${patientId}`, {
         resolveReferences: ["subject", "performer"],
@@ -325,6 +334,7 @@ export default class RequestBox extends Component {
   }
 
   getServiceRequest(patientId, client) {
+    console.log("RequestBox::getServiceRequest() get all ServiceRequests for patient: " + patientId);
     client
       .request(`ServiceRequest?subject=Patient/${patientId}`, {
         resolveReferences: ["subject", "performer"],
@@ -342,6 +352,7 @@ export default class RequestBox extends Component {
   }
 
   getMedicationRequest(patientId, client) {
+    console.log("RequestBox::getMedicationRequest() get all MedicationRequests for patient: " + patientId);
     client
       .request(`MedicationRequest?subject=Patient/${patientId}`, {
         resolveReferences: ["subject", "performer"],
@@ -361,6 +372,10 @@ export default class RequestBox extends Component {
   getPatients = () => {
     console.log(this.props.access_token.access_token);
     this.setState({ openPatient: true });
+    if (this.props.access_token.access_token === "-") {
+      this.props.access_token.access_token = "";
+    }
+    this.props.access_token.access_token = ""; //zzzz temporarily clear the token
     const client = FHIR.client({
       serverUrl: this.props.ehrUrl,
       tokenResponse: {
@@ -369,7 +384,7 @@ export default class RequestBox extends Component {
     });
 
     client
-      .request("Patient", { flat: true })
+      .request("Patient?_sort=identifier", { flat: true })
       .then((result) => {
         this.setState({
           patientList: result,

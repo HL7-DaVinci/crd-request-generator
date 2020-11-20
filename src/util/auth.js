@@ -27,6 +27,7 @@ function login() {
         return encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
     }).join('&');
     // We get the token from the url
+    console.log("auth::login(): fetch the token from: " + tokenUrl);
     return fetch(tokenUrl, {
         method: "POST",
         headers: {

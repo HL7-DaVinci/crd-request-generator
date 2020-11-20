@@ -221,9 +221,6 @@ export default class SMARTBox extends Component {
         request: "none"
       });
     } else {
-      let request = JSON.parse(data.value);
-      let coding = this.getCoding(request);
-      //console.log(request.resourceType + " for code " + coding.code + " selected");
       this.setState({
         request: data.value
       });
