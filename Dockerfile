@@ -5,5 +5,5 @@ COPY package*.json ./
 USER node
 RUN npm install
 COPY --chown=node:node . .
-EXPOSE 3005
+EXPOSE 3000
 CMD [ "/home/node/app/run.sh" ]
