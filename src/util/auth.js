@@ -36,60 +36,64 @@ function login() {
     });
 }
 
-async function createJwt(prvKeyObj, pubKeyObj, baseUrl) {
+function createJwt(keypair, baseUrl, cdsUrl) {
     console.log("creating jwt");
-    const jwkPrv2 = KEYUTIL.getJWKFromKey(prvKeyObj);
-    const jwkPub2 = KEYUTIL.getJWKFromKey(pubKeyObj);
-
     const currentTime = KJUR.jws.IntDate.get('now');
     const endTime = KJUR.jws.IntDate.get('now + 1day');
-    const kid = KJUR.jws.JWS.getJWKthumbprint(jwkPub2)
-    // const pubPem = {"pem":KEYUTIL.getPEM(pubKey),"id":kid};
-    const pubPem = jwkPub2;
-    pubPem.id = kid;
-    // Check if the public key is already in the db
-    const checkForPublic = await fetch(baseUrl + "/reqgen/public/" + kid, {
-        "headers": {
-            "Content-Type": "application/json"
-        },
-        "method": "GET"
-    }).then((response) => {
-        if(response.status !==200) {
-            // problem!
-            return false;
-        }else{
-            return response.json();
-        }
-    }).catch(response => {console.log(response)});
-    if (!checkForPublic) {
-        // POST key to db if it's not already there
-        const alag = await fetch(baseUrl + "/reqgen/public/", {
-            "body": JSON.stringify(pubPem),
-            "headers": {
-                "Content-Type": "application/json"
-            },
-            "method": "POST"
-        });
-    }
+    const kid = KJUR.jws.JWS.getJWKthumbprint(keypair.public)
+
     const header = {
         "alg": "RS256",
         "typ": "JWT",
         "kid": kid,
-        "jku": window.location.href + "/public"
+        "jku": config.public_keys
     };
+
     const body = {
-        "iss": "localhost:3000",
-        "aud": "r4/order-review-services",
+        "iss": baseUrl,
+        "aud": cdsUrl,
         "iat": currentTime,
         "exp": endTime,
         "jti": makeid()
     }
 
-    var sJWT = KJUR.jws.JWS.sign("RS256", JSON.stringify(header), JSON.stringify(body), jwkPrv2)
+    var sJWT = KJUR.jws.JWS.sign("RS256", JSON.stringify(header), JSON.stringify(body), keypair.private)
     return sJWT;
+}
+
+function setupKeys(callback) {
+  const {prvKeyObj, pubKeyObj} = KEYUTIL.generateKeypair('RSA', 2048);
+  const jwkPrv2 = KEYUTIL.getJWKFromKey(prvKeyObj);
+  const jwkPub2 = KEYUTIL.getJWKFromKey(pubKeyObj);
+  const kid = KJUR.jws.JWS.getJWKthumbprint(jwkPub2)
+
+  const keypair = {
+      private: jwkPrv2,
+      public: jwkPub2,
+      kid: kid
+  }
+
+  const pubPem = {
+    "pem": jwkPub2,
+    "id": kid
+  };
+
+  fetch(`${config.public_keys}/`, {
+    "body": JSON.stringify(pubPem),
+    "headers": {
+        "Content-Type": "application/json"
+    },
+    "method": "POST"
+  }).then((response) => {
+      callback(keypair);
+  }).catch((error) => {
+      console.log(error);
+  })
+   
 }
 
 export {
     createJwt,
-    login
+    login,
+    setupKeys
 }

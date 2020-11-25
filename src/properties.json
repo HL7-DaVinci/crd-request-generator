@@ -9,5 +9,6 @@
   "cds_service_stu3": "http://localhost:8090/stu3/cds-services/order-sign-crd",
   "true_base": "http://localhost:8080/test-ehr",
   "user": "user1",
-  "password": "password"
+  "password": "password",
+  "public_keys": "http://localhost:3001/public_keys"
 }
