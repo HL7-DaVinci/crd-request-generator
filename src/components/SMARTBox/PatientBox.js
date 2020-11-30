@@ -16,6 +16,7 @@ export default class SMARTBox extends Component {
     this.updateDeviceRequest = this.updateDeviceRequest.bind(this);
     this.updateServiceRequest = this.updateServiceRequest.bind(this);
     this.updateMedicationRequest = this.updateMedicationRequest.bind(this);
+    this.updateMedicationDispense = this.updateMedicationDispense.bind(this);
   }
 
   getCoding(request) {
@@ -25,6 +26,8 @@ export default class SMARTBox extends Component {
     } else if (request.resourceType === "ServiceRequest") {
       code = request.code.coding[0];
     } else if (request.resourceType === "MedicationRequest") {
+      code = request.medicationCodeableConcept.coding[0];
+    } else if (request.resourceType === "MedicationDispense") {
       code = request.medicationCodeableConcept.coding[0];
     }
     if (code) {
@@ -72,7 +75,10 @@ export default class SMARTBox extends Component {
       this.updateServiceRequest(patient, request);
     } else if (request.resourceType === "MedicationRequest") {
       this.updateMedicationRequest(patient, request);
-    } else {
+    } else if (request.resourceType === "MedicationDispense") {
+      this.updateMedicationDispense(patient, request);
+    } 
+      else {
       this.props.clearCallback();
     }
   }
@@ -215,6 +221,52 @@ export default class SMARTBox extends Component {
     }
   }
 
+  updateMedicationDispense(patient, medicationDispense) {
+    this.props.callback("medicationDispense", medicationDispense);
+    this.props.updateMedicationDispenseCallback(medicationDispense);
+    const coding = this.getCoding(medicationDispense);
+    const code = coding.code;
+    const system = coding.system;
+    const text = coding.display;
+    this.props.callback("code", code);
+    this.props.callback("codeSystem", system);
+    this.props.callback("display", text);
+    if (
+      this.props.options.filter((e) => {
+        return e.value === code && e.codeSystem === system;
+      }).length === 0
+    ) {
+      this.props.callback("codeValues", [
+        { key: text, codeSystem: system, value: code },
+        ...this.props.options,
+      ]);
+    }
+    if (patient.address && patient.address[0].state) {
+      this.props.callback("patientState", patient.address[0].state);
+    } else {
+      this.props.callback("patientState", "");
+    }
+    if (medicationDispense.performer) {
+      if (medicationDispense.performer[0].actor.reference) {
+        fetch(`${this.props.ehrUrl}${medicationDispense.performer[0].actor.reference}`, {
+          method: "GET",
+        })
+          .then((response) => {
+            return response.json();
+          })
+          .then((json) => {
+            if (json.address && json.address[0].state) {
+              this.props.callback("practitionerState", json.address[0].state);
+            } else {
+              this.props.callback("practitionerState", "");
+            }
+          });
+      }
+    } else {
+      this.props.callback("practitionerState", "");
+    }
+  }
+
   handleRequestChange(e, data) {
     if (data.value === "none") {
       this.setState({
@@ -253,6 +305,12 @@ export default class SMARTBox extends Component {
     }
     if (this.props.medicationRequests) {
         this.props.medicationRequests.data.map((e) => {
+        this.makeOption(e, options);
+      });
+    }
+
+      if (this.props.medicationDispenses) {
+        this.props.medicationDispenses.data.map((e) => {
         this.makeOption(e, options);
       });
     }

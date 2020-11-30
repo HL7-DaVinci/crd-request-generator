@@ -30,6 +30,8 @@ export default class RequestBox extends Component {
       insurance: {},
       medicationRequests: {},
       medicationRequest: {},
+      medicationDispenses: {},
+      medicationDispense: {}
     };
 
     this.renderRequestResources = this.renderRequestResources.bind(this);
@@ -43,6 +45,7 @@ export default class RequestBox extends Component {
     this.renderPrefetchedResources = this.renderPrefetchedResources.bind(this);
     this.renderError = this.renderError.bind(this);
     this.getMedicationRequest = this.getMedicationRequest.bind(this);
+    this.getMedicationDispense = this.getMedicationDispense.bind(this);
   }
 
   componentDidMount() {}
@@ -295,6 +298,43 @@ export default class RequestBox extends Component {
       });
   };
 
+  gatherMedicationDispenseResources = (medicationDispense) => {
+    const client = FHIR.client({
+      serverUrl: this.props.ehrUrl,
+      tokenResponse: {
+        access_token: this.props.access_token.access_token,
+      },
+    });
+
+    client
+      .request(`MedicationDispense/${medicationDispense.id}`, {
+        resolveReferences: ["performer.0.actor"],
+        graph: false,
+        flat: true,
+      })
+      .then((result) => {
+        const references = result.references;
+        Object.keys(references).forEach((refKey) => {
+          const ref = references[refKey];
+          if (ref.resourceType === "Practitioner") {
+            this.setState({ practitioner: ref });
+            // find pracRoles
+            client
+              .request(`PractitionerRole?practitioner=${ref.id}`, {
+                resolveReferences: ["location"],
+                graph: false,
+                flat: true,
+              })
+              .then((result) => {
+                // TODO: Better logic here
+                this.addReferencesToList(result.references);
+                this.addReferencesToList(result.data);
+              });
+          }
+        });
+      });
+  };
+
   checkForReferences(client, resource, references) {
     client
       .request(`${resource.resourceType}/${resource.id}`, {
@@ -358,6 +398,23 @@ export default class RequestBox extends Component {
       });
   }
 
+  getMedicationDispense(patientId, client) {
+    client
+      .request(`MedicationDispense?subject=Patient/${patientId}`, {
+        resolveReferences: ["subject", "performer"],
+        graph: false,
+        flat: true,
+      })
+      .then((result) => {
+        this.setState((prevState) => ({
+          medicationDispenses: {
+            ...prevState.medicationDispenses,
+            [patientId]: result,
+          },
+        }));
+      });
+  }
+
   getPatients = () => {
     console.log(this.props.access_token.access_token);
     this.setState({ openPatient: true });
@@ -378,6 +435,7 @@ export default class RequestBox extends Component {
           this.getDeviceRequest(e.id, client);
           this.getServiceRequest(e.id, client);
           this.getMedicationRequest(e.id, client);
+          this.getMedicationDispense(e.id, client);
         });
       })
       .catch((e) => {
@@ -456,12 +514,19 @@ export default class RequestBox extends Component {
       "coverage",
       "practitioner",
     ];
+    const medicationDispenseResources = [
+      "patient",
+      "medicationDispense",
+      "practitioner",
+    ];
     if (!_.isEmpty(this.state.deviceRequest)) {
       return this.renderRequestResources(deviceRequestResources);
     } else if (!_.isEmpty(this.state.serviceRequest)) {
       return this.renderRequestResources(serviceRequestResources);
     } else if (!_.isEmpty(this.state.medicationRequest)) {
       return this.renderRequestResources(medicationRequestResources);
+    } else if (!_.isEmpty(this.state.medicationDispense)) {
+      return this.renderRequestResources(medicationDispenseResources);
     }
   }
 
@@ -551,6 +616,9 @@ export default class RequestBox extends Component {
                             medicationRequests={
                               this.state.medicationRequests[patient.id]
                             }
+                            medicationDispenses={
+                              this.state.medicationDispenses[patient.id]
+                            }
                             callback={this.updateStateElement}
                             updateDeviceRequestCallback={
                               this.gatherDeviceRequestResources
@@ -560,6 +628,9 @@ export default class RequestBox extends Component {
                             }
                             updateMedicationRequestCallback={
                               this.gatherMedicationRequestResources
+                            }
+                            updateMedicationDispenseCallback={
+                              this.gatherMedicationDispenseResources
                             }
                             clearCallback={this.clearState}
                             ehrUrl={this.props.ehrUrl}
