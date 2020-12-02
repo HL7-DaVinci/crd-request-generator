@@ -78,6 +78,12 @@ export default class RequestBox extends Component {
       this.state.coverage,
       ...this.state.otherResources,
     ];
+    const medicationDispenseResources = [
+      this.state.patient,
+      this.state.medicationDispense,
+      this.state.practitioner,
+      ...this.state.otherResources,
+    ];
     let prefetch;
     if (!_.isEmpty(this.state.deviceRequest)) {
       prefetch = deviceRequestResources.reduce((pre, resource) => {
@@ -93,14 +99,22 @@ export default class RequestBox extends Component {
         }
         return pre;
       }, []);
-    } else {
+    } else if (!_.isEmpty(this.state.medicationRequest)) {
       prefetch = medicationRequestResources.reduce((pre, resource) => {
         if (resource.id) {
           pre.push({ resource });
         }
         return pre;
       }, []);
+    } else if (!_.isEmpty(this.state.medicationDispense)) {
+      prefetch = medicationDispenseResources.reduce((pre, resource) => {
+        if (resource.id) {
+          pre.push({ resource });
+        }
+        return pre;
+      }, []);
     }
+
     if (!_.isEmpty(this.state.deviceRequest)) {
       this.props.submitInfo(
         prefetch,
@@ -117,6 +131,12 @@ export default class RequestBox extends Component {
       this.props.submitInfo(
         prefetch,
         this.state.medicationRequest,
+        this.state.patient
+      );
+    } else if (!_.isEmpty(this.state.medicationDispense)) {
+      this.props.submitInfo(
+        prefetch,
+        this.state.medicationDispense,
         this.state.patient
       );
     }
