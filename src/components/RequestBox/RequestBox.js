@@ -383,8 +383,9 @@ export default class RequestBox extends Component {
       },
     });
 
+    // just grab the first 8
     client
-      .request("Patient?_sort=identifier", { flat: true })
+      .request("Patient?_sort=identifier&_count=8", { flat: true })
       .then((result) => {
         this.setState({
           patientList: result,
