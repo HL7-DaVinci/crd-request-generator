@@ -74,7 +74,7 @@ export default class RequestBuilder extends Component {
             this.setState({ token })
         }).catch((error) =>{
             // fails when keycloak isn't running, add dummy token
-            this.setState({ token: {access_token: "-"}})
+            this.setState({ token: {access_token: ""}})
         })
     }
 
