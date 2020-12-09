@@ -11,21 +11,21 @@ function buildR4Request(request, patient, ehrUrl, token, prefetch, includePrefet
             "scope": "patient/Patient.read patient/Observation.read",
             "subject": "cds-service4"
         },
-        "user": "Practitioner/example",
         "context": {
+            "userId": "Practitioner/example",
             "patientId": patient.id,
             "encounterId": "enc89284"
         }
     };
 
-    if (hook == "order-review") {
+    if (hook === "order-review") {
         r4json.context.orders = {
             "resourceType": "Bundle",
             "entry": [
                 request
             ]
         }
-    } else if (hook == "order-select") {
+    } else if (hook === "order-select") {
         r4json.context.draftOrders = {
             "resourceType": "Bundle",
             "entry": [
@@ -35,7 +35,7 @@ function buildR4Request(request, patient, ehrUrl, token, prefetch, includePrefet
         r4json.context.selections = [
             request.resourceType + "/" + request.id
         ]
-    } else if (hook == "order-sign") {
+    } else if (hook === "order-sign") {
         r4json.context.draftOrders = {
             "resourceType": "Bundle",
             "entry": [
@@ -83,22 +83,22 @@ function buildStu3Request(request, patient, ehrUrl, token, prefetch, includePref
         "hookInstance": "63d7d1fa-9469-4c44-a5f7-76a129e30967",
         "fhirServer": ehrUrl.stu3,
         "fhirAuthorization": null,
-        "user": "Practitioner/1234",
         "context": {
+          "userId": "Practitioner/1234",
           "patientId": patient.id,
           "encounterId": null,
           "services": null
         }
     };
 
-    if (hook == "order-review") {
+    if (hook === "order-review") {
         stu3json.context.orders = {
             "resourceType": "Bundle",
             "entry": [
                 request
             ]
         }
-    } else if (hook == "order-select") {
+    } else if (hook === "order-select") {
         stu3json.context.draftOrders = {
             "resourceType": "Bundle",
             "entry": [
@@ -108,7 +108,7 @@ function buildStu3Request(request, patient, ehrUrl, token, prefetch, includePref
         stu3json.context.selections = [
             request.resourceType + "/" + request.id
         ]
-    } else if (hook == "order-sign") {
+    } else if (hook === "order-sign") {
         stu3json.context.draftOrders = {
             "resourceType": "Bundle",
             "entry": [
