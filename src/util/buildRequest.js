@@ -11,21 +11,21 @@ export default function buildRequest(request, patient, ehrUrl, token, prefetch, 
             "scope": "patient/Patient.read patient/Observation.read",
             "subject": "cds-service4"
         },
-        "user": "Practitioner/example",
         "context": {
+            "userId": "Practitioner/example",
             "patientId": patient.id,
             "encounterId": "enc89284"
         }
     };
 
-    if (hook == "order-review") {
+    if (hook === "order-review") {
         r4json.context.orders = {
             "resourceType": "Bundle",
             "entry": [
                 request
             ]
         }
-    } else if (hook == "order-select") {
+    } else if (hook === "order-select") {
         r4json.context.draftOrders = {
             "resourceType": "Bundle",
             "entry": [
@@ -35,7 +35,7 @@ export default function buildRequest(request, patient, ehrUrl, token, prefetch, 
         r4json.context.selections = [
             request.resourceType + "/" + request.id
         ]
-    } else if (hook == "order-sign") {
+    } else if (hook === "order-sign") {
         r4json.context.draftOrders = {
             "resourceType": "Bundle",
             "entry": [
