@@ -3,11 +3,9 @@
   "client": "app-login",
   "auth": "http://localhost:8180/auth",
   "server": "http://localhost:8090",
-  "ehr_server": "http://localhost:8080/test-ehr/r4/",
+  "ehr_server": "http://localhost:8080/test-ehr/r4",
+  "ehr_base": "http://localhost:8080/test-ehr/r4",
   "cds_service":"http://localhost:8090/r4/cds-services/order-sign-crd",
-  "ehr_server_stu3":"http://localhost:8080/test-ehr/stu3/",
-  "cds_service_stu3": "http://localhost:8090/stu3/cds-services/order-sign-crd",
-  "true_base": "http://localhost:8080/test-ehr",
   "user": "user1",
   "password": "password",
   "public_keys": "http://localhost:3001/public_keys"

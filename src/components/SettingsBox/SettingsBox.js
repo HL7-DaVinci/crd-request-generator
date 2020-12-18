@@ -25,7 +25,7 @@ export default class SettingsBox extends Component {
         return (
             <div>
                 {Object.keys(headers).map((header)=>{
-                    let value = headers[header].value[this.props.version];
+                    let value = headers[header].value;
                     return <div key={header}>
                         <p className="setting-header">{headers[header].display}</p>
                         <InputBox 
@@ -34,11 +34,7 @@ export default class SettingsBox extends Component {
                             updateCB = {this.updateCB}
                             elementName = {header}/>
                     </div>
-
                 })}
-
-
-
             </div>
 
         )

@@ -35,14 +35,11 @@ export default class RequestBox extends Component {
     this.renderRequestResources = this.renderRequestResources.bind(this);
     this.addReferencesToList = this.addReferencesToList.bind(this);
     this.checkForReferences = this.checkForReferences.bind(this);
-    this.getDeviceRequest = this.getDeviceRequest.bind(this);
-    this.getServiceRequest = this.getServiceRequest.bind(this);
     this.renderPatientInfo = this.renderPatientInfo.bind(this);
     this.renderOtherInfo = this.renderOtherInfo.bind(this);
     this.renderResource = this.renderResource.bind(this);
     this.renderPrefetchedResources = this.renderPrefetchedResources.bind(this);
     this.renderError = this.renderError.bind(this);
-    this.getMedicationRequest = this.getMedicationRequest.bind(this);
   }
 
   componentDidMount() {}
@@ -153,7 +150,6 @@ export default class RequestBox extends Component {
         access_token: this.props.access_token.access_token,
       },
     });
-
     // If the device request is provided it has the pertinent information.
     // this is for STU3
     // TODO: Update for R4
@@ -307,78 +303,30 @@ export default class RequestBox extends Component {
       });
   }
 
-  getDeviceRequest(patientId, client) {
-    client
-      .request(`DeviceRequest?subject=Patient/${patientId}`, {
-        resolveReferences: ["subject", "performer"],
-        graph: false,
-        flat: true,
-      })
-      .then((result) => {
-        this.setState((prevState) => ({
-          deviceRequests: {
-            ...prevState.deviceRequests,
-            [patientId]: result,
-          },
-        }));
-      });
-  }
-
-  getServiceRequest(patientId, client) {
-    client
-      .request(`ServiceRequest?subject=Patient/${patientId}`, {
-        resolveReferences: ["subject", "performer"],
-        graph: false,
-        flat: true,
-      })
-      .then((result) => {
-        this.setState((prevState) => ({
-          serviceRequests: {
-            ...prevState.serviceRequests,
-            [patientId]: result,
-          },
-        }));
-      });
-  }
-
-  getMedicationRequest(patientId, client) {
-    client
-      .request(`MedicationRequest?subject=Patient/${patientId}`, {
-        resolveReferences: ["subject", "performer"],
-        graph: false,
-        flat: true,
-      })
-      .then((result) => {
-        this.setState((prevState) => ({
-          medicationRequests: {
-            ...prevState.medicationRequests,
-            [patientId]: result,
-          },
-        }));
-      });
-  }
-
   getPatients = () => {
     console.log(this.props.access_token.access_token);
     this.setState({ openPatient: true });
-    const client = FHIR.client({
-      serverUrl: this.props.ehrUrl,
-      tokenResponse: {
-        access_token: this.props.access_token.access_token,
-      },
-    });
+    const params = {serverUrl: this.props.ehrUrl};
+    console.log(this.props.access_token.access_token);
+    if (this.props.access_token.access_token) {
+        params["tokenResponse"] = {access_token: this.props.access_token.access_token}
+    }
+    console.log(params);
+    const client = FHIR.client(
+      params
+    );
 
     client
-      .request("Patient", { flat: true })
+      .request("Patient?_sort=identifier&_count=8", { flat: true })
       .then((result) => {
         this.setState({
           patientList: result,
         });
-        result.map((e) => {
-          this.getDeviceRequest(e.id, client);
-          this.getServiceRequest(e.id, client);
-          this.getMedicationRequest(e.id, client);
-        });
+        // result.map((e) => {
+        //   this.getDeviceRequest(e.id, client);
+        //   this.getServiceRequest(e.id, client);
+        //   this.getMedicationRequest(e.id, client);
+        // });
       })
       .catch((e) => {
         this.setState({
@@ -528,6 +476,11 @@ export default class RequestBox extends Component {
   }
 
   render() {
+    const params = {};
+    params['serverUrl'] = this.props.ehrUrl;
+    if (this.props.access_token) {
+        params['tokenResponse'] = {access_token: this.props.access_token.access_token};
+    }
     return (
       <div>
         <div className="request">
@@ -542,15 +495,7 @@ export default class RequestBox extends Component {
                           <PatientBox
                             key={patient.id}
                             patient={patient}
-                            deviceRequests={
-                              this.state.deviceRequests[patient.id]
-                            }
-                            serviceRequests={
-                              this.state.serviceRequests[patient.id]
-                            }
-                            medicationRequests={
-                              this.state.medicationRequests[patient.id]
-                            }
+                            params = {params}
                             callback={this.updateStateElement}
                             updateDeviceRequestCallback={
                               this.gatherDeviceRequestResources

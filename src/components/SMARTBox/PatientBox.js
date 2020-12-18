@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Dropdown, Header } from 'semantic-ui-react'
 import { getAge } from "../../util/fhir";
+import FHIR from "fhirclient";
 import "./smart.css";
 
 
@@ -8,7 +9,10 @@ export default class SMARTBox extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      request: "none"
+      request: "none",
+      deviceRequests: {},
+      medicationRequests: {},
+      serviceRequests: {},
     };
 
     this.handleRequestChange = this.handleRequestChange.bind(this);
@@ -16,6 +20,11 @@ export default class SMARTBox extends Component {
     this.updateDeviceRequest = this.updateDeviceRequest.bind(this);
     this.updateServiceRequest = this.updateServiceRequest.bind(this);
     this.updateMedicationRequest = this.updateMedicationRequest.bind(this);
+    this.getDeviceRequest = this.getDeviceRequest.bind(this);
+    this.getServiceRequest = this.getServiceRequest.bind(this);
+    this.getMedicationRequest = this.getMedicationRequest.bind(this);
+    this.getRequests = this.getRequests.bind(this);
+
   }
 
   getCoding(request) {
@@ -215,6 +224,52 @@ export default class SMARTBox extends Component {
     }
   }
 
+  getDeviceRequest(patientId, client) {
+    client
+      .request(`DeviceRequest?subject=Patient/${patientId}`, {
+        resolveReferences: ["subject", "performer"],
+        graph: false,
+        flat: true,
+      })
+      .then((result) => {
+        console.log(result);
+        this.setState((prevState) => ({ deviceRequests: result }));
+      });
+  }
+
+  getServiceRequest(patientId, client) {
+    client
+      .request(`ServiceRequest?subject=Patient/${patientId}`, {
+        resolveReferences: ["subject", "performer"],
+        graph: false,
+        flat: true,
+      })
+      .then((result) => {
+        this.setState((prevState) => ({
+          serviceRequests: {
+            ...prevState.serviceRequests,
+            [patientId]: result,
+          },
+        }));
+      });
+  }
+
+  getMedicationRequest(patientId, client) {
+    client
+      .request(`MedicationRequest?subject=Patient/${patientId}`, {
+        resolveReferences: ["subject", "performer"],
+        graph: false,
+        flat: true,
+      })
+      .then((result) => {
+        this.setState((prevState) => ({
+          medicationRequests: {
+            ...prevState.medicationRequests,
+            [patientId]: result,
+          },
+        }));
+      });
+  }
   handleRequestChange(e, data) {
     if (data.value === "none") {
       this.setState({
@@ -230,6 +285,16 @@ export default class SMARTBox extends Component {
     }
   }
   
+  getRequests() {
+    const client = FHIR.client(
+        this.props.params
+      );
+    const patientId = this.props.patient.id;
+    this.getDeviceRequest(patientId, client);
+    this.getServiceRequest(patientId, client);
+    this.getMedicationRequest(patientId, client);
+  }
+
   render() {
     const patient = this.props.patient;
     let name = "";
@@ -241,20 +306,28 @@ export default class SMARTBox extends Component {
 
     // add all of the requests to the list of options
     let options = []
-    if (this.props.deviceRequests) {
-      this.props.deviceRequests.data.map((e) => {
+    let returned = false;
+    if (this.state.deviceRequests.data) {
+      returned = true;
+      console.log(this.state.deviceRequests);
+      this.state.deviceRequests.data.map((e) => {
         this.makeOption(e, options);
       });
     }
-    if (this.props.serviceRequests) {
-      this.props.serviceRequests.data.map((e) => {
+    if (this.state.serviceRequests.data) {
+      this.state.serviceRequests.data.map((e) => {
         this.makeOption(e, options);
       });
     }
-    if (this.props.medicationRequests) {
-        this.props.medicationRequests.data.map((e) => {
+    if (this.state.medicationRequests.data) {
+        this.state.medicationRequests.data.map((e) => {
         this.makeOption(e, options);
       });
+    }
+
+    let noResults = 'No results found.'
+    if(!returned) {
+        noResults = 'Loading...';
     }
 
     return (
@@ -292,7 +365,9 @@ export default class SMARTBox extends Component {
               search searchInput={{ type: 'text' }}
               selection fluid options={options} 
               placeholder='Choose an option' 
+              noResultsMessage={noResults}
               onChange={this.handleRequestChange}
+              onOpen={this.getRequests}
             />
           </div>
         </div>
