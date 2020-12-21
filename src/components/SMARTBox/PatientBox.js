@@ -284,7 +284,7 @@ export default class SMARTBox extends Component {
         flat: true,
       })
       .then((result) => {
-        this.setState((prevState) => ({ deviceRequests: result }));
+        this.setState(() => ({ deviceRequests: result }));
       });
   }
 
@@ -296,7 +296,7 @@ export default class SMARTBox extends Component {
         flat: true,
       })
       .then((result) => {
-        this.setState((prevState) => ({ serviceRequests: result }));
+        this.setState(() => ({ serviceRequests: result }));
       });
   }
 
@@ -308,7 +308,7 @@ export default class SMARTBox extends Component {
         flat: true,
       })
       .then((result) => {
-        this.setState((prevState) => ({ medicationRequests: result }));
+        this.setState(() => ({ medicationRequests: result }));
       });
   }
 
@@ -320,12 +320,7 @@ export default class SMARTBox extends Component {
         flat: true,
       })
       .then((result) => {
-        this.setState((prevState) => ({
-          medicationDispenses: {
-            ...prevState.medicationDispenses,
-            [patientId]: result,
-          },
-        }));
+        this.setState(() => ({ medicationDispenses: result}));
       });
   }
 
@@ -352,6 +347,7 @@ export default class SMARTBox extends Component {
     this.getDeviceRequest(patientId, client);
     this.getServiceRequest(patientId, client);
     this.getMedicationRequest(patientId, client);
+    this.getMedicationDispense(patientId, client);
   }
 
   render() {

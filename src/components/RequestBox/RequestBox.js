@@ -17,7 +17,6 @@ export default class RequestBox extends Component {
       practitioner: {},
       deviceRequest: {},
       coverage: {},
-      deviceRequests: {},
       otherResources: [],
       codeValues: defaultValues,
       patientState: null,
@@ -25,12 +24,9 @@ export default class RequestBox extends Component {
       code: null,
       codeSystem: null,
       display: null,
-      serviceRequests: {},
       serviceRequest: {},
       insurance: {},
-      medicationRequests: {},
       medicationRequest: {},
-      medicationDispenses: {},
       medicationDispense: {}
     };
 
@@ -381,11 +377,6 @@ export default class RequestBox extends Component {
         this.setState({
           patientList: result,
         });
-        // result.map((e) => {
-        //   this.getDeviceRequest(e.id, client);
-        //   this.getServiceRequest(e.id, client);
-        //   this.getMedicationRequest(e.id, client);
-        // });
       })
       .catch((e) => {
         this.setState({
