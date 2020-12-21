@@ -314,7 +314,6 @@ export default class SMARTBox extends Component {
       });
     }
 
-    console.log(options);
     let noResults = 'No results found.'
     if(!returned) {
         noResults = 'Loading...';
