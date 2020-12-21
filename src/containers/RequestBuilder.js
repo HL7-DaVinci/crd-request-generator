@@ -28,7 +28,6 @@ export default class RequestBuilder extends Component {
             loading: false,
             logs: [],
             keypair: null,
-            version: "r4",
             config: {},
             ehrUrl: headers.ehrUrl.value,
             authUrl: headers.authUrl.value,
@@ -53,7 +52,6 @@ export default class RequestBuilder extends Component {
         };
 
         this.updateStateElement = this.updateStateElement.bind(this);
-        this.updateVersionedStateElement = this.updateVersionedStateElement.bind(this)
         this.startLoading = this.startLoading.bind(this);
         this.submit_info = this.submit_info.bind(this);
         this.consoleLog = this.consoleLog.bind(this);
@@ -63,7 +61,7 @@ export default class RequestBuilder extends Component {
 
     componentDidMount() {
         this.setState({ config });
-
+        this.setState({baseUrl: config.ehr_base ? config.ehr_base : config.ehr_server})
         const callback = (keypair) => {
             this.setState({ keypair });
         }
@@ -74,7 +72,7 @@ export default class RequestBuilder extends Component {
             this.setState({ token })
         }).catch((error) =>{
             // fails when keycloak isn't running, add dummy token
-            this.setState({ token: {access_token: "-"}})
+            this.setState({ token: {access_token: ""}})
         })
     }
 
@@ -109,17 +107,6 @@ export default class RequestBuilder extends Component {
         this.setState({ [elementName]: text });
     }
 
-    updateVersionedStateElement = (elementName, text) => {
-        this.setState(prevState => ({
-            ...prevState,
-            [elementName]: {
-                ...prevState[elementName],
-                [this.state.version]: text
-            }
-        }
-        ))
-    }
-
     onInputChange(event) {
         this.setState({ [event.target.name]: event.target.value });
     }
@@ -131,11 +118,7 @@ export default class RequestBuilder extends Component {
 
     }
 
-    getHookType(cdsUrl, fhirVersion) {
-        var url = cdsUrl.r4;
-        if (fhirVersion === "stu3") {
-            url = cdsUrl.stu3;
-        }
+    getHookType(url) {
         if (url.includes("order-review")) {
             return "order-review";
         } else if (url.includes("order-sign")) {
@@ -150,22 +133,19 @@ export default class RequestBuilder extends Component {
         this.consoleLog("Initiating form submission", types.info);
         this.setState({patient});
         
-        var hook = this.getHookType(this.state.cdsUrl, this.state.version);
-        let json_request = buildRequest(request, patient, this.state.ehrUrl, this.state.token, prefetch, this.state.version, this.state.prefetch, hook);
-        const cdsUrl = this.state.cdsUrl[this.state.version];
-        // get the base url for the EHR server by stripping the FHIR version off
-        let baseUrl = this.state.ehrUrl[this.state.version];
-        baseUrl = baseUrl.substr(0, baseUrl.toLowerCase().lastIndexOf(this.state.version.toLowerCase()) - 1);
-        this.setState({baseUrl});
+        var hook = this.getHookType(this.state.cdsUrl);
+        let json_request = buildRequest(request, patient, this.state.ehrUrl, this.state.token, prefetch, this.state.prefetch, hook);
+        const cdsUrl = this.state.cdsUrl;
+        let baseUrl = this.state.baseUrl;
         const jwt = "Bearer " + createJwt(this.state.keypair, baseUrl, cdsUrl);
         console.log(jwt);
         var myHeaders = new Headers({
             "Content-Type": "application/json",
             "authorization": jwt
         });
-        this.consoleLog("Fetching response from " + this.state.cdsUrl[this.state.version], types.info)
+        this.consoleLog("Fetching response from " + this.state.cdsUrl, types.info)
         try {
-            fetch(this.state.cdsUrl[this.state.version], {
+            fetch(this.state.cdsUrl, {
                 method: "POST",
                 headers: myHeaders,
                 body: JSON.stringify(json_request)
@@ -238,6 +218,11 @@ export default class RequestBuilder extends Component {
                 "display": "Auth Server",
                 "value": this.state.authUrl,
                 "key": "authUrl"
+            },
+            "baseUrl": {
+                "display": "Base EHR",
+                "value": this.state.baseUrl,
+                "key": "baseUrl"
             }
         }
 
@@ -246,8 +231,6 @@ export default class RequestBuilder extends Component {
                 <div className="nav-header">
                     <button className={"launch-button left-button btn btn-class " + (this.state.ehrLaunch ? "active" : "not-active")} onClick={() => this.updateStateElement("ehrLaunch", true)}>EHR Launch</button>
                     <button className={"launch-button right-button btn btn-class " + (!this.state.ehrLaunch ? "active" : "not-active")} onClick={() => this.updateStateElement("ehrLaunch", false)}>Standalone</button>
-                    <button className={"version-button left-button btn btn-class " + (this.state.version === "r4" ? "active" : "not-active")} onClick={() => this.updateStateElement("version", "r4")}>r4</button>
-                    <button className={"version-button right-button btn btn-class " + (this.state.version === "stu3" ? "active" : "not-active")} onClick={() => this.updateStateElement("version", "stu3")}>stu3</button>
                     <button className={"btn btn-class settings " + (this.state.showSettings ? "active" : "not-active")} onClick={() => this.updateStateElement("showSettings", !this.state.showSettings)}><span className="glyphicon glyphicon-cog settings-icon" /></button>
 
                 </div>
@@ -263,14 +246,13 @@ export default class RequestBuilder extends Component {
                     </div>
                     {this.state.showSettings ?
                         <SettingsBox
-                            version={this.state.version}
                             headers={header}
-                            updateCB={this.updateVersionedStateElement}
+                            updateCB={this.updateStateElement}
                         /> : null}
                     <div>
                         {/*for the ehr launch */}
                         <RequestBox
-                            ehrUrl={this.state.ehrUrl[this.state.version]}
+                            ehrUrl={this.state.ehrUrl}
                             submitInfo={this.submit_info}
                             access_token={this.state.token}>
 
@@ -303,7 +285,7 @@ export default class RequestBuilder extends Component {
                         patientId={this.state.patient.id}
                         ehrLaunch={true}
                         fhirServerUrl={this.state.baseUrl}
-                        fhirVersion={this.state.version} />
+                        fhirVersion={'r4'} />
                 </div>
 
             </div>

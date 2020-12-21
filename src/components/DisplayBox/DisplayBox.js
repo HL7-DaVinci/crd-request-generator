@@ -197,14 +197,14 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
           parameters: launchParameters,
         },
       }).then((result) => {
-        if (result.data && Object.prototype.hasOwnProperty.call(result.data, 'launchId')) {
+        if (result.data && Object.prototype.hasOwnProperty.call(result.data, 'launch_id')) {
           if (link.url.indexOf('?') < 0) {
             link.url += '?';
           } else {
             link.url += '&';
           }
-          link.url += `launch=${result.data.launchId}`;
-          link.url += `&iss=${fhirBaseUrl}/${fhirVersion}`;
+          link.url += `launch=${result.data.launch_id}`;
+          link.url += `&iss=${fhirBaseUrl}`;
           return resolve(link);
         }
         console.error('FHIR server endpoint did not return a launch_id to launch the SMART app. See network calls to the Launch endpoint for more details');

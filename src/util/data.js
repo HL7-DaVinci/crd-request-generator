@@ -11,26 +11,17 @@ const types = {
 const headers = {
     "ehrUrl": {
         "display": "EHR Server",
-        "value": {
-            "r4":config.ehr_server,
-            "stu3":config.ehr_server_stu3
-        },
+        "value": config.ehr_server,
         "key": "ehrUrl"
     },
     "cdsUrl": {
         "display": "CRD Server",
-        "value": {
-            "r4":config.cds_service,
-            "stu3":config.cds_service_stu3
-        },
+        "value": config.cds_service,
         "key":"cdsUrl"
     },
     "authUrl": {
         "display": "Auth Server",
-        "value": {
-            "r4": config.auth,
-            "stu3": config.auth
-        },
+        "value": config.auth,
         "key": "authUrl"
     }
 }
