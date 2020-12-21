@@ -119,7 +119,7 @@ export default class SMARTBox extends Component {
     }
     if (serviceRequest.performer) {
       if (serviceRequest.performer[0].reference) {
-        fetch(`${this.props.ehrUrl}${serviceRequest.performer[0].reference}`, {
+        fetch(`${this.props.ehrUrl}/${serviceRequest.performer[0].reference}`, {
           method: "GET",
         })
           .then((response) => {
@@ -165,7 +165,7 @@ export default class SMARTBox extends Component {
     }
     if (deviceRequest.performer) {
       if (deviceRequest.performer.reference) {
-        fetch(`${this.props.ehrUrl}${deviceRequest.performer.reference}`, {
+        fetch(`${this.props.ehrUrl}/${deviceRequest.performer.reference}`, {
           method: "GET",
         })
           .then((response) => {
@@ -211,7 +211,7 @@ export default class SMARTBox extends Component {
     }
     if (medicationRequest.requester) {
       if (medicationRequest.requester.reference) {
-        fetch(`${this.props.ehrUrl}${medicationRequest.requester.reference}`, {
+        fetch(`${this.props.ehrUrl}/${medicationRequest.requester.reference}`, {
           method: "GET",
         })
           .then((response) => {
@@ -284,7 +284,6 @@ export default class SMARTBox extends Component {
         flat: true,
       })
       .then((result) => {
-        console.log(result);
         this.setState((prevState) => ({ deviceRequests: result }));
       });
   }
@@ -297,12 +296,7 @@ export default class SMARTBox extends Component {
         flat: true,
       })
       .then((result) => {
-        this.setState((prevState) => ({
-          serviceRequests: {
-            ...prevState.serviceRequests,
-            [patientId]: result,
-          },
-        }));
+        this.setState((prevState) => ({ serviceRequests: result }));
       });
   }
 
@@ -314,12 +308,7 @@ export default class SMARTBox extends Component {
         flat: true,
       })
       .then((result) => {
-        this.setState((prevState) => ({
-          medicationRequests: {
-            ...prevState.medicationRequests,
-            [patientId]: result,
-          },
-        }));
+        this.setState((prevState) => ({ medicationRequests: result }));
       });
   }
 
