@@ -284,7 +284,7 @@ export default class SMARTBox extends Component {
         flat: true,
       })
       .then((result) => {
-        this.setState(() => ({ deviceRequests: result }));
+        this.setState({ deviceRequests: result });
       });
   }
 
@@ -296,7 +296,7 @@ export default class SMARTBox extends Component {
         flat: true,
       })
       .then((result) => {
-        this.setState(() => ({ serviceRequests: result }));
+        this.setState({ serviceRequests: result });
       });
   }
 
@@ -308,7 +308,7 @@ export default class SMARTBox extends Component {
         flat: true,
       })
       .then((result) => {
-        this.setState(() => ({ medicationRequests: result }));
+        this.setState({ medicationRequests: result });
       });
   }
 
@@ -320,7 +320,7 @@ export default class SMARTBox extends Component {
         flat: true,
       })
       .then((result) => {
-        this.setState(() => ({ medicationDispenses: result}));
+        this.setState({ medicationDispenses: result});
       });
   }
 
