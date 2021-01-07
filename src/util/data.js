@@ -11,17 +11,17 @@ const types = {
 const headers = {
     "ehrUrl": {
         "display": "EHR Server",
-        "value": config.ehr_server,
+        "value": (process.env.REACT_APP_EHR_SERVER ? process.env.REACT_APP_EHR_SERVER : config.ehr_server),
         "key": "ehrUrl"
     },
     "cdsUrl": {
         "display": "CRD Server",
-        "value": config.cds_service,
+        "value": (process.env.REACT_APP_CDS_SERVICE ? process.env.REACT_APP_CDS_SERVICE : config.cds_service),
         "key":"cdsUrl"
     },
     "authUrl": {
         "display": "Auth Server",
-        "value": config.auth,
+        "value": (process.env.REACT_APP_AUTH ? process.env.REACT_APP_AUTH : config.auth),
         "key": "authUrl"
     }
 }

@@ -13,12 +13,12 @@ function makeid() {
 
 function login() {
 
-    const tokenUrl = config.auth + "/realms/" + config.realm + "/protocol/openid-connect/token"
+    const tokenUrl = config.auth + "/realms/" + (process.env.REACT_APP_REALM ? process.env.REACT_APP_REALM : config.realm) + "/protocol/openid-connect/token"
     let params = {
         grant_type: "password",
-        username: config.user,
-        password: config.password,
-        client_id: config.client
+        username: (process.env.REACT_APP_USER ? process.env.REACT_APP_USER : config.user),
+        password: (process.env.REACT_APP_PASSWORD ? process.env.REACT_APP_PASSWORD : config.password),
+        client_id: (process.env.REACT_APP_CLIENT ? process.env.REACT_APP_CLIENT : config.client)
     }
 
     // Encodes the params to be compliant with
@@ -46,7 +46,7 @@ function createJwt(keypair, baseUrl, cdsUrl) {
         "alg": "RS256",
         "typ": "JWT",
         "kid": kid,
-        "jku": config.public_keys
+        "jku": (process.env.REACT_APP_PUBLIC_KEYS ? process.env.REACT_APP_PUBLIC_KEYS : config.public_keys)
     };
 
     const body = {
@@ -78,7 +78,7 @@ function setupKeys(callback) {
     "id": kid
   };
 
-  fetch(`${config.public_keys}/`, {
+  fetch(`${(process.env.REACT_APP_PUBLIC_KEYS ? process.env.REACT_APP_PUBLIC_KEYS : config.public_keys)}/`, {
     "body": JSON.stringify(pubPem),
     "headers": {
         "Content-Type": "application/json"

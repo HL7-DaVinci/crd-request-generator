@@ -61,7 +61,9 @@ export default class RequestBuilder extends Component {
 
     componentDidMount() {
         this.setState({ config });
-        this.setState({baseUrl: config.ehr_base ? config.ehr_base : config.ehr_server})
+        let ehr_base = (process.env.REACT_APP_EHR_BASE ? process.env.REACT_APP_EHR_BASE : config.ehr_base);
+        let ehr_server = (process.env.REACT_APP_EHR_SERVER ? process.env.REACT_APP_EHR_SERVER : config.ehr_server);
+        this.setState({baseUrl: ehr_base ? ehr_base : ehr_server})
         const callback = (keypair) => {
             this.setState({ keypair });
         }
