@@ -2,5 +2,5 @@
 
 echo "npm run build"
 npm run build
-echo "npm run start$VERSION"
-npm run start$VERSION
+echo "npm run start"
+npm run start
