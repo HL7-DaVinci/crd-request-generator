@@ -317,11 +317,12 @@ export default class RequestBox extends Component {
     );
 
     client
-      .request("Patient?_sort=identifier&_count=8", { flat: true })
+      .request("Patient?_sort=identifier&_count=12", { flat: true })
       .then((result) => {
         this.setState({
           patientList: result,
         });
+        console.log(result);
         // result.map((e) => {
         //   this.getDeviceRequest(e.id, client);
         //   this.getServiceRequest(e.id, client);
