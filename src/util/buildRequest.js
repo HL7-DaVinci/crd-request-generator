@@ -69,6 +69,14 @@ export default function buildRequest(request, patient, ehrUrl, token, prefetch, 
                     "entry": prefetch
                 }
             }
+        } else if(request.resourceType === 'MedicationDispense') {
+            r4json.prefetch = {
+                "medicationDispenseBundle": {
+                    "resourceType": "Bundle",
+                    "type": "collection",
+                    "entry": prefetch
+                }
+            }
         }
     }
 

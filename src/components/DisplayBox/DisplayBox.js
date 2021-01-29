@@ -180,7 +180,7 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
         "Accept": 'application/json'
       };
       const launchParameters = {
-        patientId: patientId,
+        patient: patientId,
       };
   
       if (link.appContext) {

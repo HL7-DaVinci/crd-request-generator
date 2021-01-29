@@ -13,6 +13,7 @@ export default class SMARTBox extends Component {
       deviceRequests: {},
       medicationRequests: {},
       serviceRequests: {},
+      medicationDispenses: {}
     };
 
     this.handleRequestChange = this.handleRequestChange.bind(this);
@@ -20,9 +21,11 @@ export default class SMARTBox extends Component {
     this.updateDeviceRequest = this.updateDeviceRequest.bind(this);
     this.updateServiceRequest = this.updateServiceRequest.bind(this);
     this.updateMedicationRequest = this.updateMedicationRequest.bind(this);
+    this.updateMedicationDispense = this.updateMedicationDispense.bind(this);
     this.getDeviceRequest = this.getDeviceRequest.bind(this);
     this.getServiceRequest = this.getServiceRequest.bind(this);
     this.getMedicationRequest = this.getMedicationRequest.bind(this);
+    this.getMedicationDispense = this.getMedicationDispense.bind(this);
     this.getRequests = this.getRequests.bind(this);
 
   }
@@ -34,6 +37,8 @@ export default class SMARTBox extends Component {
     } else if (request.resourceType === "ServiceRequest") {
       code = request.code.coding[0];
     } else if (request.resourceType === "MedicationRequest") {
+      code = request.medicationCodeableConcept.coding[0];
+    } else if (request.resourceType === "MedicationDispense") {
       code = request.medicationCodeableConcept.coding[0];
     }
     if (code) {
@@ -68,8 +73,6 @@ export default class SMARTBox extends Component {
     options.push(option);
   }
 
-  gatherResources() {}
-
   updateValues(patient) {
     this.props.callback("patient", patient);
     this.props.callback("openPatient", false);
@@ -81,7 +84,10 @@ export default class SMARTBox extends Component {
       this.updateServiceRequest(patient, request);
     } else if (request.resourceType === "MedicationRequest") {
       this.updateMedicationRequest(patient, request);
-    } else {
+    } else if (request.resourceType === "MedicationDispense") {
+      this.updateMedicationDispense(patient, request);
+    } 
+      else {
       this.props.clearCallback();
     }
   }
@@ -224,6 +230,52 @@ export default class SMARTBox extends Component {
     }
   }
 
+  updateMedicationDispense(patient, medicationDispense) {
+    this.props.callback("medicationDispense", medicationDispense);
+    this.props.updateMedicationDispenseCallback(medicationDispense);
+    const coding = this.getCoding(medicationDispense);
+    const code = coding.code;
+    const system = coding.system;
+    const text = coding.display;
+    this.props.callback("code", code);
+    this.props.callback("codeSystem", system);
+    this.props.callback("display", text);
+    if (
+      this.props.options.filter((e) => {
+        return e.value === code && e.codeSystem === system;
+      }).length === 0
+    ) {
+      this.props.callback("codeValues", [
+        { key: text, codeSystem: system, value: code },
+        ...this.props.options,
+      ]);
+    }
+    if (patient.address && patient.address[0].state) {
+      this.props.callback("patientState", patient.address[0].state);
+    } else {
+      this.props.callback("patientState", "");
+    }
+    if (medicationDispense.performer) {
+      if (medicationDispense.performer[0].actor.reference) {
+        fetch(`${this.props.ehrUrl}${medicationDispense.performer[0].actor.reference}`, {
+          method: "GET",
+        })
+          .then((response) => {
+            return response.json();
+          })
+          .then((json) => {
+            if (json.address && json.address[0].state) {
+              this.props.callback("practitionerState", json.address[0].state);
+            } else {
+              this.props.callback("practitionerState", "");
+            }
+          });
+      }
+    } else {
+      this.props.callback("practitionerState", "");
+    }
+  }
+
   getDeviceRequest(patientId, client) {
     client
       .request(`DeviceRequest?subject=Patient/${patientId}`, {
@@ -259,6 +311,19 @@ export default class SMARTBox extends Component {
         this.setState({ medicationRequests: result });
       });
   }
+
+  getMedicationDispense(patientId, client) {
+    client
+      .request(`MedicationDispense?subject=Patient/${patientId}`, {
+        resolveReferences: ["subject", "performer"],
+        graph: false,
+        flat: true,
+      })
+      .then((result) => {
+        this.setState({ medicationDispenses: result});
+      });
+  }
+
   handleRequestChange(e, data) {
     if (data.value === "none") {
       this.setState({
@@ -282,6 +347,7 @@ export default class SMARTBox extends Component {
     this.getDeviceRequest(patientId, client);
     this.getServiceRequest(patientId, client);
     this.getMedicationRequest(patientId, client);
+    this.getMedicationDispense(patientId, client);
   }
 
   render() {
@@ -314,6 +380,11 @@ export default class SMARTBox extends Component {
       });
     }
 
+    if (this.state.medicationDispenses.data) {
+      this.state.medicationDispenses.data.map((e) => {
+      this.makeOption(e, options);
+    })};
+    
     let noResults = 'No results found.'
     if(!returned) {
         noResults = 'Loading...';
