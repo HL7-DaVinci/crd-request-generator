@@ -372,7 +372,7 @@ export default class RequestBox extends Component {
     );
 
     client
-      .request("Patient?_sort=identifier&_count=8", { flat: true })
+      .request("Patient?_sort=identifier&_count=12", { flat: true })
       .then((result) => {
         this.setState({
           patientList: result,
