@@ -40,6 +40,24 @@ export default class RequestBox extends Component {
     this.renderError = this.renderError.bind(this);
   }
 
+  replaceRequestAndSubmit(request) {
+    console.log("replaceRequestAndSubmit");
+
+    // replace the request in the state with the new one
+    if (request.resourceType.toUpperCase() === "MEDICATIONREQUEST") {
+      this.state.medicationRequest = request;
+    } else if (request.resourceType.toUpperCase() === "DEVICEREQUEST") {
+      this.state.deviceRequest = request;
+    } else if (request.resourceType.toUpperCase() === "SERVICEREQUEST") {
+      this.state.serviceRequest = request;
+    } else if (request.resourceType.toUpperCase() === "MEDICATIONDISPENSE") {
+      this.state.medicationDispense = request;
+    }
+
+    // submit the CRD request
+    this.submit();
+  }
+
   componentDidMount() {}
 
   exitSmart = () => {

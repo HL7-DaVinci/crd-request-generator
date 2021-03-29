@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import FHIR from "fhirclient";
 import styles from './card-list.css';
 import Button from 'terra-button';
 import TerraCard from 'terra-card';
@@ -78,8 +79,13 @@ export default class DisplayBox extends Component{
    * @param {*} suggestion - CDS service-defined suggestion to take based on CDS Hooks specification
    * @param {*} url - CDS service endpoint URL
    */
-  takeSuggestion(suggestion, url) {
+  takeSuggestion(suggestion, url, buttonId) {
     if (!this.props.isDemoCard) {
+      console.log("taking suggestion");
+
+      // disable the button
+      document.getElementById(buttonId).setAttribute("disabled", "true");
+
       if (suggestion.label) {
         if (suggestion.uuid) {
           axios({
@@ -88,7 +94,51 @@ export default class DisplayBox extends Component{
             data: {},
           });
         }
-        this.props.takeSuggestion(suggestion);
+
+        const client = FHIR.client({
+          serverUrl: this.props.ehrUrl,
+          tokenResponse: {
+            access_token: this.props.access_token.access_token,
+          },
+        });
+
+        // handle each action from the suggestion
+        suggestion.actions.forEach((a) => {
+          if (a.type.toUpperCase() === "DELETE") {
+            var uri = a.resource.resourceType + "/" + a.resource.id;
+            console.log("completing suggested action DELETE: " + uri);
+            client.delete(uri).then((result) => {
+              console.log("suggested action DELETE result:");
+              console.log(result);
+            });
+
+          } else if (a.type.toUpperCase() === "CREATE") {
+            var uri = a.resource.resourceType;
+            console.log("completing suggested action CREATE: " + uri);
+            client.create(a.resource).then((result) => {
+              console.log("suggested action CREATE result:");
+              console.log(result);
+
+              // call into the request builder to resubmit the CRD request with the suggested request
+              this.props.takeSuggestion(result);
+            });
+
+          } else if (a.type.toUpperCase() === "UPDATE") {
+            var uri = a.resource.resourceType + "/" + a.resource.id;
+            console.log("completing suggested action UPDATE: " + uri);
+            client.update(a.resource).then((result) => {
+              console.log("suggested action UPDATE result:");
+              console.log(result);
+
+              // call into the request builder to resubmit the CRD request with the suggested request
+              this.props.takeSuggestion(result);
+            });
+
+          } else {
+            console.log("WARNING: unknown action");
+          }
+        });
+
       } else {
         console.error('There was no label on this suggestion', suggestion);
       }
@@ -284,12 +334,14 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
               // -- Suggestions --
               let suggestionsSection;
               if (card.suggestions) {
+                var buttonId = "suggestion_button-"+cardInd;
                 suggestionsSection = card.suggestions.map((item, ind) => (
                   <Button
                     key={ind}
-                    onClick={() => this.takeSuggestion(item, card.serviceUrl)}
+                    onClick={() => this.takeSuggestion(item, card.serviceUrl, buttonId+"-"+ind)}
                     text={item.label}
                     variant={Button.Opts.Variants.EMPHASIS}
+                    id={buttonId+"-"+ind}
                   />
                 ));
               }
