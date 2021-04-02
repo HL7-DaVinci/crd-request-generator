@@ -103,19 +103,19 @@ export default class DisplayBox extends Component{
         });
 
         // handle each action from the suggestion
-        suggestion.actions.forEach((a) => {
-          if (a.type.toUpperCase() === "DELETE") {
-            var uri = a.resource.resourceType + "/" + a.resource.id;
+        suggestion.actions.forEach((action) => {
+          if (action.type.toUpperCase() === "DELETE") {
+            var uri = action.resource.resourceType + "/" + action.resource.id;
             console.log("completing suggested action DELETE: " + uri);
             client.delete(uri).then((result) => {
               console.log("suggested action DELETE result:");
               console.log(result);
             });
 
-          } else if (a.type.toUpperCase() === "CREATE") {
-            var uri = a.resource.resourceType;
+          } else if (action.type.toUpperCase() === "CREATE") {
+            var uri = action.resource.resourceType;
             console.log("completing suggested action CREATE: " + uri);
-            client.create(a.resource).then((result) => {
+            client.create(action.resource).then((result) => {
               console.log("suggested action CREATE result:");
               console.log(result);
 
@@ -123,10 +123,10 @@ export default class DisplayBox extends Component{
               this.props.takeSuggestion(result);
             });
 
-          } else if (a.type.toUpperCase() === "UPDATE") {
-            var uri = a.resource.resourceType + "/" + a.resource.id;
+          } else if (action.type.toUpperCase() === "UPDATE") {
+            var uri = action.resource.resourceType + "/" + action.resource.id;
             console.log("completing suggested action UPDATE: " + uri);
-            client.update(a.resource).then((result) => {
+            client.update(action.resource).then((result) => {
               console.log("suggested action UPDATE result:");
               console.log(result);
 
