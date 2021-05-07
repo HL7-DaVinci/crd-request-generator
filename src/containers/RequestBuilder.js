@@ -56,6 +56,8 @@ export default class RequestBuilder extends Component {
         this.submit_info = this.submit_info.bind(this);
         this.consoleLog = this.consoleLog.bind(this);
         this.exitSmart = this.exitSmart.bind(this);
+        this.takeSuggestion = this.takeSuggestion.bind(this);
+        this.requestBox = React.createRef();
     }
 
 
@@ -177,6 +179,11 @@ export default class RequestBuilder extends Component {
 
     }
 
+    takeSuggestion(resource) {
+        // when a suggestion is taken, call into the requestBox to resubmit the CRD request with the new request
+        this.requestBox.current.replaceRequestAndSubmit(resource);
+    }
+
     validateState() {
         const validationResult = {};
         Object.keys(this.validateMap).forEach(key => {
@@ -256,9 +263,9 @@ export default class RequestBuilder extends Component {
                         <RequestBox
                             ehrUrl={this.state.ehrUrl}
                             submitInfo={this.submit_info}
-                            access_token={this.state.token}>
-
-                        </RequestBox>
+                            access_token={this.state.token}
+                            ref={this.requestBox}
+                        />
 
                     </div>
                     <br />
@@ -287,7 +294,10 @@ export default class RequestBuilder extends Component {
                         patientId={this.state.patient.id}
                         ehrLaunch={true}
                         fhirServerUrl={this.state.baseUrl}
-                        fhirVersion={'r4'} />
+                        fhirVersion={'r4'}
+                        ehrUrl={this.state.ehrUrl}
+                        access_token={this.state.token}
+                        takeSuggestion={this.takeSuggestion} />
                 </div>
 
             </div>

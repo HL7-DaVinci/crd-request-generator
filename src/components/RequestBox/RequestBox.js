@@ -40,93 +40,96 @@ export default class RequestBox extends Component {
     this.renderError = this.renderError.bind(this);
   }
 
+  replaceRequestAndSubmit(request) {
+    let resourceType = request.resourceType.toUpperCase();
+    console.log("replaceRequestAndSubmit: " + request.resourceType);
+
+    // replace the request in the state with the new one
+    if (resourceType === "DEVICEREQUEST") {
+      this.setState({ deviceRequest: request });
+    } else if (resourceType === "SERVICEREQUEST") {
+      this.setState({ serviceRequest: request });
+    } else if (resourceType === "MEDICATIONREQUEST") {
+        this.setState({ medicationRequest: request });
+    } else if (resourceType === "MEDICATIONDISPENSE") {
+      this.setState({ medicationDispense: request });
+    }
+
+    // build the prefetch
+    const prefetch = this.makePrefetch(request);
+
+    // submit the CRD request
+    this.props.submitInfo(prefetch, request, this.state.patient);
+  }
+
   componentDidMount() {}
 
   exitSmart = () => {
     this.setState({ openPatient: false });
   };
 
-  submit = () => {
-    // make the prefetch
-    const deviceRequestResources = [
-      this.state.patient,
-      this.state.deviceRequest,
-      this.state.coverage,
-      this.state.practitioner,
-      ...this.state.otherResources,
-    ];
-    const serviceRequestResources = [
-      this.state.patient,
-      this.state.serviceRequest,
-      this.state.coverage,
-      this.state.practitioner,
-      ...this.state.otherResources,
-    ];
-    const medicationRequestResources = [
-      this.state.patient,
-      this.state.medicationRequest,
-      this.state.practitioner,
-      this.state.coverage,
-      ...this.state.otherResources,
-    ];
-    const medicationDispenseResources = [
-      this.state.patient,
-      this.state.medicationDispense,
-      this.state.practitioner,
-      ...this.state.otherResources,
-    ];
-    let prefetch;
-    if (!_.isEmpty(this.state.deviceRequest)) {
-      prefetch = deviceRequestResources.reduce((pre, resource) => {
-        if (resource.id) {
-          pre.push({ resource: resource });
-        }
-        return pre;
-      }, []);
-    } else if (!_.isEmpty(this.state.serviceRequest)) {
-      prefetch = serviceRequestResources.reduce((pre, resource) => {
-        if (resource.id) {
-          pre.push({ resource: resource });
-        }
-        return pre;
-      }, []);
-    } else if (!_.isEmpty(this.state.medicationRequest)) {
-      prefetch = medicationRequestResources.reduce((pre, resource) => {
-        if (resource.id) {
-          pre.push({ resource });
-        }
-        return pre;
-      }, []);
-    } else if (!_.isEmpty(this.state.medicationDispense)) {
-      prefetch = medicationDispenseResources.reduce((pre, resource) => {
-        if (resource.id) {
-          pre.push({ resource });
-        }
-        return pre;
-      }, []);
-    }
+  makePrefetch(request) {
+    let resourceType = request.resourceType.toUpperCase();
 
+    if ( (resourceType === "DEVICEREQUEST") 
+      || (resourceType === "SERVICEREQUEST") 
+      || (resourceType === "MEDICATIONREQUEST") ) {
+      
+      const resources = [
+        this.state.patient,
+        request,
+        this.state.coverage,
+        this.state.practitioner,
+        ...this.state.otherResources,
+      ];
+
+      return resources.reduce((pre, resource) => {
+        if (resource.id) {
+          pre.push({ resource });
+        }
+        return pre;
+      }, []);
+
+    } else if (resourceType === "MEDICATIONDISPENSE") {
+
+      const medicationDispenseResources = [
+        this.state.patient,
+        request,
+        this.state.practitioner,
+        ...this.state.otherResources,
+      ];
+      return medicationDispenseResources.reduce((pre, resource) => {
+        if (resource.id) {
+          pre.push({ resource });
+        }
+        return pre;
+      }, []);
+
+    }
+  }
+
+  submit = () => {
     if (!_.isEmpty(this.state.deviceRequest)) {
       this.props.submitInfo(
-        prefetch,
+        this.makePrefetch(this.state.deviceRequest),
         this.state.deviceRequest,
         this.state.patient
       );
     } else if (!_.isEmpty(this.state.serviceRequest)) {
       this.props.submitInfo(
-        prefetch,
+        this.makePrefetch(this.state.serviceRequest),
         this.state.serviceRequest,
         this.state.patient
       );
     } else if (!_.isEmpty(this.state.medicationRequest)) {
       this.props.submitInfo(
-        prefetch,
+        this.makePrefetch(this.state.medicationRequest),
         this.state.medicationRequest,
         this.state.patient
       );
     } else if (!_.isEmpty(this.state.medicationDispense)) {
       this.props.submitInfo(
-        prefetch,
+        this.makePrefetch(this.state.medicationDispense),
         this.state.medicationDispense,
         this.state.patient
       );
