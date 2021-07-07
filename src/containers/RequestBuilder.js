@@ -32,6 +32,8 @@ export default class RequestBuilder extends Component {
             ehrUrl: headers.ehrUrl.value,
             authUrl: headers.authUrl.value,
             cdsUrl: headers.cdsUrl.value,
+            orderSelect: headers.orderSelect.value,
+            orderSign: headers.orderSign.value,
             showSettings: false,
             ehrLaunch: false,
             patientList: [],
@@ -98,6 +100,7 @@ export default class RequestBuilder extends Component {
     }
 
     consoleLog(content, type) {
+        console.log(content);
         let jsonContent = {
             content: content,
             type: type
@@ -122,24 +125,20 @@ export default class RequestBuilder extends Component {
 
     }
 
-    getHookType(url) {
-        if (url.includes("order-review")) {
-            return "order-review";
-        } else if (url.includes("order-sign")) {
-            return "order-sign";
-        } else {
-            console.log("Could not determine the CDS Hook type, defaulting to order-select.");
-            return "order-select";
-        }
-    }
-
-    submit_info(prefetch, request, patient) {
+    submit_info(prefetch, request, patient, extraPrefetch, hook) {
         this.consoleLog("Initiating form submission", types.info);
         this.setState({patient});
         
-        var hook = this.getHookType(this.state.cdsUrl);
-        let json_request = buildRequest(request, patient, this.state.ehrUrl, this.state.token, prefetch, this.state.prefetch, hook);
-        const cdsUrl = this.state.cdsUrl;
+        let json_request = buildRequest(request, patient, this.state.ehrUrl, this.state.token, prefetch, this.state.prefetch, extraPrefetch, hook);
+        let cdsUrl = this.state.cdsUrl;
+        if (hook === "order-sign") {
+            cdsUrl = cdsUrl + "/" + this.state.orderSign;
+        } else if (hook === "order-select") {
+            cdsUrl = cdsUrl + "/" + this.state.orderSelect;
+        } else {
+            this.consoleLog("ERROR: unknown hook type", hook);
+            return;
+        }
         let baseUrl = this.state.baseUrl;
         const jwt = "Bearer " + createJwt(this.state.keypair, baseUrl, cdsUrl);
         console.log(jwt);
@@ -147,9 +146,9 @@ export default class RequestBuilder extends Component {
             "Content-Type": "application/json",
             "authorization": jwt
         });
-        this.consoleLog("Fetching response from " + this.state.cdsUrl, types.info)
+        this.consoleLog("Fetching response from " + cdsUrl, types.info)
         try {
-            fetch(this.state.cdsUrl, {
+            fetch(cdsUrl, {
                 method: "POST",
                 headers: myHeaders,
                 body: JSON.stringify(json_request)
@@ -222,6 +221,16 @@ export default class RequestBuilder extends Component {
                 "display": "CRD Server",
                 "value": this.state.cdsUrl,
                 "key": "cdsUrl"
+            },
+            "orderSelect": {
+                "display": "Order Select Rest End Point",
+                "value": this.state.orderSelect,
+                "key": "orderSelect"
+            },
+            "orderSign": {
+                "display": "Order Sign Rest End Point",
+                "value": this.state.orderSign,
+                "key": "orderSign"
             },
             "authUrl": {
                 "display": "Auth Server",

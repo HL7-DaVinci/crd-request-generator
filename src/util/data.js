@@ -19,6 +19,16 @@ const headers = {
         "value": (process.env.REACT_APP_CDS_SERVICE ? process.env.REACT_APP_CDS_SERVICE : config.cds_service),
         "key":"cdsUrl"
     },
+    "orderSelect": {
+        "display": "Order Select Rest End Point",
+        "value": (process.env.REACT_APP_ORDER_SELECT ? process.env.REACT_APP_ORDER_SELECT : config.order_select),
+        "key":"orderSelect"
+    },
+    "orderSign": {
+        "display": "Order Sign Rest End Point",
+        "value": (process.env.REACT_APP_ORDER_SIGN ? process.env.REACT_APP_ORDER_SIGN : config.order_sign),
+        "key":"orderSign"
+    },
     "authUrl": {
         "display": "Auth Server",
         "value": (process.env.REACT_APP_AUTH ? process.env.REACT_APP_AUTH : config.auth),
