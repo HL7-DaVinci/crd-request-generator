@@ -1,8 +1,8 @@
 
-export default function buildRequest(request, patient, ehrUrl, token, prefetch, includePrefetch, hook) {    
+export default function buildRequest(request, patient, ehrUrl, token, prefetch, includePrefetch, extraPrefetch, hook) {  
     const r4json = {
         "hookInstance": "d1577c69-dfbe-44ad-ba6d-3e05e953b2ea",
-        "fhirServer": ehrUrl.r4,
+        "fhirServer": ehrUrl,
         "hook": hook,
         "fhirAuthorization": {
             "access_token": token.access_token,
@@ -18,14 +18,7 @@ export default function buildRequest(request, patient, ehrUrl, token, prefetch, 
         }
     };
 
-    if (hook === "order-review") {
-        r4json.context.orders = {
-            "resourceType": "Bundle",
-            "entry": [
-                request
-            ]
-        }
-    } else if (hook === "order-select") {
+    if (hook === "order-select") {
         r4json.context.draftOrders = {
             "resourceType": "Bundle",
             "entry": [
@@ -62,11 +55,26 @@ export default function buildRequest(request, patient, ehrUrl, token, prefetch, 
                 }
             }
         } else if(request.resourceType === 'MedicationRequest') {
-            r4json.prefetch = {
-                "medicationRequestBundle": {
-                    "resourceType": "Bundle",
-                    "type": "collection",
-                    "entry": prefetch
+            if (extraPrefetch != null) {
+                r4json.prefetch = {
+                    "medicationRequestBundle": {
+                        "resourceType": "Bundle",
+                        "type": "collection",
+                        "entry": prefetch
+                    },
+                    "medicationStatementBundle": {
+                        "resourceType": "Bundle",
+                        "type": "collection",
+                        "entry": extraPrefetch
+                    }
+                }
+            } else {
+                r4json.prefetch = {
+                    "medicationRequestBundle": {
+                        "resourceType": "Bundle",
+                        "type": "collection",
+                        "entry": prefetch
+                    }
                 }
             }
         } else if(request.resourceType === 'MedicationDispense') {
