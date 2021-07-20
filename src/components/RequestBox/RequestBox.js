@@ -179,7 +179,7 @@ export default class RequestBox extends Component {
       // currently only MedicationRequest has a use case for the OrderSelect hook
       if (request.resourceType.toUpperCase() === "MEDICATIONREQUEST") {
 
-        // retrieve teh MedicationStatements
+        // retrieve the MedicationStatements
         client.request(`MedicationStatement?subject=${this.state.patient.id}&_include=MedicationStatement:patient`, {
           graph: false,
           flat: true
