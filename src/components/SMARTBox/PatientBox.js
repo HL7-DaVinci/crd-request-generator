@@ -257,7 +257,7 @@ export default class SMARTBox extends Component {
     }
     if (medicationDispense.performer) {
       if (medicationDispense.performer[0].actor.reference) {
-        fetch(`${this.props.ehrUrl}${medicationDispense.performer[0].actor.reference}`, {
+        fetch(`${this.props.ehrUrl}/${medicationDispense.performer[0].actor.reference}`, {
           method: "GET",
         })
           .then((response) => {

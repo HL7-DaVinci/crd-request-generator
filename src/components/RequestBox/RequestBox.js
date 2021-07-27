@@ -97,6 +97,7 @@ export default class RequestBox extends Component {
 
     } else if (resourceType === "MEDICATIONDISPENSE") {
 
+      
       const medicationDispenseResources = [
         this.state.patient,
         request,
@@ -378,10 +379,12 @@ export default class RequestBox extends Component {
       },
     });
 
+    let medicationRequestReference = medicationDispense.authorizingPrescription[0].reference;
+
     this.setState({ gatherCount: 1 });
     client
       .request(`MedicationDispense/${medicationDispense.id}`, {
-        resolveReferences: ["performer.0.actor"],
+        resolveReferences: ["performer.0.actor", "authorizingPrescription.0"],
         graph: false,
         flat: true,
       })
@@ -406,8 +409,39 @@ export default class RequestBox extends Component {
                 this.addReferencesToList(result.data);
               })
               .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense); });
-          }
+          } 
         });
+
+        // work around authorizingPrescription reference can not be resolved issue 
+        if (medicationRequestReference) {
+          this.state.gatherCount = this.state.gatherCount + 1;
+          client
+            .request(medicationRequestReference, {
+              resolveReferences: ["insurance.0"],
+              graph: false,
+              flat: true,
+            })
+            .then((result) => {
+              this.state.gatherCount = this.state.gatherCount + 1;
+              let coverageReference = result.references;
+              Object.keys(coverageReference).forEach((refKey) => {
+                const ref = coverageReference[refKey];
+                if (ref.resourceType === "Coverage") {
+                  client
+                    .request(`Coverage/${ref.id}`, {
+                      resolveReferences: ["payor"],
+                      graph: false,
+                      flat: true,
+                    })
+                    .then((result) => {
+                      this.addReferencesToList(result.references);
+                    })
+                    .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense); });
+                }
+              });
+            })
+            .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense); });
+        }
       })
       .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense); });
   };
