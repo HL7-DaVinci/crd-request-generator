@@ -379,12 +379,12 @@ export default class RequestBox extends Component {
       },
     });
 
-    let medicationRequestReference = medicationDispense.authorizingPrescription[0].reference;
-
     this.setState({ gatherCount: 1 });
+    // authorizingPrescription reference can't be resolved. 
+    // An issue is opened in fhir client repo: https://github.com/smart-on-fhir/client-js/issues/131
     client
       .request(`MedicationDispense/${medicationDispense.id}`, {
-        resolveReferences: ["performer.0.actor", "authorizingPrescription.0"],
+        resolveReferences: ["performer.0.actor", "authorizingPrescription.0"], 
         graph: false,
         flat: true,
       })
@@ -409,10 +409,11 @@ export default class RequestBox extends Component {
                 this.addReferencesToList(result.data);
               })
               .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense); });
-          } 
+          }
         });
 
         // work around authorizingPrescription reference can not be resolved issue 
+        let medicationRequestReference = medicationDispense.authorizingPrescription[0].reference;
         if (medicationRequestReference) {
           this.state.gatherCount = this.state.gatherCount + 1;
           client
