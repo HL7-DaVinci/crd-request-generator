@@ -413,35 +413,37 @@ export default class RequestBox extends Component {
         });
 
         // work around authorizingPrescription reference can not be resolved issue 
-        let medicationRequestReference = medicationDispense.authorizingPrescription[0].reference;
-        if (medicationRequestReference) {
-          this.state.gatherCount = this.state.gatherCount + 1;
-          client
-            .request(medicationRequestReference, {
-              resolveReferences: ["insurance.0"],
-              graph: false,
-              flat: true,
-            })
-            .then((result) => {
-              this.state.gatherCount = this.state.gatherCount + 1;
-              let coverageReference = result.references;
-              Object.keys(coverageReference).forEach((refKey) => {
-                const ref = coverageReference[refKey];
-                if (ref.resourceType === "Coverage") {
-                  client
-                    .request(`Coverage/${ref.id}`, {
-                      resolveReferences: ["payor"],
-                      graph: false,
-                      flat: true,
-                    })
-                    .then((result) => {
-                      this.addReferencesToList(result.references);
-                    })
-                    .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense); });
-                }
-              });
-            })
-            .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense); });
+        if (medicationDispense.authorizingPrescription != undefined && medicationDispense.authorizingPrescription.length > 0) {
+          let medicationRequestReference = medicationDispense.authorizingPrescription[0].reference;
+          if (medicationRequestReference) {
+            this.state.gatherCount = this.state.gatherCount + 1;
+            client
+              .request(medicationRequestReference, {
+                resolveReferences: ["insurance.0"],
+                graph: false,
+                flat: true,
+              })
+              .then((result) => {
+                this.state.gatherCount = this.state.gatherCount + 1;
+                let coverageReference = result.references;
+                Object.keys(coverageReference).forEach((refKey) => {
+                  const ref = coverageReference[refKey];
+                  if (ref.resourceType === "Coverage") {
+                    client
+                      .request(`Coverage/${ref.id}`, {
+                        resolveReferences: ["payor"],
+                        graph: false,
+                        flat: true,
+                      })
+                      .then((result) => {
+                        this.addReferencesToList(result.references);
+                      })
+                      .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense); });
+                  }
+                });
+              })
+              .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense); });
+          }
         }
       })
       .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense); });
