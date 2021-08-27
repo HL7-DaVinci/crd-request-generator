@@ -11,6 +11,7 @@ import RequestBox from '../components/RequestBox/RequestBox';
 import buildRequest from '../util/buildRequest.js';
 import { types, headers, defaultValues } from '../util/data.js';
 import { createJwt, login, setupKeys } from '../util/auth';
+import FHIR from "fhirclient";
 
 
 export default class RequestBuilder extends Component {
@@ -122,6 +123,80 @@ export default class RequestBuilder extends Component {
         this.setState({ loading: true }, () => {
             this.submit_info();
         });
+    }
+
+    build_note_from_card(card, currentTime) {
+        var note = { 
+            op: "add", 
+            path: "/note/0", 
+            value: {
+                authorString: card.source.label,
+                time: currentTime, 
+                text: "(" + card.indicator + ") " + card.summary + " " + card.detail
+            }
+        }
+        return note;
+    }
+
+    submit_note(initialRequest, cards) {
+        // build the url of the FHIR (EHR) server
+        const urlPart = initialRequest.resourceType + "/" + initialRequest.id;
+        const url = this.state.ehrUrl + "/" + urlPart
+        console.log(url);
+
+        // get the latest request instead of using the currently loaded version
+        let params = {serverUrl: this.state.ehrUrl};
+        const client = FHIR.client(params);
+        client.request(urlPart, {graph: false, flat: true})
+            .then((request) => {
+
+                // get the current date/time
+                var date = new Date();
+                var now = date.toISOString();
+
+                // build the request to send
+                var data = [];
+                if (!request.note) {
+                    data.push({
+                        "op": "add", 
+                        "path": "/note", 
+                        "value":[]
+                    });
+                }
+
+                // send all of the card updates as a single patch
+                cards.forEach((card) => {
+                    console.log(card);
+                    if (card && card.summary) {
+                        data.push(this.build_note_from_card(card, now));
+                    }
+                });
+                console.log("Update request notes:");
+                console.log(data);
+
+                if (data.length > 0) {
+                    var myHeaders = new Headers({
+                        "Content-Type": "application/json-patch+json",
+                        "accept": "application/json"
+                    });
+                    try {
+                        fetch(url, {
+                            method: "PATCH",
+                            headers: myHeaders,
+                            body: JSON.stringify(data)
+                        }).then(response => {
+                            console.log("submit_note: response received:");
+                            console.log(response);
+                        }).catch(() => this.consoleLog("No response recieved from the server when submitting note", types.error));
+                    } catch (error) {
+                        this.consoleLog("Unexpected error occured when submitting note", types.error)
+                        if (error instanceof TypeError) {
+                            this.consoleLog(error.name + ": " + error.message, types.error);
+                        }
+                    }
+                }
+            });
+
 
     }
 
@@ -153,9 +228,12 @@ export default class RequestBuilder extends Component {
                 headers: myHeaders,
                 body: JSON.stringify(json_request)
             }).then(response => {
-                this.consoleLog("Recieved response", types.info);
+                this.consoleLog("Received response", types.info);
                 response.json().then((fhirResponse) => {
                     console.log(fhirResponse);
+                    if (fhirResponse && fhirResponse.cards) {
+                        this.submit_note(request, fhirResponse.cards);
+                    }
                     if (fhirResponse && fhirResponse.status) {
                         this.consoleLog("Server returned status "
                             + fhirResponse.status + ": "
