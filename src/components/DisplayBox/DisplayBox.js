@@ -129,9 +129,6 @@ export default class DisplayBox extends Component{
             client.update(action.resource).then((result) => {
               console.log("suggested action UPDATE result:");
               console.log(result);
-
-              // call into the request builder to resubmit the CRD request with the suggested request
-              this.props.takeSuggestion(result);
             });
 
           } else {
