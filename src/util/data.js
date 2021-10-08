@@ -33,6 +33,11 @@ const headers = {
         "display": "Auth Server",
         "value": (process.env.REACT_APP_AUTH ? process.env.REACT_APP_AUTH : config.auth),
         "key": "authUrl"
+    },
+    "alternativeTherapy": {
+        "display": "Alternative Therapy Cards Allowed",
+        "value": (process.env.REACT_APP_ALTERNATIVE_THERAPY? process.env.REACT_APP_ALTERNATIVE_THERAPY : config.alternative_therapy),
+        "key": "alternativeTherapy"
     }
 }
 

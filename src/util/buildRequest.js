@@ -1,5 +1,5 @@
 
-export default function buildRequest(request, patient, ehrUrl, token, prefetch, includePrefetch, extraPrefetch, hook) {  
+export default function buildRequest(request, patient, ehrUrl, token, prefetch, includePrefetch, extraPrefetch, hook, alternativeTherapy) {  
     const r4json = {
         "hookInstance": "d1577c69-dfbe-44ad-ba6d-3e05e953b2ea",
         "fhirServer": ehrUrl,
@@ -15,6 +15,11 @@ export default function buildRequest(request, patient, ehrUrl, token, prefetch, 
             "userId": "Practitioner/example",
             "patientId": patient.id,
             "encounterId": "enc89284"
+        },
+        "extension": {
+            "davinci-crd.configuration": {
+                "alt-drug": alternativeTherapy
+            }
         }
     };
 
