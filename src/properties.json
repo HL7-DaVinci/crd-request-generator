@@ -11,5 +11,5 @@
   "user": "user1",
   "password": "password",
   "public_keys": "http://localhost:3001/public_keys",
-  "alternative_therapy": true
+  "alt_drug": true
 }

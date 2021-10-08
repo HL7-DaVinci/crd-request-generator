@@ -36,7 +36,7 @@ const headers = {
     },
     "alternativeTherapy": {
         "display": "Alternative Therapy Cards Allowed",
-        "value": (process.env.REACT_APP_ALTERNATIVE_THERAPY? process.env.REACT_APP_ALTERNATIVE_THERAPY : config.alternative_therapy),
+        "value": (process.env.REACT_APP_ALTERNATIVE_THERAPY? process.env.REACT_APP_ALTERNATIVE_THERAPY : config.alt_drug),
         "key": "alternativeTherapy"
     }
 }

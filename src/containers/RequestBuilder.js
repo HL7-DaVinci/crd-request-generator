@@ -46,6 +46,7 @@ export default class RequestBuilder extends Component {
             baseUrl: null,
             serviceRequests: {},
             currentServiceRequest: null,
+            includeConfig: true,
             alternativeTherapy: headers.alternativeTherapy.value
         };
         this.validateMap = {
@@ -130,7 +131,11 @@ export default class RequestBuilder extends Component {
         this.consoleLog("Initiating form submission", types.info);
         this.setState({patient});
         
-        let json_request = buildRequest(request, patient, this.state.ehrUrl, this.state.token, prefetch, this.state.prefetch, extraPrefetch, hook, this.state.alternativeTherapy);
+        const hookConfig = {
+            "includeConfig": this.state.includeConfig,
+            "alternativeTherapy": this.state.alternativeTherapy
+        }
+        let json_request = buildRequest(request, patient, this.state.ehrUrl, this.state.token, prefetch, this.state.prefetch, extraPrefetch, hook, hookConfig);
         let cdsUrl = this.state.cdsUrl;
         if (hook === "order-sign") {
             cdsUrl = cdsUrl + "/" + this.state.orderSign;
@@ -248,6 +253,12 @@ export default class RequestBuilder extends Component {
                 "display": "Base EHR",
                 "value": this.state.baseUrl,
                 "key": "baseUrl"
+            },
+            "includeConfig": {
+                "type": "check",
+                "display": "Include Configuration in CRD Request",
+                "value": this.state.includeConfig,
+                "key": "includeConfig"
             },
             "alternativeTherapy": {
                 "type": "check",
