@@ -10,5 +10,6 @@
   "order_select": "order-select-crd",
   "user": "user1",
   "password": "password",
-  "public_keys": "http://localhost:3001/public_keys"
+  "public_keys": "http://localhost:3001/public_keys",
+  "alt_drug": true
 }

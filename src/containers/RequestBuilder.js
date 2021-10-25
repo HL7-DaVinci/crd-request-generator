@@ -45,7 +45,9 @@ export default class RequestBuilder extends Component {
             currentDeviceRequest: null,
             baseUrl: null,
             serviceRequests: {},
-            currentServiceRequest: null
+            currentServiceRequest: null,
+            includeConfig: true,
+            alternativeTherapy: headers.alternativeTherapy.value
         };
         this.validateMap = {
             age: (foo => { return isNaN(foo) }),
@@ -129,7 +131,11 @@ export default class RequestBuilder extends Component {
         this.consoleLog("Initiating form submission", types.info);
         this.setState({patient});
         
-        let json_request = buildRequest(request, patient, this.state.ehrUrl, this.state.token, prefetch, this.state.prefetch, extraPrefetch, hook);
+        const hookConfig = {
+            "includeConfig": this.state.includeConfig,
+            "alternativeTherapy": this.state.alternativeTherapy
+        }
+        let json_request = buildRequest(request, patient, this.state.ehrUrl, this.state.token, prefetch, this.state.prefetch, extraPrefetch, hook, hookConfig);
         let cdsUrl = this.state.cdsUrl;
         if (hook === "order-sign") {
             cdsUrl = cdsUrl + "/" + this.state.orderSign;
@@ -213,34 +219,52 @@ export default class RequestBuilder extends Component {
         const header =
         {
             "ehrUrl": {
+                "type": "input",
                 "display": "EHR Server",
                 "value": this.state.ehrUrl,
                 "key": "ehrUrl"
             },
             "cdsUrl": {
+                "type": "input",
                 "display": "CRD Server",
                 "value": this.state.cdsUrl,
                 "key": "cdsUrl"
             },
             "orderSelect": {
+                "type": "input",
                 "display": "Order Select Rest End Point",
                 "value": this.state.orderSelect,
                 "key": "orderSelect"
             },
             "orderSign": {
+                "type": "input",
                 "display": "Order Sign Rest End Point",
                 "value": this.state.orderSign,
                 "key": "orderSign"
             },
             "authUrl": {
+                "type": "input",
                 "display": "Auth Server",
                 "value": this.state.authUrl,
                 "key": "authUrl"
             },
             "baseUrl": {
+                "type": "input",
                 "display": "Base EHR",
                 "value": this.state.baseUrl,
                 "key": "baseUrl"
+            },
+            "includeConfig": {
+                "type": "check",
+                "display": "Include Configuration in CRD Request",
+                "value": this.state.includeConfig,
+                "key": "includeConfig"
+            },
+            "alternativeTherapy": {
+                "type": "check",
+                "display": "Alternative Therapy Cards Allowed",
+                "value": this.state.alternativeTherapy,
+                "key": "alternativeTherapy"
             }
         }
 
@@ -311,10 +335,6 @@ export default class RequestBuilder extends Component {
 
             </div>
         )
-    }
-
-    getJson() {
-        return buildRequest(this.state);
     }
 }
 

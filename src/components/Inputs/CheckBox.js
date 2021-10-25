@@ -4,7 +4,7 @@ export default class CheckBox extends Component {
     constructor(props){
         super(props);
         this.state={
-            toggle: false
+            toggle: props.toggle
         };
 
     this.onInputChange = this.onInputChange.bind(this);
@@ -22,15 +22,15 @@ export default class CheckBox extends Component {
 
     }
     render() {
-        const toggleClass = this.state.toggle?"checkBoxClicked":"checkBox";
+        const toggleClass = (this.state.toggle?"checkBoxClicked":"checkBox");
         const indicatorClass = this.state.toggle?"onOffActive":"onOff";
         return (
             <span>
             <button
-            className={toggleClass +" btn-class btn"}
+            className={toggleClass +" btn-class btn " + this.props.extraClass}
             name={this.props.elementName}
             onClick={this.onInputChange}
-            >{this.props.displayName} <a className={indicatorClass + " onOffState"} ></a></button>
+            >{this.props.displayName} <a className={indicatorClass + " onOffState " + this.props.extraInnerClass} ></a></button>
             </span>
         )
     }
