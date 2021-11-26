@@ -7,7 +7,7 @@
   "ehr_base": "http://localhost:8080/test-ehr/r4",
   "cds_service":"http://localhost:8090/r4/cds-services",
   "order_sign": "order-sign-crd",
-  "order_select": "order-select",
+  "order_select": "order-select-rems",
   "user": "alice",
   "password": "alice",
   "public_keys": "http://localhost:3001/public_keys",

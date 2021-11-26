@@ -1,4 +1,4 @@
-import config from '../properties.json';
+import config from './config.js';
 
 
 const types = {
