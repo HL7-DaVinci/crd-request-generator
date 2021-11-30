@@ -73,6 +73,16 @@ export default class DisplayBox extends Component{
             return false;
         }
     }
+
+    supportedRequesType(resource) {
+      let resourceType = resource.resourceType.toUpperCase();
+      if ( (resourceType === "DEVICEREQUEST") 
+        || (resourceType === "SERVICEREQUEST") 
+        || (resourceType === "MEDICATIONREQUEST")
+        || (resourceType === "MEDICATIONDISPENSE") ) {
+          return true;
+      }
+    }
   /**
    * Take a suggestion from a CDS service based on action on from a card. Also pings the analytics endpoint (if any) of the
    * CDS service to notify that a suggestion was taken
@@ -119,8 +129,10 @@ export default class DisplayBox extends Component{
               console.log("suggested action CREATE result:");
               console.log(result);
 
-              // call into the request builder to resubmit the CRD request with the suggested request
-              this.props.takeSuggestion(result);
+              if (this.supportedRequesType(result)) {
+                // call into the request builder to resubmit the CRD request with the suggested request
+                this.props.takeSuggestion(result);
+              }
             });
 
           } else if (action.type.toUpperCase() === "UPDATE") {
