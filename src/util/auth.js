@@ -1,5 +1,5 @@
 import KJUR, { KEYUTIL } from 'jsrsasign';
-import config from '../properties.json';
+import config from './config.js';
 
 function makeid() {
     var text = [];
