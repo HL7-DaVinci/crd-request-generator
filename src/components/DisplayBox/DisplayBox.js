@@ -89,12 +89,20 @@ export default class DisplayBox extends Component{
    * @param {*} suggestion - CDS service-defined suggestion to take based on CDS Hooks specification
    * @param {*} url - CDS service endpoint URL
    */
-  takeSuggestion(suggestion, url, buttonId) {
+  takeSuggestion(suggestion, url, buttonId, suggestionCount, cardNum, selectionBehavior) {
     if (!this.props.isDemoCard) {
       console.log("taking suggestion");
 
-      // disable the button
-      document.getElementById(buttonId).setAttribute("disabled", "true");
+      if (selectionBehavior === 'at-most-one') {
+        // disable all suggestion buttons for this card
+        for (var i = 0; i < suggestionCount; i++) {
+          let bId = "suggestion_button-"+cardNum+"-"+i;
+          document.getElementById(bId).setAttribute("disabled", "true");
+        }
+      } else {
+        // disable this suggestion button if any are allowed
+        document.getElementById(buttonId).setAttribute("disabled", "true");
+      }
 
       if (suggestion.label) {
         if (suggestion.uuid) {
@@ -277,6 +285,7 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
     });
   }
 
+
   /**
    * Helper function to build out the UI for the source of the Card
    * @param {*} source - Object as part of the card to build the UI for
@@ -309,7 +318,9 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
           </div>
         );
       }
+
     render() {
+        this.buttonList = [];
         const indicators = {
             info: 0,
             warning: 1,
@@ -341,18 +352,22 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
               const detailSection = card.detail ? <div style={{color: summaryColors.info}}><ReactMarkdown source={card.detail} /></div> : <Text color='grey'>None</Text>;
       
               // -- Suggestions --
-              let suggestionsSection;
+              let suggestionsSection = [];
               if (card.suggestions) {
-                var buttonId = "suggestion_button-"+cardInd;
-                suggestionsSection = card.suggestions.map((item, ind) => (
-                  <Button
-                    key={ind}
-                    onClick={() => this.takeSuggestion(item, card.serviceUrl, buttonId+"-"+ind)}
-                    text={item.label}
-                    variant={Button.Opts.Variants.EMPHASIS}
-                    id={buttonId+"-"+ind}
-                  />
-                ));
+                card.suggestions.forEach((item, ind) => {
+                  var buttonId = "suggestion_button-"+cardInd+"-"+ind;
+                  this.buttonList.push(buttonId);
+
+                  suggestionsSection.push(
+                    <Button
+                      key={ind}
+                      onClick={() => this.takeSuggestion(item, card.serviceUrl, buttonId, card.suggestions.length, cardInd, card.selectionBehavior)}
+                      text={item.label}
+                      variant={Button.Opts.Variants.EMPHASIS}
+                      id={buttonId}
+                    />
+                  );
+                });
               }
       
               // -- Links --
@@ -399,5 +414,13 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
                   {renderedCards}
                   </div>
                 </div>;
+        }
+
+        componentDidUpdate() {
+          // clear the suggestion buttons
+          console.log(this.buttonList);
+          this.buttonList.forEach((requestButton, id) => {
+            document.getElementById(requestButton).removeAttribute("disabled");
+          });
         }
       }
