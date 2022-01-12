@@ -32,7 +32,9 @@ export default function buildRequest(request, patient, ehrUrl, token, prefetch, 
         r4json.context.draftOrders = {
             "resourceType": "Bundle",
             "entry": [
-                request
+                {
+                    "resource": request
+                }
             ]
         }
         r4json.context.selections = [
@@ -42,7 +44,9 @@ export default function buildRequest(request, patient, ehrUrl, token, prefetch, 
         r4json.context.draftOrders = {
             "resourceType": "Bundle",
             "entry": [
-                request
+                {
+                    "resource": request
+                }
             ]
         }
     }
