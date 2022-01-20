@@ -4,7 +4,7 @@ import DisplayBox from '../components/DisplayBox/DisplayBox';
 import ConsoleBox from '../components/ConsoleBox/ConsoleBox';
 import '../index.css';
 import '../components/ConsoleBox/consoleBox.css';
-import config from '../properties.json';
+import config from '../util/config.js';
 import { KEYUTIL } from 'jsrsasign';
 import SettingsBox from '../components/SettingsBox/SettingsBox';
 import RequestBox from '../components/RequestBox/RequestBox';
