@@ -4,7 +4,7 @@
   "private": true,
   "homepage": "http://localhost:8080",
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.21.2",
     "base64url": "^3.0.0",
     "classnames": "^2.2.6",
     "fhirclient": "^2.3.1",
