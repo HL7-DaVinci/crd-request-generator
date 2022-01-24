@@ -3,6 +3,8 @@ name: Docker Image CI/CD
 on:
   push:
     branches: [ master ]
+  workflow_dispatch: 
+  pull-request: [ master ]
 
 jobs:
   docker-ci-cd: 
