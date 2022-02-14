@@ -1,0 +1,50 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Debug CRD-Request-Generator (Launch Docker)",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}",
+            "sourceMapPathOverrides": {
+                "/home/node/app/crd-request-generator/*": "${webRoot}/*",
+            },
+            "runtimeArgs": [
+                "--remote-debugging-port=9222"
+              ]
+        },
+        {
+            "type": "chrome",
+            "request": "attach",
+            "name": "Debug CRD-Request-Generator (Attach Docker)",
+            "port": 9222,
+            "urlFilter": "http://localhost:3000/*",
+            "webRoot": "${workspaceFolder}",
+            "sourceMapPathOverrides": {
+                "/home/node/app/crd-request-generator/*": "${webRoot}/*",
+            }
+        },
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Debug CRD-Request-Generator (Launch Local)",
+            "url": "http://localhost:3000",
+            "webRoot": "${workspaceFolder}",
+            "runtimeArgs": [
+                "--remote-debugging-port=9222"
+              ]
+        },
+        {
+            "type": "chrome",
+            "request": "attach",
+            "port": 9222,
+            "name": "Debug CRD-Request-Generator (Attach Local)",
+            "urlFilter": "http://localhost:3000/*",
+            "webRoot": "${workspaceFolder}",
+        }
+    ]
+}
