@@ -16,6 +16,7 @@ jobs:
           owner: HL7-DaVinci
           base: master # Upstream
           head: master # local
-          ignore_fail: true # ignoring merge fail, dont want auto merge 
+          ignore_fail: true 
+          auto_merge: false 
           pr_title: Fork Auto Sync
           pr_message: Upstream repository has been updated - Please review changes 
