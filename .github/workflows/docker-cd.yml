@@ -23,4 +23,4 @@ jobs:
       with:
         context: .
         push: true
-        tags: smalho01234/crd-request-generator:latest
+        tags: codexrems/crd-request-generator:REMSvlatest
