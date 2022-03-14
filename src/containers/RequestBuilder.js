@@ -61,7 +61,6 @@ export default class RequestBuilder extends Component {
         this.consoleLog = this.consoleLog.bind(this);
         this.exitSmart = this.exitSmart.bind(this);
         this.takeSuggestion = this.takeSuggestion.bind(this);
-        this.renderPrefetchCheckbox = this.renderPrefetchCheckbox.bind(this);
         this.requestBox = React.createRef();
     }
 
@@ -126,23 +125,6 @@ export default class RequestBuilder extends Component {
             this.submit_info();
         });
 
-    }
-
-    renderPrefetchCheckbox() {
-
-      const updateCB = () => {
-        this.state.prefetch = !this.state.prefetch;
-      };
-  
-      return (
-        <div>
-          <CheckBox
-              extraClass = "prefetch-checkbox"
-              toggle = {this.state.prefetch}
-              updateCB={updateCB}
-              elementName = {"prefetch-checkbox"} />
-        </div>
-      );
     }
 
     submit_info(prefetch, request, patient, extraPrefetch, hook) {
@@ -282,7 +264,13 @@ export default class RequestBuilder extends Component {
                 "display": "Alternative Therapy Cards Allowed",
                 "value": this.state.alternativeTherapy,
                 "key": "alternativeTherapy"
-            }
+            },
+            "prefetch": {
+              "type": "check",
+              "display": "Send Prefetch",
+              "value": this.state.prefetch,
+              "key": "prefetch"
+          }
         }
 
         return (
@@ -310,7 +298,6 @@ export default class RequestBuilder extends Component {
                         /> : null}
                     <div>
                         {/*for the ehr launch */}
-                        {this.renderPrefetchCheckbox()}
                         <RequestBox
                             ehrUrl={this.state.ehrUrl}
                             submitInfo={this.submit_info}
