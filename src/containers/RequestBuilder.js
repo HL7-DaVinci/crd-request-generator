@@ -11,7 +11,7 @@ import RequestBox from '../components/RequestBox/RequestBox';
 import buildRequest from '../util/buildRequest.js';
 import { types, headers, defaultValues } from '../util/data.js';
 import { createJwt, login, setupKeys } from '../util/auth';
-
+import CheckBox from '../../src/components/Inputs/CheckBox';
 
 export default class RequestBuilder extends Component {
     constructor(props) {
@@ -61,6 +61,7 @@ export default class RequestBuilder extends Component {
         this.consoleLog = this.consoleLog.bind(this);
         this.exitSmart = this.exitSmart.bind(this);
         this.takeSuggestion = this.takeSuggestion.bind(this);
+        this.renderPrefetchCheckbox = this.renderPrefetchCheckbox.bind(this);
         this.requestBox = React.createRef();
     }
 
@@ -127,10 +128,26 @@ export default class RequestBuilder extends Component {
 
     }
 
+    renderPrefetchCheckbox() {
+
+      const updateCB = () => {
+        this.state.prefetch = !this.state.prefetch;
+      };
+  
+      return (
+        <div>
+          <CheckBox
+              extraClass = "prefetch-checkbox"
+              toggle = {this.state.prefetch}
+              updateCB={updateCB}
+              elementName = {"prefetch-checkbox"} />
+        </div>
+      );
+    }
+
     submit_info(prefetch, request, patient, extraPrefetch, hook) {
         this.consoleLog("Initiating form submission", types.info);
         this.setState({patient});
-        
         const hookConfig = {
             "includeConfig": this.state.includeConfig,
             "alternativeTherapy": this.state.alternativeTherapy
@@ -293,6 +310,7 @@ export default class RequestBuilder extends Component {
                         /> : null}
                     <div>
                         {/*for the ehr launch */}
+                        {this.renderPrefetchCheckbox()}
                         <RequestBox
                             ehrUrl={this.state.ehrUrl}
                             submitInfo={this.submit_info}
