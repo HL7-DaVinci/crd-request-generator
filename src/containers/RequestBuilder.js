@@ -11,7 +11,6 @@ import RequestBox from '../components/RequestBox/RequestBox';
 import buildRequest from '../util/buildRequest.js';
 import { types, headers, defaultValues } from '../util/data.js';
 import { createJwt, login, setupKeys } from '../util/auth';
-import CheckBox from '../../src/components/Inputs/CheckBox';
 
 export default class RequestBuilder extends Component {
     constructor(props) {
