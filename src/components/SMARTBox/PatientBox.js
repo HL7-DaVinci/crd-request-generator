@@ -501,7 +501,7 @@ export default class SMARTBox extends Component {
           </div>
           <div className="request-info">
             <span style={{ fontWeight: "bold", marginRight: "5px" }}>
-              In Progress Forms:
+              In Progress Form:
             </span>
             <Dropdown 
               search searchInput={{ type: 'text' }}
