@@ -140,7 +140,9 @@ export default class SMARTBox extends Component {
 
   updateDeviceRequest(patient, deviceRequest) {
     this.props.callback("deviceRequest", deviceRequest);
-    this.props.updateDeviceRequestCallback(deviceRequest);
+    // this.props.updateDeviceRequestCallback(deviceRequest);
+    const queries = this.props.updateDeviceRequestCallback('deviceRequestBundle', deviceRequest);
+    console.log(queries);
     const coding = this.getCoding(deviceRequest);
     const code = coding.code;
     const system = coding.system;

@@ -6,6 +6,7 @@ import { defaultValues, shortNameMap } from "../../util/data";
 import { getAge } from "../../util/fhir";
 import _ from "lodash";
 import "./request.css";
+import { PrefetchTemplate } from "../../PrefetchTemplate";
 
 export default class RequestBox extends Component {
   constructor(props) {
@@ -658,7 +659,8 @@ export default class RequestBox extends Component {
                             params = {params}
                             callback={this.updateStateElement}
                             updateDeviceRequestCallback={
-                              this.gatherDeviceRequestResources
+                              PrefetchTemplate.generateQueries
+                              // this.gatherDeviceRequestResources
                             }
                             updateServiceRequestCallback={
                               this.gatherServiceRequestResources

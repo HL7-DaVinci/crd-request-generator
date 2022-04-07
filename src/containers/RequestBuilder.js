@@ -11,6 +11,7 @@ import RequestBox from '../components/RequestBox/RequestBox';
 import buildRequest from '../util/buildRequest.js';
 import { types, headers, defaultValues } from '../util/data.js';
 import { createJwt, login, setupKeys } from '../util/auth';
+import {PrefetchTemplate} from '../PrefetchTemplate';
 
 export default class RequestBuilder extends Component {
     constructor(props) {
@@ -23,7 +24,7 @@ export default class RequestBuilder extends Component {
             response: null,
             token: null,
             oauth: false,
-            prefetch: true,
+            sendPrefetch: true,
             loading: false,
             logs: [],
             keypair: null,
@@ -133,7 +134,7 @@ export default class RequestBuilder extends Component {
             "includeConfig": this.state.includeConfig,
             "alternativeTherapy": this.state.alternativeTherapy
         }
-        let json_request = buildRequest(request, patient, this.state.ehrUrl, this.state.token, prefetch, this.state.prefetch, extraPrefetch, hook, hookConfig);
+        let json_request = buildRequest(request, patient, this.state.ehrUrl, this.state.token, prefetch, this.state.sendPrefetch, extraPrefetch, hook, hookConfig);
         let cdsUrl = this.state.cdsUrl;
         if (hook === "order-sign") {
             cdsUrl = cdsUrl + "/" + this.state.orderSign;
@@ -267,7 +268,7 @@ export default class RequestBuilder extends Component {
             "prefetch": {
               "type": "check",
               "display": "Send Prefetch",
-              "value": this.state.prefetch,
+              "value": this.state.sendPrefetch,
               "key": "prefetch"
           }
         }
