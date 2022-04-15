@@ -36,8 +36,8 @@ function login() {
     const tokenUrl = (process.env.REACT_APP_AUTH ? process.env.REACT_APP_AUTH : this.state.config.auth) + "/realms/" + (process.env.REACT_APP_REALM ? process.env.REACT_APP_REALM : this.state.config.realm) + "/protocol/openid-connect/token"
     let params = {
         grant_type: "password",
-        username: "user1",
-        password: "password",
+        username: "alice",
+        password: "alice",
         client_id: (process.env.REACT_APP_CLIENT ? process.env.REACT_APP_CLIENT : this.state.config.client)
     }
 
