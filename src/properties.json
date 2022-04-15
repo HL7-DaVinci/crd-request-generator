@@ -8,8 +8,8 @@
   "cds_service":"http://localhost:8090/r4/cds-services",
   "order_sign": "order-sign-crd",
   "order_select": "order-select-crd",
-  "user": "user1",
-  "password": "password",
+  "user": "alice",
+  "password": "alice",
   "public_keys": "http://localhost:3001/public_keys",
   "alt_drug": true
 }
