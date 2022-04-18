@@ -132,7 +132,7 @@ export default class SMARTBox extends Component {
   updatePrefetchRequest(request) {
     this.props.callback(request.resourceType, request);
     const queries = this.props.updatePrefetchCallback(request.resourceType, request);
-    console.log(queries);
+    console.log("Queries: " + queries);
     queries.forEach((query) => {
       const urlQuery = this.props.ehrUrl + '/' + query;
       console.log(urlQuery);
@@ -142,7 +142,9 @@ export default class SMARTBox extends Component {
         const responseJson = response.json()
         return responseJson;
       }).then((bundle) => {
-        this.props.callback("prefetchedResources", bundle['entry']);
+        bundle['entry'].forEach((resource) => {
+          this.props.callbackList("prefetchedResources", resource);
+        });
         this.props.callback("request", request);
       });
     });

@@ -262,7 +262,6 @@ export default class RequestBox extends Component {
     if (resource.id) {
       var resourceId = resource.id;
       var resourceType = resource.resourceType;
-      console.log("ID:" + resourceId);
       value = (
         <div key={resourceId}>
           <span style={{ textTransform: "capitalize" }}>{resourceType}</span>:{" "}
@@ -309,6 +308,7 @@ export default class RequestBox extends Component {
                             patient={patient}
                             params = {params}
                             callback={this.updateStateElement}
+                            callbackList={this.updateStateList}
                             updatePrefetchCallback={
                               PrefetchTemplate.generateQueries
                             }
