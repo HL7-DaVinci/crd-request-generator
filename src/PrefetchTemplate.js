@@ -67,10 +67,10 @@ export class PrefetchTemplate {
       + "&_include=Encounter:location",
       COVERAGE_PREFETCH_QUERY);
 
-    prefetchMap.set("deviceRequestBundle", DEVICE_REQUEST_BUNDLE);
-    prefetchMap.set("medicationRequestBundle", MEDICATION_REQUEST_BUNDLE);
-    prefetchMap.set("nutritionOrderBundle", NUTRITION_ORDER_BUNDLE);
-    prefetchMap.set("serviceRequestBundle", SERVICE_REQUEST_BUNDLE);
+    prefetchMap.set("DeviceRequest", DEVICE_REQUEST_BUNDLE);
+    prefetchMap.set("MedicationRequest", MEDICATION_REQUEST_BUNDLE);
+    prefetchMap.set("MedicationDispense", NUTRITION_ORDER_BUNDLE);
+    prefetchMap.set("ServiceRequest", SERVICE_REQUEST_BUNDLE);
     prefetchMap.set("encounterBundle", ENCOUNTER_BUNDLE);
     console.log(prefetchMap);
 
@@ -80,7 +80,7 @@ export class PrefetchTemplate {
   static generatePramElementMap() {
     const paramElementMap = new Map();
     paramElementMap.set('context.draftOrders.DeviceRequest.id', ['id']);
-    paramElementMap.set('context.draftOrders.MedicationRequest.id', ['id']);
+    paramElementMap.set('context.medications.MedicationRequest.id', ['id']);
     paramElementMap.set('context.draftOrders.NutritionOrder.id', ['id']);
     paramElementMap.set('context.draftOrders.ServiceRequest.id', ['id']);
     paramElementMap.set('context.draftOrders.ontext.appointments.Appointment.id', ['id']);
@@ -100,7 +100,7 @@ export class PrefetchTemplate {
       for (var j = 0; j < parametersToFill.length; j++) {
         var unresolvedParameter = parametersToFill[j];
         var resolvedParameter = PrefetchTemplate.resolveParameter(unresolvedParameter, requestBundle);
-        var resolvedQuery = resolvedQuery.replace(unresolvedParameter, resolvedParameter);
+        var resolvedQuery = resolvedQuery.replace('{{' + unresolvedParameter + '}}', resolvedParameter);
       }
       resolvedQueries.push(resolvedQuery);
       console.log(resolvedQueries);
