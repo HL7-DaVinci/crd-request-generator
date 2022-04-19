@@ -11,7 +11,6 @@ import RequestBox from '../components/RequestBox/RequestBox';
 import buildRequest from '../util/buildRequest.js';
 import { types, headers, defaultValues } from '../util/data.js';
 import { createJwt, login, setupKeys } from '../util/auth';
-import {PrefetchTemplate} from '../PrefetchTemplate';
 
 export default class RequestBuilder extends Component {
     constructor(props) {
@@ -127,21 +126,21 @@ export default class RequestBuilder extends Component {
 
     }
 
-    submit_info(prefetch, request, patient, extraPrefetch, hook) {
+    submit_info(prefetch, request, patient, hook) {
         this.consoleLog("Initiating form submission", types.info);
         this.setState({patient});
         const hookConfig = {
             "includeConfig": this.state.includeConfig,
             "alternativeTherapy": this.state.alternativeTherapy
         }
-        let json_request = buildRequest(request, patient, this.state.ehrUrl, this.state.token, prefetch, this.state.sendPrefetch, extraPrefetch, hook, hookConfig);
+        let json_request = buildRequest(request, patient, this.state.ehrUrl, this.state.token, prefetch, this.state.sendPrefetch, hook, hookConfig);
         let cdsUrl = this.state.cdsUrl;
         if (hook === "order-sign") {
             cdsUrl = cdsUrl + "/" + this.state.orderSign;
         } else if (hook === "order-select") {
             cdsUrl = cdsUrl + "/" + this.state.orderSelect;
         } else {
-            this.consoleLog("ERROR: unknown hook type", hook);
+            this.consoleLog("ERROR: unknown hook type: '", hook, "'");
             return;
         }
         let baseUrl = this.state.baseUrl;

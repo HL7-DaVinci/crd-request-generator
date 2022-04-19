@@ -1,4 +1,3 @@
-
 // Prefetch Template Source:
 // https://build.fhir.org/ig/HL7/davinci-crd/hooks.html#prefetch
 export class PrefetchTemplate {
@@ -72,7 +71,6 @@ export class PrefetchTemplate {
     prefetchMap.set("MedicationDispense", NUTRITION_ORDER_BUNDLE);
     prefetchMap.set("ServiceRequest", SERVICE_REQUEST_BUNDLE);
     prefetchMap.set("encounterBundle", ENCOUNTER_BUNDLE);
-    console.log(prefetchMap);
 
     return prefetchMap;
   }

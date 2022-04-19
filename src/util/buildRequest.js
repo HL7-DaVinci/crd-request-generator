@@ -1,5 +1,5 @@
 
-export default function buildRequest(request, patient, ehrUrl, token, prefetch, includePrefetch, extraPrefetch, hook, hookConfig) {
+export default function buildRequest(request, patient, ehrUrl, token, prefetch, includePrefetch, hook, hookConfig) {
     const r4json = {
         "hookInstance": "d1577c69-dfbe-44ad-ba6d-3e05e953b2ea",
         "fhirServer": ehrUrl,
@@ -69,26 +69,11 @@ export default function buildRequest(request, patient, ehrUrl, token, prefetch, 
                 }
             }
         } else if(request.resourceType === 'MedicationRequest') {
-            if (extraPrefetch != null) {
-                r4json.prefetch = {
-                    "medicationRequestBundle": {
-                        "resourceType": "Bundle",
-                        "type": "collection",
-                        "entry": prefetch
-                    },
-                    "medicationStatementBundle": {
-                        "resourceType": "Bundle",
-                        "type": "collection",
-                        "entry": extraPrefetch
-                    }
-                }
-            } else {
-                r4json.prefetch = {
-                    "medicationRequestBundle": {
-                        "resourceType": "Bundle",
-                        "type": "collection",
-                        "entry": prefetch
-                    }
+            r4json.prefetch = {
+                "medicationRequestBundle": {
+                    "resourceType": "Bundle",
+                    "type": "collection",
+                    "entry": prefetch
                 }
             }
         } else if(request.resourceType === 'MedicationDispense') {
