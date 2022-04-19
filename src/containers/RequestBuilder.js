@@ -12,7 +12,6 @@ import buildRequest from '../util/buildRequest.js';
 import { types, headers, defaultValues } from '../util/data.js';
 import { createJwt, login, setupKeys } from '../util/auth';
 
-
 export default class RequestBuilder extends Component {
     constructor(props) {
         super(props);
@@ -130,7 +129,6 @@ export default class RequestBuilder extends Component {
     submit_info(prefetch, request, patient, extraPrefetch, hook) {
         this.consoleLog("Initiating form submission", types.info);
         this.setState({patient});
-        
         const hookConfig = {
             "includeConfig": this.state.includeConfig,
             "alternativeTherapy": this.state.alternativeTherapy
@@ -265,7 +263,13 @@ export default class RequestBuilder extends Component {
                 "display": "Alternative Therapy Cards Allowed",
                 "value": this.state.alternativeTherapy,
                 "key": "alternativeTherapy"
-            }
+            },
+            "prefetch": {
+              "type": "check",
+              "display": "Send Prefetch",
+              "value": this.state.prefetch,
+              "key": "prefetch"
+          }
         }
 
         return (
