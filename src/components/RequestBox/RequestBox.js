@@ -680,25 +680,25 @@ export default class RequestBox extends Component {
 
     if (!this.isOrderNotSelected()) {
       if (Object.keys(this.state.deviceRequest).length > 0) {
-        order = `${this.props.ehrUrl}/${this.state.deviceRequest.resourceType}/${this.state.deviceRequest.id}`;
+        order = `${this.state.deviceRequest.resourceType}/${this.state.deviceRequest.id}`;
 
         if (this.state.deviceRequest.insurance && this.state.deviceRequest.insurance.length > 0) {
-          coverage = `${this.props.ehrUrl}/${this.state.deviceRequest.insurance[0].reference}`;
+          coverage = `${this.state.deviceRequest.insurance[0].reference}`;
         }
       } else if (Object.keys(this.state.serviceRequest).length > 0) {
-        order = `${this.props.ehrUrl}/${this.state.serviceRequest.resourceType}/${this.state.serviceRequest.id}`;
+        order = `${this.state.serviceRequest.resourceType}/${this.state.serviceRequest.id}`;
 
         if (this.state.serviceRequest.insurance && this.state.serviceRequest.insurance.length > 0) {
-          coverage = `${this.props.ehrUrl}/${this.state.serviceRequest.insurance[0].reference}`;
+          coverage = `${this.state.serviceRequest.insurance[0].reference}`;
         }
       } else if (Object.keys(this.state.medicationRequest).length > 0) {
-        order = `${this.props.ehrUrl}/${this.state.medicationRequest.resourceType}/${this.state.medicationRequest.id}`;
+        order = `${this.state.medicationRequest.resourceType}/${this.state.medicationRequest.id}`;
 
         if (this.state.medicationRequest.insurance && this.state.medicationRequest.insurance.length > 0) {
-          coverage = `${this.props.ehrUrl}/${this.state.medicationRequest.insurance[0].reference}`;
+          coverage = `${this.state.medicationRequest.insurance[0].reference}`;
         }
       } else if (Object.keys(this.state.medicationDispense).length > 0) {
-        order = `${this.props.ehrUrl}/${this.state.medicationDispense.resourceType}/${this.state.medicationDispense.id}`;
+        order = `${this.state.medicationDispense.resourceType}/${this.state.medicationDispense.id}`;
       }
     }
 
@@ -711,7 +711,7 @@ export default class RequestBox extends Component {
     }
     
     if(Object.keys(this.state.response).length > 0) {
-      response = `${this.props.ehrUrl}/QuestionnaireResponse/${this.state.response.id}`;
+      response = `QuestionnaireResponse/${this.state.response.id}`;
     }
     
     if(order && response) {
@@ -807,7 +807,7 @@ export default class RequestBox extends Component {
           </div>
         </div>
         <button className={"submit-btn btn btn-class "} onClick={this.relaunch} disabled={disableLaunchDTR}>
-          Launch DTR
+          Relaunch DTR
         </button>
         <button className={"submit-btn btn btn-class "} onClick={this.submit} disabled={disableSendToCRD}>
           Submit to CRD
