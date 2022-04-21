@@ -523,6 +523,7 @@ export default class RequestBox extends Component {
           State: {this.state.patientState ? this.state.patientState : "N/A"}
         </div>
         {this.renderOtherInfo()}
+        {this.renderQRInfo()}
       </div>
     );
   }
@@ -553,6 +554,7 @@ export default class RequestBox extends Component {
       <div className="questionnaire-response">
         <div className="lower-border">
           <span style={{ fontWeight: "bold" }}>In Progress Form</span>
+          </div>
           <div className="info lower-border">Form: { qrResponse.questionnaire ? qrResponse.questionnaire : "N/A"}</div>
           <div className="info lower-border">
             Author: {qrResponse.author ? qrResponse.author.reference : "N/A"}
@@ -561,7 +563,6 @@ export default class RequestBox extends Component {
             Date: {qrResponse.authored ? qrResponse.authored : "N/A"}
           </div>
         </div>
-      </div>
     );
   }
 
@@ -803,7 +804,7 @@ export default class RequestBox extends Component {
               {this.renderPatientInfo()}
               {this.renderPrefetchedResources()}
             </div> 
-           <div>{this.renderQRInfo()}</div>   
+             
           </div>
         </div>
         <button className={"submit-btn btn btn-class "} onClick={this.relaunch} disabled={disableLaunchDTR}>
