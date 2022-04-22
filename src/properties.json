@@ -11,5 +11,7 @@
   "user": "user1",
   "password": "password",
   "public_keys": "http://localhost:3001/public_keys",
-  "alt_drug": true
+  "alt_drug": true, 
+  "launch_url": "http://localhost:3005/launch",
+  "response_expiration_days": 30
 }

@@ -6,6 +6,7 @@ import { defaultValues, shortNameMap } from "../../util/data";
 import { getAge } from "../../util/fhir";
 import _ from "lodash";
 import "./request.css";
+import axios from 'axios';
 
 export default class RequestBox extends Component {
   constructor(props) {
@@ -28,7 +29,8 @@ export default class RequestBox extends Component {
       insurance: {},
       medicationRequest: {},
       medicationDispense: {},
-      gatherCount: 0
+      gatherCount: 0,
+      response: {}
     };
 
     this.renderRequestResources = this.renderRequestResources.bind(this);
@@ -39,8 +41,10 @@ export default class RequestBox extends Component {
     this.renderResource = this.renderResource.bind(this);
     this.renderPrefetchedResources = this.renderPrefetchedResources.bind(this);
     this.renderError = this.renderError.bind(this);
+    this.buildLaunchLink = this.buildLaunchLink.bind(this);
   }
 
+  // TODO - see how to submit response for alternative therapy
   replaceRequestAndSubmit(request) {
     let resourceType = request.resourceType.toUpperCase();
     console.log("replaceRequestAndSubmit: " + request.resourceType);
@@ -60,7 +64,7 @@ export default class RequestBox extends Component {
     const prefetch = this.makePrefetch(request);
 
     // submit the CRD request
-    this.props.submitInfo(prefetch, request, this.state.patient, null, "order-sign");
+    this.props.submitInfo(prefetch, request, undefined, this.state.patient, null, "order-sign");
   }
 
   componentDidMount() {}
@@ -113,6 +117,7 @@ export default class RequestBox extends Component {
       this.props.submitInfo(
         this.makePrefetch(this.state.deviceRequest),
         this.state.deviceRequest,
+        this.state.response,
         this.state.patient,
         null,
         "order-sign"
@@ -121,6 +126,7 @@ export default class RequestBox extends Component {
       this.props.submitInfo(
         this.makePrefetch(this.state.serviceRequest),
         this.state.serviceRequest,
+        this.state.response,
         this.state.patient,
         null,
         "order-sign"
@@ -129,6 +135,7 @@ export default class RequestBox extends Component {
       this.props.submitInfo(
         this.makePrefetch(this.state.medicationRequest),
         this.state.medicationRequest,
+        this.state.response,
         this.state.patient,
         null,
         "order-sign"
@@ -137,6 +144,7 @@ export default class RequestBox extends Component {
       this.props.submitInfo(
         this.makePrefetch(this.state.medicationDispense),
         this.state.medicationDispense,
+        this.state.response,
         this.state.patient,
         null,
         "order-sign"
@@ -162,7 +170,8 @@ export default class RequestBox extends Component {
       coverage: {},
       serviceRequest: {},
       medicationRequest: {},
-      medicationDispense: {}
+      medicationDispense: {},
+      response: {}
     });
   };
 
@@ -172,7 +181,7 @@ export default class RequestBox extends Component {
     });
   }
 
-  checkIfGatherCompleted(client, request) {
+  checkIfGatherCompleted(client, request, response) {
     // decrement the gatherCount and prepare to send the order select if the gathers have finished
     this.setState({ gatherCount: (this.state.gatherCount - 1) })
     if (this.state.gatherCount === 0) {
@@ -193,13 +202,13 @@ export default class RequestBox extends Component {
           const prefetch = this.makePrefetch(request);
 
           // submit the OrderSelect hook CRD request
-          this.props.submitInfo(prefetch, request, this.state.patient, extraPrefetch, "order-select");
+          this.props.submitInfo(prefetch, request, response, this.state.patient, extraPrefetch, "order-select");
         });
       }
     }
   }
 
-  gatherDeviceRequestResources = (deviceRequest) => {
+  gatherDeviceRequestResources = (deviceRequest, response) => {
     const client = FHIR.client({
       serverUrl: this.props.ehrUrl,
       tokenResponse: {
@@ -232,7 +241,7 @@ export default class RequestBox extends Component {
               .then((result) => {
                 this.addReferencesToList(result.references);
               })
-              .finally((info) => { this.checkIfGatherCompleted(client, deviceRequest); });
+              .finally((info) => { this.checkIfGatherCompleted(client, deviceRequest, response); });
             this.setState({ coverage: ref });
           } else if (ref.resourceType === "Practitioner") {
             this.setState({ practitioner: ref });
@@ -257,7 +266,7 @@ export default class RequestBox extends Component {
       .finally((info) => { this.checkIfGatherCompleted(client, deviceRequest); });
   };
 
-  gatherServiceRequestResources = (serviceRequest) => {
+  gatherServiceRequestResources = (serviceRequest, response) => {
     const client = FHIR.client({
       serverUrl: this.props.ehrUrl,
       tokenResponse: {
@@ -290,7 +299,7 @@ export default class RequestBox extends Component {
               .then((result) => {
                 this.addReferencesToList(result.references);
               })
-              .finally((info) => { this.checkIfGatherCompleted(client, serviceRequest); });
+              .finally((info) => { this.checkIfGatherCompleted(client, serviceRequest, response); });
             this.setState({ coverage: ref });
           } else if (ref.resourceType === "Practitioner") {
             this.setState({ practitioner: ref });
@@ -315,7 +324,7 @@ export default class RequestBox extends Component {
       .finally((info) => { this.checkIfGatherCompleted(client, serviceRequest); });
   };
 
-  gatherMedicationRequestResources = (medicationRequest) => {
+  gatherMedicationRequestResources = (medicationRequest, response) => {
     const client = FHIR.client({
       serverUrl: this.props.ehrUrl,
       tokenResponse: {
@@ -346,7 +355,7 @@ export default class RequestBox extends Component {
               .then((result) => {
                 this.addReferencesToList(result.references);
               })
-              .finally((info) => { this.checkIfGatherCompleted(client, medicationRequest); });
+              .finally((info) => { this.checkIfGatherCompleted(client, medicationRequest, response); });
             this.setState({ coverage: ref });
           } else if (ref.resourceType === "Practitioner") {
             // keep track of whether gathering is completed
@@ -371,7 +380,7 @@ export default class RequestBox extends Component {
       .finally((info) => { this.checkIfGatherCompleted(client, medicationRequest); });
   };
 
-  gatherMedicationDispenseResources = (medicationDispense) => {
+  gatherMedicationDispenseResources = (medicationDispense, response) => {
     const client = FHIR.client({
       serverUrl: this.props.ehrUrl,
       tokenResponse: {
@@ -408,7 +417,7 @@ export default class RequestBox extends Component {
                 this.addReferencesToList(result.references);
                 this.addReferencesToList(result.data);
               })
-              .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense); });
+              .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense, response); });
           }
         });
 
@@ -438,15 +447,15 @@ export default class RequestBox extends Component {
                       .then((result) => {
                         this.addReferencesToList(result.references);
                       })
-                      .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense); });
+                      .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense, response); });
                   }
                 });
               })
-              .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense); });
+              .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense, response); });
           }
         }
       })
-      .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense); });
+      .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense, response); });
   };
 
   checkForReferences(client, resource, references) {
@@ -514,6 +523,7 @@ export default class RequestBox extends Component {
           State: {this.state.patientState ? this.state.patientState : "N/A"}
         </div>
         {this.renderOtherInfo()}
+        {this.renderQRInfo()}
       </div>
     );
   }
@@ -535,6 +545,24 @@ export default class RequestBox extends Component {
           Display: {this.state.display ? this.state.display : "N/A"}
         </div>
       </div>
+    );
+  }
+
+  renderQRInfo() {
+    const qrResponse = this.state.response;
+    return (
+      <div className="questionnaire-response">
+        <div className="lower-border">
+          <span style={{ fontWeight: "bold" }}>In Progress Form</span>
+          </div>
+          <div className="info lower-border">Form: { qrResponse.questionnaire ? qrResponse.questionnaire : "N/A"}</div>
+          <div className="info lower-border">
+            Author: {qrResponse.author ? qrResponse.author.reference : "N/A"}
+          </div>
+          <div className="info lower-border">
+            Date: {qrResponse.authored ? qrResponse.authored : "N/A"}
+          </div>
+        </div>
     );
   }
 
@@ -635,12 +663,94 @@ export default class RequestBox extends Component {
     );
   }
 
+  /**
+   * Relaunch DTR using the available context
+   */
+  relaunch = (e) => {
+    this.buildLaunchLink()
+      .then(link => {
+        //e.preventDefault();
+        window.open(link.url, "_blank");
+      });
+  }
+
+  buildLaunchLink() {
+    // build appContext and URL encode it
+    let appContext = "";
+    let order = undefined, coverage = undefined, response = undefined;
+
+    if (!this.isOrderNotSelected()) {
+      if (Object.keys(this.state.deviceRequest).length > 0) {
+        order = `${this.state.deviceRequest.resourceType}/${this.state.deviceRequest.id}`;
+
+        if (this.state.deviceRequest.insurance && this.state.deviceRequest.insurance.length > 0) {
+          coverage = `${this.state.deviceRequest.insurance[0].reference}`;
+        }
+      } else if (Object.keys(this.state.serviceRequest).length > 0) {
+        order = `${this.state.serviceRequest.resourceType}/${this.state.serviceRequest.id}`;
+
+        if (this.state.serviceRequest.insurance && this.state.serviceRequest.insurance.length > 0) {
+          coverage = `${this.state.serviceRequest.insurance[0].reference}`;
+        }
+      } else if (Object.keys(this.state.medicationRequest).length > 0) {
+        order = `${this.state.medicationRequest.resourceType}/${this.state.medicationRequest.id}`;
+
+        if (this.state.medicationRequest.insurance && this.state.medicationRequest.insurance.length > 0) {
+          coverage = `${this.state.medicationRequest.insurance[0].reference}`;
+        }
+      } else if (Object.keys(this.state.medicationDispense).length > 0) {
+        order = `${this.state.medicationDispense.resourceType}/${this.state.medicationDispense.id}`;
+      }
+    }
+
+    if(order) {
+      appContext += `order=${order}`
+
+      if(coverage) {
+        appContext += `&coverage=${coverage}`
+      }
+    }
+    
+    if(Object.keys(this.state.response).length > 0) {
+      response = `QuestionnaireResponse/${this.state.response.id}`;
+    }
+    
+    if(order && response) {
+      appContext += `&response=${response}`
+    } else if (!order && response) {
+      appContext += `response=${response}`
+    } 
+
+    const link = {
+      appContext: encodeURIComponent(appContext),
+      type: "smart",
+      url: this.props.launchUrl
+    }
+
+    let linkCopy = Object.assign({}, link);
+   
+    return this.props.retrieveLaunchContext(
+      linkCopy, this.props.fhirAccessToken,
+        this.state.patient.id, this.props.fhirServerUrl, this.props.fhirVersion
+    ).then((result) => {
+        linkCopy = result;
+        return linkCopy;
+    });
+  }
+
+  isOrderNotSelected() {
+    return Object.keys(this.state.deviceRequest).length === 0 && Object.keys(this.state.serviceRequest).length === 0
+      && Object.keys(this.state.medicationRequest).length === 0 && Object.keys(this.state.medicationDispense).length === 0;
+  }
+
   render() {
     const params = {};
     params['serverUrl'] = this.props.ehrUrl;
     if (this.props.access_token) {
         params['tokenResponse'] = {access_token: this.props.access_token.access_token};
     }
+    const disableSendToCRD = this.isOrderNotSelected();
+    const disableLaunchDTR = this.isOrderNotSelected() && Object.keys(this.state.response).length === 0;
     return (
       <div>
         <div className="request">
@@ -672,6 +782,7 @@ export default class RequestBox extends Component {
                             clearCallback={this.clearState}
                             ehrUrl={this.props.ehrUrl}
                             options={this.state.codeValues}
+                            responseExpirationDays={this.props.responseExpirationDays}
                           />
                         );
                       })}
@@ -692,11 +803,15 @@ export default class RequestBox extends Component {
             <div>
               {this.renderPatientInfo()}
               {this.renderPrefetchedResources()}
-            </div>
+            </div> 
+             
           </div>
         </div>
-        <button className={"submit-btn btn btn-class "} onClick={this.submit}>
-          Submit
+        <button className={"submit-btn btn btn-class "} onClick={this.relaunch} disabled={disableLaunchDTR}>
+          Relaunch DTR
+        </button>
+        <button className={"submit-btn btn btn-class "} onClick={this.submit} disabled={disableSendToCRD}>
+          Submit to CRD
         </button>
       </div>
     );
