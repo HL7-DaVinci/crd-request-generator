@@ -64,7 +64,7 @@ export default class RequestBox extends Component {
     const prefetch = this.makePrefetch(request);
 
     // submit the CRD request
-    this.props.submitInfo(prefetch, request, undefined, this.state.patient, null, "order-sign");
+    this.props.submitInfo(prefetch, request, this.state.patient, null, "order-sign");
   }
 
   componentDidMount() {}
@@ -117,7 +117,6 @@ export default class RequestBox extends Component {
       this.props.submitInfo(
         this.makePrefetch(this.state.deviceRequest),
         this.state.deviceRequest,
-        this.state.response,
         this.state.patient,
         null,
         "order-sign"
@@ -126,7 +125,6 @@ export default class RequestBox extends Component {
       this.props.submitInfo(
         this.makePrefetch(this.state.serviceRequest),
         this.state.serviceRequest,
-        this.state.response,
         this.state.patient,
         null,
         "order-sign"
@@ -135,7 +133,6 @@ export default class RequestBox extends Component {
       this.props.submitInfo(
         this.makePrefetch(this.state.medicationRequest),
         this.state.medicationRequest,
-        this.state.response,
         this.state.patient,
         null,
         "order-sign"
@@ -144,7 +141,6 @@ export default class RequestBox extends Component {
       this.props.submitInfo(
         this.makePrefetch(this.state.medicationDispense),
         this.state.medicationDispense,
-        this.state.response,
         this.state.patient,
         null,
         "order-sign"
@@ -181,7 +177,7 @@ export default class RequestBox extends Component {
     });
   }
 
-  checkIfGatherCompleted(client, request, response) {
+  checkIfGatherCompleted(client, request) {
     // decrement the gatherCount and prepare to send the order select if the gathers have finished
     this.setState({ gatherCount: (this.state.gatherCount - 1) })
     if (this.state.gatherCount === 0) {
@@ -202,13 +198,13 @@ export default class RequestBox extends Component {
           const prefetch = this.makePrefetch(request);
 
           // submit the OrderSelect hook CRD request
-          this.props.submitInfo(prefetch, request, response, this.state.patient, extraPrefetch, "order-select");
+          this.props.submitInfo(prefetch, request, this.state.patient, extraPrefetch, "order-select");
         });
       }
     }
   }
 
-  gatherDeviceRequestResources = (deviceRequest, response) => {
+  gatherDeviceRequestResources = (deviceRequest) => {
     const client = FHIR.client({
       serverUrl: this.props.ehrUrl,
       tokenResponse: {
@@ -241,7 +237,7 @@ export default class RequestBox extends Component {
               .then((result) => {
                 this.addReferencesToList(result.references);
               })
-              .finally((info) => { this.checkIfGatherCompleted(client, deviceRequest, response); });
+              .finally((info) => { this.checkIfGatherCompleted(client, deviceRequest); });
             this.setState({ coverage: ref });
           } else if (ref.resourceType === "Practitioner") {
             this.setState({ practitioner: ref });
@@ -266,7 +262,7 @@ export default class RequestBox extends Component {
       .finally((info) => { this.checkIfGatherCompleted(client, deviceRequest); });
   };
 
-  gatherServiceRequestResources = (serviceRequest, response) => {
+  gatherServiceRequestResources = (serviceRequest) => {
     const client = FHIR.client({
       serverUrl: this.props.ehrUrl,
       tokenResponse: {
@@ -299,7 +295,7 @@ export default class RequestBox extends Component {
               .then((result) => {
                 this.addReferencesToList(result.references);
               })
-              .finally((info) => { this.checkIfGatherCompleted(client, serviceRequest, response); });
+              .finally((info) => { this.checkIfGatherCompleted(client, serviceRequest); });
             this.setState({ coverage: ref });
           } else if (ref.resourceType === "Practitioner") {
             this.setState({ practitioner: ref });
@@ -324,7 +320,7 @@ export default class RequestBox extends Component {
       .finally((info) => { this.checkIfGatherCompleted(client, serviceRequest); });
   };
 
-  gatherMedicationRequestResources = (medicationRequest, response) => {
+  gatherMedicationRequestResources = (medicationRequest) => {
     const client = FHIR.client({
       serverUrl: this.props.ehrUrl,
       tokenResponse: {
@@ -355,7 +351,7 @@ export default class RequestBox extends Component {
               .then((result) => {
                 this.addReferencesToList(result.references);
               })
-              .finally((info) => { this.checkIfGatherCompleted(client, medicationRequest, response); });
+              .finally((info) => { this.checkIfGatherCompleted(client, medicationRequest); });
             this.setState({ coverage: ref });
           } else if (ref.resourceType === "Practitioner") {
             // keep track of whether gathering is completed
@@ -380,7 +376,7 @@ export default class RequestBox extends Component {
       .finally((info) => { this.checkIfGatherCompleted(client, medicationRequest); });
   };
 
-  gatherMedicationDispenseResources = (medicationDispense, response) => {
+  gatherMedicationDispenseResources = (medicationDispense) => {
     const client = FHIR.client({
       serverUrl: this.props.ehrUrl,
       tokenResponse: {
@@ -417,7 +413,7 @@ export default class RequestBox extends Component {
                 this.addReferencesToList(result.references);
                 this.addReferencesToList(result.data);
               })
-              .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense, response); });
+              .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense); });
           }
         });
 
@@ -447,15 +443,15 @@ export default class RequestBox extends Component {
                       .then((result) => {
                         this.addReferencesToList(result.references);
                       })
-                      .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense, response); });
+                      .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense); });
                   }
                 });
               })
-              .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense, response); });
+              .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense); });
           }
         }
       })
-      .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense, response); });
+      .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense); });
   };
 
   checkForReferences(client, resource, references) {
