@@ -17,7 +17,6 @@ export default class RequestBox extends Component {
       patientList: [],
       patient: {},
       practitioner: {},
-      deviceRequest: {},
       coverage: {},
       prefetchedResources: [],
       codeValues: defaultValues,
@@ -86,11 +85,7 @@ export default class RequestBox extends Component {
     this.setState({
       prefetchedResources: [],
       practitioner: {},
-      deviceRequest: {},
       coverage: {},
-      serviceRequest: {},
-      medicationRequest: {},
-      medicationDispense: {},
       response: {}
     });
   };
@@ -259,26 +254,11 @@ export default class RequestBox extends Component {
     let order = undefined, coverage = undefined, response = undefined;
 
     if (!this.isOrderNotSelected()) {
-      if (Object.keys(this.state.deviceRequest).length > 0) {
-        order = `${this.state.deviceRequest.resourceType}/${this.state.deviceRequest.id}`;
-
-        if (this.state.deviceRequest.insurance && this.state.deviceRequest.insurance.length > 0) {
-          coverage = `${this.state.deviceRequest.insurance[0].reference}`;
+      if (Object.keys(this.state.request).length > 0) {
+        order = `${this.state.request.resourceType}/${this.state.request.id}`;
+        if (this.state.request.insurance && this.state.request.insurance.length > 0) {
+          coverage = `${this.state.request.insurance[0].reference}`;
         }
-      } else if (Object.keys(this.state.serviceRequest).length > 0) {
-        order = `${this.state.serviceRequest.resourceType}/${this.state.serviceRequest.id}`;
-
-        if (this.state.serviceRequest.insurance && this.state.serviceRequest.insurance.length > 0) {
-          coverage = `${this.state.serviceRequest.insurance[0].reference}`;
-        }
-      } else if (Object.keys(this.state.medicationRequest).length > 0) {
-        order = `${this.state.medicationRequest.resourceType}/${this.state.medicationRequest.id}`;
-
-        if (this.state.medicationRequest.insurance && this.state.medicationRequest.insurance.length > 0) {
-          coverage = `${this.state.medicationRequest.insurance[0].reference}`;
-        }
-      } else if (Object.keys(this.state.medicationDispense).length > 0) {
-        order = `${this.state.medicationDispense.resourceType}/${this.state.medicationDispense.id}`;
       }
     }
 
@@ -318,8 +298,7 @@ export default class RequestBox extends Component {
   }
 
   isOrderNotSelected() {
-    return Object.keys(this.state.deviceRequest).length === 0 && Object.keys(this.state.serviceRequest).length === 0
-      && Object.keys(this.state.medicationRequest).length === 0 && Object.keys(this.state.medicationDispense).length === 0;
+    return Object.keys(this.state.request).length === 0;
   }
 
   render() {
