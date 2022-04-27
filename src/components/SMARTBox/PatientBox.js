@@ -13,7 +13,9 @@ export default class SMARTBox extends Component {
       deviceRequests: {},
       medicationRequests: {},
       serviceRequests: {},
-      medicationDispenses: {}
+      medicationDispenses: {},
+      response: "none",
+      questionnaireResponses: {},
     };
 
     this.handleRequestChange = this.handleRequestChange.bind(this);
@@ -24,7 +26,9 @@ export default class SMARTBox extends Component {
     this.getMedicationRequest = this.getMedicationRequest.bind(this);
     this.getMedicationDispense = this.getMedicationDispense.bind(this);
     this.getRequests = this.getRequests.bind(this);
-
+    this.getResponses = this.getResponses.bind(this);
+    this.makeQROption = this.makeQROption.bind(this);
+    this.handleResponseChange = this.handleResponseChange.bind(this);
   }
 
   getCoding(request) {
@@ -74,18 +78,28 @@ export default class SMARTBox extends Component {
     this.props.callback("patient", patient);
     this.props.callback("openPatient", false);
     this.props.clearCallback();
-    console.log(this.state.request);
-    const request = JSON.parse(this.state.request);
-    if (request.resourceType === "DeviceRequest" || request.resourceType === "ServiceRequest" || request.resourceType === "MedicationRequest" || request.resourceType === "MedicationDispense") {
-      this.updatePrefetchRequest(request);
-    } else {
-      this.props.clearCallback();
+    if(this.state.request !== "none" ) {
+      const request = JSON.parse(this.state.request);
+      if (request.resourceType === "DeviceRequest" || request.resourceType === "ServiceRequest" || request.resourceType === "MedicationRequest" || request.resourceType === "MedicationDispense") {
+        this.updatePrefetchRequest(request);
+      } else {
+        this.props.clearCallback();
+      }
+    }
+    
+    if(this.state.response !== "none") {
+      const response = JSON.parse(this.state.response);
+      this.updateQRResponse(patient, response);
     }
   }
 
-  updateServiceRequest(patient, serviceRequest) {
+  updateQRResponse(patient, response) {
+    this.props.callback("response", response);
+  }
+
+  updateServiceRequest(patient, serviceRequest, response) {
     this.props.callback("serviceRequest", serviceRequest);
-    this.props.updateServiceRequestCallback(serviceRequest);
+    this.props.updateServiceRequestCallback(serviceRequest, response);
     const coding = this.getCoding(serviceRequest);
     const code = coding.code;
     const system = coding.system;
@@ -150,98 +164,6 @@ export default class SMARTBox extends Component {
     });
   }
 
-  updateMedicationRequest(patient, medicationRequest) {
-    this.props.callback("medicationRequest", medicationRequest);
-    this.props.updateMedicationRequestCallback(medicationRequest);
-    const coding = this.getCoding(medicationRequest);
-    const code = coding.code;
-    const system = coding.system;
-    const text = coding.display;
-    this.props.callback("code", code);
-    this.props.callback("codeSystem", system);
-    this.props.callback("display", text);
-    if (
-      this.props.options.filter((e) => {
-        return e.value === code && e.codeSystem === system;
-      }).length === 0
-    ) {
-      this.props.callback("codeValues", [
-        { key: text, codeSystem: system, value: code },
-        ...this.props.options,
-      ]);
-    }
-    if (patient.address && patient.address[0].state) {
-      this.props.callback("patientState", patient.address[0].state);
-    } else {
-      this.props.callback("patientState", "");
-    }
-    if (medicationRequest.requester) {
-      if (medicationRequest.requester.reference) {
-        fetch(`${this.props.ehrUrl}/${medicationRequest.requester.reference}`, {
-          method: "GET",
-        })
-          .then((response) => {
-            return response.json();
-          })
-          .then((json) => {
-            if (json.address && json.address[0].state) {
-              this.props.callback("practitionerState", json.address[0].state);
-            } else {
-              this.props.callback("practitionerState", "");
-            }
-          });
-      }
-    } else {
-      this.props.callback("practitionerState", "");
-    }
-  }
-
-  updateMedicationDispense(patient, medicationDispense) {
-    this.props.callback("medicationDispense", medicationDispense);
-    this.props.updateMedicationDispenseCallback(medicationDispense);
-    const coding = this.getCoding(medicationDispense);
-    const code = coding.code;
-    const system = coding.system;
-    const text = coding.display;
-    this.props.callback("code", code);
-    this.props.callback("codeSystem", system);
-    this.props.callback("display", text);
-    if (
-      this.props.options.filter((e) => {
-        return e.value === code && e.codeSystem === system;
-      }).length === 0
-    ) {
-      this.props.callback("codeValues", [
-        { key: text, codeSystem: system, value: code },
-        ...this.props.options,
-      ]);
-    }
-    if (patient.address && patient.address[0].state) {
-      this.props.callback("patientState", patient.address[0].state);
-    } else {
-      this.props.callback("patientState", "");
-    }
-    if (medicationDispense.performer) {
-      if (medicationDispense.performer[0].actor.reference) {
-        fetch(`${this.props.ehrUrl}/${medicationDispense.performer[0].actor.reference}`, {
-          method: "GET",
-        })
-          .then((response) => {
-            return response.json();
-          })
-          .then((json) => {
-            if (json.address && json.address[0].state) {
-              this.props.callback("practitionerState", json.address[0].state);
-            } else {
-              this.props.callback("practitionerState", "");
-            }
-          });
-      }
-    } else {
-      this.props.callback("practitionerState", "");
-    }
-  }
-
   getDeviceRequest(patientId, client) {
     client
       .request(`DeviceRequest?subject=Patient/${patientId}`, {
@@ -300,7 +222,20 @@ export default class SMARTBox extends Component {
       let coding = this.getCoding(request);
       //console.log(request.resourceType + " for code " + coding.code + " selected");
       this.setState({
-        request: data.value
+        request: data.value,
+        response: "none"
+      });
+    }
+  }
+
+  handleResponseChange(e, data) {
+    if (data.value === "none") {
+      this.setState({
+        response: "none"
+      });
+    } else { 
+      this.setState({
+        response: data.value
       });
     }
   }
@@ -316,6 +251,41 @@ export default class SMARTBox extends Component {
     this.getMedicationDispense(patientId, client);
   }
 
+  /**
+   * Retrieve QuestionnaireResponse 
+   */
+  getResponses() {
+    const client = FHIR.client(
+      this.props.params
+    );
+    const patientId = this.props.patient.id;
+
+    let updateDate = new Date();
+    updateDate.setDate(updateDate.getDate() - this.props.responseExpirationDays);
+    client
+      .request(`QuestionnaireResponse?_lastUpdated=gt${updateDate.toISOString().split('T')[0]}&status=in-progress&subject=Patient/${patientId}`, {
+        resolveReferences: ["subject"],
+        graph: false,
+        flat: true,
+      })
+      .then((result) => {
+        this.setState({ questionnaireResponses: result });
+      });
+  }
+
+  makeQROption(qr, options) {
+    const display = `${qr.questionnaire}: created at ${qr.authored}`;
+    let option = {
+      key: qr.id,
+      text: display, 
+      value: JSON.stringify(qr),
+      content: (
+        <Header content={"QuestionnaireResponse"} subheader={display} />
+      )
+    }
+    options.push(option);
+  }
+
   render() {
     const patient = this.props.patient;
     let name = "";
@@ -327,6 +297,7 @@ export default class SMARTBox extends Component {
 
     // add all of the requests to the list of options
     let options = []
+    let responseOptions = [];
     let returned = false;
     if (this.state.deviceRequests.data) {
       returned = true;
@@ -350,6 +321,11 @@ export default class SMARTBox extends Component {
       this.state.medicationDispenses.data.map((e) => {
       this.makeOption(e, options);
     })};
+
+    if(this.state.questionnaireResponses.data) {
+      returned = true;
+      this.state.questionnaireResponses.data.map(qr => this.makeQROption(qr, responseOptions));
+    }
     
     let noResults = 'No results found.'
     if(!returned) {
@@ -394,6 +370,19 @@ export default class SMARTBox extends Component {
               noResultsMessage={noResults}
               onChange={this.handleRequestChange}
               onOpen={this.getRequests}
+            />
+          </div>
+          <div className="request-info">
+            <span style={{ fontWeight: "bold", marginRight: "5px" }}>
+              In Progress Form:
+            </span>
+            <Dropdown 
+              search searchInput={{ type: 'text' }}
+              selection fluid options={responseOptions} 
+              placeholder='Choose an option' 
+              noResultsMessage={noResults}
+              onChange={this.handleResponseChange}
+              onOpen={this.getResponses}
             />
           </div>
         </div>
