@@ -25,8 +25,7 @@ export default class RequestBox extends Component {
       codeSystem: null,
       display: null,
       request: {},
-      gatherCount: 0
-      insurance: {},
+      gatherCount: 0,
       response: {}
     };
 
