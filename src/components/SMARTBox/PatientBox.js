@@ -97,6 +97,20 @@ export default class SMARTBox extends Component {
   }
 
   updatePrefetchRequest(request) {
+    // Extract relevant coverage ids.
+    const relevantCoverages = [];
+    if (request.insurance) {
+      request.insurance.forEach((reference) => {
+        if (reference.reference) {
+          const referenceId = reference.reference.split("/");
+          relevantCoverages.push(referenceId[referenceId.length-1]);
+        } else if (reference) {
+          const referenceId = reference.split("/");
+          relevantCoverages.push(referenceId[referenceId.length-1]);
+        }
+      });
+    }
+    console.log("JKJK:" + relevantCoverages);
     this.props.callback(request.resourceType, request);
     const queries = this.props.updatePrefetchCallback(request.resourceType, request);
     console.log("Queries: " + queries);
@@ -109,16 +123,23 @@ export default class SMARTBox extends Component {
         const responseJson = response.json()
         return responseJson;
       }).then((bundle) => {
-        bundle['entry'].forEach((resource) => {
-          this.props.callbackList("prefetchedResources", resource);
+        bundle['entry'].forEach((fullResource) => {
+          // Ignore extraneous coverage resources.
+          const resource = fullResource.resource;
+          console.log(JSON.stringify(resource));
+          if (resource.resourceType != "Coverage"
+              || (relevantCoverages.length > 0
+              && relevantCoverages.includes(resource.id))) {
+            this.props.callbackList("prefetchedResources", fullResource);
+          }
         });
-        this.props.callback("request", request);
-        const coding = this.getCoding(request);
-        this.props.callback("code", coding.code);
-        this.props.callback("codeSystem", coding.system);
-        this.props.callback("display", coding.display);
       });
     });
+    this.props.callback("request", request);
+    const coding = this.getCoding(request);
+    this.props.callback("code", coding.code);
+    this.props.callback("codeSystem", coding.system);
+    this.props.callback("display", coding.display);
   }
 
   getDeviceRequest(patientId, client) {
@@ -180,6 +201,9 @@ export default class SMARTBox extends Component {
       //console.log(request.resourceType + " for code " + coding.code + " selected");
       this.setState({
         request: data.value,
+        code: coding.code,
+        system: coding.system,
+        display: coding.display,
         response: "none"
       });
     }
