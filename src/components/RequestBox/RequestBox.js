@@ -16,8 +16,6 @@ export default class RequestBox extends Component {
       openPatient: false,
       patientList: [],
       patient: {},
-      practitioner: {},
-      coverage: {},
       prefetchedResources: [],
       codeValues: defaultValues,
       code: null,

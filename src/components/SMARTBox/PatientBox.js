@@ -37,9 +37,8 @@ export default class SMARTBox extends Component {
       code = request.codeCodeableConcept.coding[0];
     } else if (request.resourceType === "ServiceRequest") {
       code = request.code.coding[0];
-    } else if (request.resourceType === "MedicationRequest") {
-      code = request.medicationCodeableConcept.coding[0];
-    } else if (request.resourceType === "MedicationDispense") {
+    } else if (request.resourceType === "MedicationRequest"
+        || request.resourceType === "MedicationDispense") {
       code = request.medicationCodeableConcept.coding[0];
     }
     if (code) {
@@ -97,52 +96,6 @@ export default class SMARTBox extends Component {
     this.props.callback("response", response);
   }
 
-  updateServiceRequest(patient, serviceRequest, response) {
-    this.props.callback("serviceRequest", serviceRequest);
-    this.props.updateServiceRequestCallback(serviceRequest, response);
-    const coding = this.getCoding(serviceRequest);
-    const code = coding.code;
-    const system = coding.system;
-    const text = coding.display;
-    this.props.callback("code", code);
-    this.props.callback("codeSystem", system);
-    this.props.callback("display", text);
-    if (
-      this.props.options.filter((e) => {
-        return e.value === code && e.codeSystem === system;
-      }).length === 0
-    ) {
-      this.props.callback("codeValues", [
-        { key: text, codeSystem: system, value: code },
-        ...this.props.options,
-      ]);
-    }
-    if (patient.address && patient.address[0].state) {
-      this.props.callback("patientState", patient.address[0].state);
-    } else {
-      this.props.callback("patientState", "");
-    }
-    if (serviceRequest.performer) {
-      if (serviceRequest.performer[0].reference) {
-        fetch(`${this.props.ehrUrl}/${serviceRequest.performer[0].reference}`, {
-          method: "GET",
-        })
-          .then((response) => {
-            return response.json();
-          })
-          .then((json) => {
-            if (json.address && json.address[0].state) {
-              this.props.callback("practitionerState", json.address[0].state);
-            } else {
-              this.props.callback("practitionerState", "");
-            }
-          });
-      }
-    } else {
-      this.props.callback("practitionerState", "");
-    }
-  }
-
   updatePrefetchRequest(request) {
     this.props.callback(request.resourceType, request);
     const queries = this.props.updatePrefetchCallback(request.resourceType, request);
@@ -160,6 +113,10 @@ export default class SMARTBox extends Component {
           this.props.callbackList("prefetchedResources", resource);
         });
         this.props.callback("request", request);
+        const coding = this.getCoding(request);
+        this.props.callback("code", coding.code);
+        this.props.callback("codeSystem", coding.system);
+        this.props.callback("display", coding.display);
       });
     });
   }
