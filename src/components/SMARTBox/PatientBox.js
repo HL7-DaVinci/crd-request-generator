@@ -110,7 +110,6 @@ export default class SMARTBox extends Component {
         }
       });
     }
-    console.log("JKJK:" + relevantCoverages);
     this.props.callback(request.resourceType, request);
     const queries = this.props.updatePrefetchCallback(request.resourceType, request);
     console.log("Queries: " + queries);
@@ -126,7 +125,6 @@ export default class SMARTBox extends Component {
         bundle['entry'].forEach((fullResource) => {
           // Ignore extraneous coverage resources.
           const resource = fullResource.resource;
-          console.log(JSON.stringify(resource));
           if (resource.resourceType != "Coverage"
               || (relevantCoverages.length > 0
               && relevantCoverages.includes(resource.id))) {
