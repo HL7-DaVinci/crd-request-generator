@@ -28,6 +28,16 @@ export class PrefetchTemplate {
       + "&_include:iterate=PractitionerRole:practitioner",
       COVERAGE_PREFETCH_QUERY);
 
+    const MEDICATION_DISPENSE_BUNDLE = new PrefetchTemplate(
+      "MedicationDispense?_id={{context.medications.MedicationDispense.id}}"
+      + "&_include=MedicationDispense:patient"
+      + "&_include=MedicationDispense:intended-dispenser"
+      + "&_include=MedicationDispense:requester:PractitionerRole"
+      + "&_include=MedicationDispense:medication"
+      + "&_include:iterate=PractitionerRole:organization"
+      + "&_include:iterate=PractitionerRole:practitioner",
+      COVERAGE_PREFETCH_QUERY);
+
     const NUTRITION_ORDER_BUNDLE = new PrefetchTemplate(
       "NutritionOrder?_id={{context.draftOrders.NutritionOrder.id}}"
       + "&_include=NutritionOrder:patient"
@@ -68,7 +78,7 @@ export class PrefetchTemplate {
 
     prefetchMap.set("DeviceRequest", DEVICE_REQUEST_BUNDLE);
     prefetchMap.set("MedicationRequest", MEDICATION_REQUEST_BUNDLE);
-    prefetchMap.set("MedicationDispense", NUTRITION_ORDER_BUNDLE);
+    prefetchMap.set("MedicationDispense", MEDICATION_DISPENSE_BUNDLE);
     prefetchMap.set("ServiceRequest", SERVICE_REQUEST_BUNDLE);
     prefetchMap.set("encounterBundle", ENCOUNTER_BUNDLE);
 
@@ -79,6 +89,7 @@ export class PrefetchTemplate {
     const paramElementMap = new Map();
     paramElementMap.set('context.draftOrders.DeviceRequest.id', ['id']);
     paramElementMap.set('context.medications.MedicationRequest.id', ['id']);
+    paramElementMap.set('context.medications.MedicationDispense.id', ['id']);
     paramElementMap.set('context.draftOrders.NutritionOrder.id', ['id']);
     paramElementMap.set('context.draftOrders.ServiceRequest.id', ['id']);
     paramElementMap.set('context.draftOrders.ontext.appointments.Appointment.id', ['id']);
