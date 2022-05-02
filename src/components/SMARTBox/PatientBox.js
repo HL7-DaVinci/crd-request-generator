@@ -97,19 +97,6 @@ export default class SMARTBox extends Component {
   }
 
   updatePrefetchRequest(request) {
-    // Extract relevant coverage ids.
-    const relevantCoverages = [];
-    if (request.insurance) {
-      request.insurance.forEach((reference) => {
-        if (reference.reference) {
-          const referenceId = reference.reference.split("/");
-          relevantCoverages.push(referenceId[referenceId.length-1]);
-        } else if (reference) {
-          const referenceId = reference.split("/");
-          relevantCoverages.push(referenceId[referenceId.length-1]);
-        }
-      });
-    }
     this.props.callback(request.resourceType, request);
     const queries = this.props.updatePrefetchCallback(request.resourceType, request);
     console.log("Queries: " + queries);
@@ -123,13 +110,7 @@ export default class SMARTBox extends Component {
         return responseJson;
       }).then((bundle) => {
         bundle['entry'].forEach((fullResource) => {
-          // Ignore extraneous coverage resources.
-          const resource = fullResource.resource;
-          if (resource.resourceType != "Coverage"
-              || (relevantCoverages.length > 0
-              && relevantCoverages.includes(resource.id))) {
-            this.props.callbackList("prefetchedResources", fullResource);
-          }
+          this.props.callbackList("prefetchedResources", fullResource);
         });
       });
     });

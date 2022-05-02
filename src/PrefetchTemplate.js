@@ -6,7 +6,7 @@ export class PrefetchTemplate {
 
     const prefetchMap = new Map();
 
-    const COVERAGE_PREFETCH_QUERY = "Coverage?_member={{context.patientId}}";
+    const COVERAGE_PREFETCH_QUERY = "Coverage?patient={{context.patientId}}";
 
     const DEVICE_REQUEST_BUNDLE = new PrefetchTemplate(
       "DeviceRequest?_id={{context.draftOrders.DeviceRequest.id}}"
@@ -58,7 +58,6 @@ export class PrefetchTemplate {
       COVERAGE_PREFETCH_QUERY);
 
     const APPOINTMENT_BUNDLE = new PrefetchTemplate(
-      "appointmentBundle",
       "Appointment?_id={{context.appointments.Appointment.id}}"
       + "&_include=Appointment:patient"
       + "&_include=Appointment:practitioner:PractitionerRole"
@@ -68,7 +67,6 @@ export class PrefetchTemplate {
       COVERAGE_PREFETCH_QUERY);
 
     const ENCOUNTER_BUNDLE = new PrefetchTemplate(
-      "",
       "Encounter?_id={{context.encounterId}}"
       + "&_include=Encounter:patient"
       + "&_include=Encounter:service-provider"
@@ -85,7 +83,7 @@ export class PrefetchTemplate {
     return prefetchMap;
   }
 
-  static generatePramElementMap() {
+  static generateParamElementMap() {
     const paramElementMap = new Map();
     paramElementMap.set('context.draftOrders.DeviceRequest.id', ['id']);
     paramElementMap.set('context.medications.MedicationRequest.id', ['id']);
@@ -153,4 +151,4 @@ export class PrefetchTemplate {
 }
 
 const prefetchMap = PrefetchTemplate.generatePrefetchMap();
-const paramElementMap = PrefetchTemplate.generatePramElementMap();
+const paramElementMap = PrefetchTemplate.generateParamElementMap();

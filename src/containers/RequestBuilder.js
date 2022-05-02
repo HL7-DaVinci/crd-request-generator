@@ -337,11 +337,11 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
                 "value": this.state.alternativeTherapy,
                 "key": "alternativeTherapy"
             },
-            "prefetch": {
+            "sendPrefetch": {
               "type": "check",
               "display": "Send Prefetch",
               "value": this.state.sendPrefetch,
-              "key": "prefetch"
+              "key": "sendPrefetch"
           }
         }
 
