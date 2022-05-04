@@ -6,7 +6,8 @@ export class PrefetchTemplate {
 
     const prefetchMap = new Map();
 
-    const COVERAGE_PREFETCH_QUERY = "Coverage?patient={{context.patientId}}";
+    const COVERAGE_PREFETCH_QUERY = new PrefetchTemplate(
+      "Coverage?patient={{context.patientId}}");
 
     const DEVICE_REQUEST_BUNDLE = new PrefetchTemplate(
       "DeviceRequest?_id={{context.draftOrders.DeviceRequest.id}}"
@@ -15,8 +16,7 @@ export class PrefetchTemplate {
       + "&_include=DeviceRequest:requester"
       + "&_include=DeviceRequest:device"
       + "&_include:iterate=PractitionerRole:organization"
-      + "&_include:iterate=PractitionerRole:practitioner",
-      COVERAGE_PREFETCH_QUERY);
+      + "&_include:iterate=PractitionerRole:practitioner");
 
     const MEDICATION_REQUEST_BUNDLE = new PrefetchTemplate(
       "MedicationRequest?_id={{context.medications.MedicationRequest.id}}"
@@ -25,8 +25,7 @@ export class PrefetchTemplate {
       + "&_include=MedicationRequest:requester:PractitionerRole"
       + "&_include=MedicationRequest:medication"
       + "&_include:iterate=PractitionerRole:organization"
-      + "&_include:iterate=PractitionerRole:practitioner",
-      COVERAGE_PREFETCH_QUERY);
+      + "&_include:iterate=PractitionerRole:practitioner");
 
     const MEDICATION_DISPENSE_BUNDLE = new PrefetchTemplate(
       "MedicationDispense?_id={{context.medications.MedicationDispense.id}}"
@@ -35,8 +34,7 @@ export class PrefetchTemplate {
       + "&_include=MedicationDispense:requester:PractitionerRole"
       + "&_include=MedicationDispense:medication"
       + "&_include:iterate=PractitionerRole:organization"
-      + "&_include:iterate=PractitionerRole:practitioner",
-      COVERAGE_PREFETCH_QUERY);
+      + "&_include:iterate=PractitionerRole:practitioner");
 
     const NUTRITION_ORDER_BUNDLE = new PrefetchTemplate(
       "NutritionOrder?_id={{context.draftOrders.NutritionOrder.id}}"
@@ -54,31 +52,31 @@ export class PrefetchTemplate {
       + "&_include=ServiceRequest:performer"
       + "&_include=ServiceRequest:requester"
       + "&_include:iterate=PractitionerRole:organization"
-      + "&_include:iterate=PractitionerRole:practitioner",
-      COVERAGE_PREFETCH_QUERY);
+      + "&_include:iterate=PractitionerRole:practitioner");
 
     const APPOINTMENT_BUNDLE = new PrefetchTemplate(
+      "appointmentBundle",
       "Appointment?_id={{context.appointments.Appointment.id}}"
       + "&_include=Appointment:patient"
       + "&_include=Appointment:practitioner:PractitionerRole"
       + "&_include:iterate=PractitionerRole:organization"
       + "&_include:iterate=PractitionerRole:practitioner"
-      + "&_include=Appointment:location",
-      COVERAGE_PREFETCH_QUERY);
+      + "&_include=Appointment:location");
 
     const ENCOUNTER_BUNDLE = new PrefetchTemplate(
+      "encounterBundle",
       "Encounter?_id={{context.encounterId}}"
       + "&_include=Encounter:patient"
       + "&_include=Encounter:service-provider"
       + "&_include=Encounter:practitioner"
-      + "&_include=Encounter:location",
-      COVERAGE_PREFETCH_QUERY);
+      + "&_include=Encounter:location");
 
+    prefetchMap.set("Coverage", COVERAGE_PREFETCH_QUERY);
     prefetchMap.set("DeviceRequest", DEVICE_REQUEST_BUNDLE);
     prefetchMap.set("MedicationRequest", MEDICATION_REQUEST_BUNDLE);
     prefetchMap.set("MedicationDispense", MEDICATION_DISPENSE_BUNDLE);
     prefetchMap.set("ServiceRequest", SERVICE_REQUEST_BUNDLE);
-    prefetchMap.set("encounterBundle", ENCOUNTER_BUNDLE);
+    prefetchMap.set("Encounter", ENCOUNTER_BUNDLE);
 
     return prefetchMap;
   }
@@ -96,11 +94,11 @@ export class PrefetchTemplate {
     return paramElementMap;
   }
 
-  static generateQueries(prefetchKey, requestBundle) {
-    var resolvedQueries = [];
-    var queries = prefetchMap.get(prefetchKey).getQueries();
-    for (var i = 0; i < queries.length; i++) {
-      var query = queries[i];
+  static generateQueries(requestBundle, ...prefetchKeys) {
+    var resolvedQueries = new Map();
+    for (var i = 0; i < prefetchKeys.length; i++) {
+      var prefetchKey = prefetchKeys[i];
+      var query = prefetchMap.get(prefetchKey).getQuery();
       // Regex source: https://regexland.com/all-between-specified-characters/
       var parametersToFill = query.match(/(?<={{).*?(?=}})/gs);
       var resolvedQuery = query.slice();
@@ -109,7 +107,7 @@ export class PrefetchTemplate {
         var resolvedParameter = PrefetchTemplate.resolveParameter(unresolvedParameter, requestBundle);
         var resolvedQuery = resolvedQuery.replace('{{' + unresolvedParameter + '}}', resolvedParameter);
       }
-      resolvedQueries.push(resolvedQuery);
+      resolvedQueries.set(prefetchKey, resolvedQuery);
       console.log(resolvedQueries);
     }
     return resolvedQueries;
@@ -138,14 +136,14 @@ export class PrefetchTemplate {
     return resolvedParameter;
   }
 
-  queries;
+  query;
 
-  constructor(...queries) {
-    this.queries = queries;
+  constructor(query) {
+    this.query = query;
   }
 
-  getQueries() {
-    return this.queries;
+  getQuery() {
+    return this.query;
   }
 
 }
