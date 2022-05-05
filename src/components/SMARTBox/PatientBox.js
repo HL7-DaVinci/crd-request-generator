@@ -100,7 +100,7 @@ export default class SMARTBox extends Component {
     this.props.callback(request.resourceType, request);
     const queries = this.props.updatePrefetchCallback(request, request.resourceType, "Coverage");
     console.log("Queries: " + queries);
-    queries.forEach((query) => {
+    queries.forEach((query, queryKey) => {
       const urlQuery = this.props.ehrUrl + '/' + query;
       console.log(urlQuery);
       fetch(urlQuery, {
@@ -110,7 +110,7 @@ export default class SMARTBox extends Component {
         return responseJson;
       }).then((bundle) => {
         bundle['entry'].forEach((fullResource) => {
-          this.props.callbackList("prefetchedResources", fullResource);
+          this.props.callbackMap("prefetchedResources", queryKey, fullResource);
         });
       });
     });

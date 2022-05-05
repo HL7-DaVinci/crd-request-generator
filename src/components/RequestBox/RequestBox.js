@@ -16,7 +16,7 @@ export default class RequestBox extends Component {
       openPatient: false,
       patientList: [],
       patient: {},
-      prefetchedResources: [],
+      prefetchedResources: new Map(),
       codeValues: defaultValues,
       code: null,
       codeSystem: null,
@@ -52,8 +52,8 @@ export default class RequestBox extends Component {
   };
 
   prepPrefetch() {
-    const preppedResources = this.state.prefetchedResources.map((resource) => {
-      return {resource: resource.resource};
+    const preppedResources = this.state.prefetchedResources.map((resource, resourceKey) => {
+      return {resourceKey: {resource: resource.resource}};
     });
     return preppedResources;
   }
@@ -74,14 +74,23 @@ export default class RequestBox extends Component {
   };
 
   updateStateList = (elementName, text) => {
-    this.setState((prevState) => ({
-      [elementName]: [...prevState[elementName], text],
-    }));
+    this.setState((prevState) => {
+      return {[elementName]: [...prevState[elementName], text]}
+    });
+  };
+
+  updateStateMap = (elementName, key, text) => {
+    this.setState((prevState) => {
+      if(!prevState[elementName][key]){
+        prevState[elementName][key] = [];
+      }
+      return {[elementName]: {...prevState[elementName], [key]: [...prevState[elementName][key], text]}};
+    });
   };
 
   clearState = () => {
     this.setState({
-      prefetchedResources: [],
+      prefetchedResources: new Map(),
       practitioner: {},
       coverage: {},
       response: {}
@@ -185,20 +194,34 @@ export default class RequestBox extends Component {
   }
 
   renderPrefetchedResources() {
-    if (!_.isEmpty(this.state.prefetchedResources)) {
-      return this.renderRequestResources(this.state.prefetchedResources);
+    const prefetchMap = new Map(Object.entries(this.state.prefetchedResources));
+    if (prefetchMap.size > 0) {
+      return this.renderRequestResources(prefetchMap);
     }
   }
 
   renderRequestResources(requestResources) {
-    var renderedPrefetches = [];
-    requestResources.forEach((resource) => {
-      renderedPrefetches.push(this.renderResource(resource));
+    var renderedPrefetches = new Map();
+    requestResources.forEach((resourceList, resourceKey) => {
+      const renderedList = [];
+      resourceList.forEach((resource) => {
+        console.log("Request resources:" + JSON.stringify(requestResources));
+        console.log("Request key:" + resourceKey);
+        renderedList.push(this.renderResource(resource))
+      });
+      renderedPrefetches.set(resourceKey, renderedList);
     });
+    console.log(renderedPrefetches);
+    console.log(Object.entries(renderedPrefetches));
     return (
       <div className="prefetched">
         <div className="prefetch-header">Prefetched</div>
-        {renderedPrefetches}
+        {Array.from(renderedPrefetches.keys()).map((resourceKey) => {
+          const currentRenderedPrefetch = renderedPrefetches.get(resourceKey);
+          {console.log(currentRenderedPrefetch)};
+          return (<div><div className="prefetch-subheader">{resourceKey + " Resources"}</div>
+            {currentRenderedPrefetch}</div>);
+        })}
       </div>
     );
   }
@@ -324,6 +347,7 @@ export default class RequestBox extends Component {
                             params = {params}
                             callback={this.updateStateElement}
                             callbackList={this.updateStateList}
+                            callbackMap={this.updateStateMap}
                             updatePrefetchCallback={
                               PrefetchTemplate.generateQueries
                             }
