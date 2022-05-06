@@ -52,39 +52,52 @@ export default function buildRequest(request, patient, ehrUrl, token, prefetch, 
     }
 
     if(includePrefetch){
-        if(request.resourceType === 'DeviceRequest') {
-            r4json.prefetch = {
-                "deviceRequestBundle": {
-                    "resourceType": "Bundle",
-                    "type": "collection",
-                    "entry": prefetch
-                }
-            }
-        } else if(request.resourceType === 'ServiceRequest') {
-            r4json.prefetch = {
+      r4json.prefetch = [];
+
+      prefetch.forEach((resource, key) => {
+        console.log(resource);
+        if (key === 'DeviceRequest') {
+          r4json.prefetch.push({
+              "deviceRequestBundle": {
+                  "resourceType": "Bundle",
+                  "type": "collection",
+                  "entry": resource
+              }
+          });
+        } else if (key === 'ServiceRequest') {
+            r4json.prefetch.push({
                 "serviceRequestBundle": {
                     "resourceType": "Bundle",
                     "type": "collection",
-                    "entry": prefetch
+                    "entry": resource
                 }
-            }
-        } else if(request.resourceType === 'MedicationRequest') {
-            r4json.prefetch = {
+            });
+        } else if(key === 'MedicationRequest') {
+            r4json.prefetch.push({
                 "medicationRequestBundle": {
                     "resourceType": "Bundle",
                     "type": "collection",
-                    "entry": prefetch
+                    "entry": resource
                 }
-            }
-        } else if(request.resourceType === 'MedicationDispense') {
-            r4json.prefetch = {
+            });
+        } else if(key === 'MedicationDispense') {
+            r4json.prefetch.push({
                 "medicationDispenseBundle": {
                     "resourceType": "Bundle",
                     "type": "collection",
-                    "entry": prefetch
+                    "entry": resource
                 }
-            }
+            });
+        } else if(key === 'Coverage') {
+          r4json.prefetch.push({
+              "coverage": {
+                  "resourceType": "Bundle",
+                  "type": "collection",
+                  "entry": resource
+              }
+          });
         }
+      });
     }
 
     console.log(r4json);
