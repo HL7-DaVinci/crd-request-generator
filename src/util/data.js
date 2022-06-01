@@ -38,6 +38,16 @@ const headers = {
         "display": "Alternative Therapy Cards Allowed",
         "value": (process.env.REACT_APP_ALTERNATIVE_THERAPY? process.env.REACT_APP_ALTERNATIVE_THERAPY : config.alt_drug),
         "key": "alternativeTherapy"
+    }, 
+    "launchUrl" : {
+        "display": "DTR Launch URL",
+        "value": (process.env.LAUNCH_URL ? process.env.LAUNCH_URL : config.launch_url),
+        "key": "launchUrl"
+    },
+    "responseExpirationDays" : {
+        "display": "In Progress Form Expiration Days",
+        "value": (process.env.FORM_EXPIRATION_DAYS ? process.env.FORM_EXPIRATION_DAYS : config.response_expiration_days),
+        "key": "responseExpirationDays"
     }
 }
 
