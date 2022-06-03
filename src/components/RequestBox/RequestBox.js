@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import FHIR from "fhirclient";
 import SMARTBox from "../SMARTBox/SMARTBox";
 import PatientBox from "../SMARTBox/PatientBox";
+import CheckBox from '../Inputs/CheckBox';
 import { defaultValues, shortNameMap } from "../../util/data";
 import { getAge } from "../../util/fhir";
 import _ from "lodash";
@@ -30,7 +31,8 @@ export default class RequestBox extends Component {
       medicationRequest: {},
       medicationDispense: {},
       gatherCount: 0,
-      response: {}
+      response: {},
+      deidentifyRecords: false
     };
 
     this.renderRequestResources = this.renderRequestResources.bind(this);
@@ -42,6 +44,7 @@ export default class RequestBox extends Component {
     this.renderPrefetchedResources = this.renderPrefetchedResources.bind(this);
     this.renderError = this.renderError.bind(this);
     this.buildLaunchLink = this.buildLaunchLink.bind(this);
+    this.updateDeidentifyCheckbox = this.updateDeidentifyCheckbox.bind(this);
   }
 
   // TODO - see how to submit response for alternative therapy
@@ -64,7 +67,7 @@ export default class RequestBox extends Component {
     const prefetch = this.makePrefetch(request);
 
     // submit the CRD request
-    this.props.submitInfo(prefetch, request, this.state.patient, null, "order-sign");
+    this.props.submitInfo(prefetch, request, this.state.patient, null, "order-sign", this.state.deidentifyRecords);
   }
 
   componentDidMount() {}
@@ -119,7 +122,8 @@ export default class RequestBox extends Component {
         this.state.deviceRequest,
         this.state.patient,
         null,
-        "order-sign"
+        "order-sign",
+        this.state.deidentifyRecords
       );
     } else if (!_.isEmpty(this.state.serviceRequest)) {
       this.props.submitInfo(
@@ -127,7 +131,8 @@ export default class RequestBox extends Component {
         this.state.serviceRequest,
         this.state.patient,
         null,
-        "order-sign"
+        "order-sign",
+        this.state.deidentifyRecords
       );
     } else if (!_.isEmpty(this.state.medicationRequest)) {
       this.props.submitInfo(
@@ -135,7 +140,8 @@ export default class RequestBox extends Component {
         this.state.medicationRequest,
         this.state.patient,
         null,
-        "order-sign"
+        "order-sign",
+        this.state.deidentifyRecords
       );
     } else if (!_.isEmpty(this.state.medicationDispense)) {
       this.props.submitInfo(
@@ -143,7 +149,8 @@ export default class RequestBox extends Component {
         this.state.medicationDispense,
         this.state.patient,
         null,
-        "order-sign"
+        "order-sign",
+        this.state.deidentifyRecords
       );
     }
   };
@@ -198,7 +205,7 @@ export default class RequestBox extends Component {
           const prefetch = this.makePrefetch(request);
 
           // submit the OrderSelect hook CRD request
-          this.props.submitInfo(prefetch, request, this.state.patient, extraPrefetch, "order-select");
+          this.props.submitInfo(prefetch, request, this.state.patient, extraPrefetch, "order-select", this.state.deidentifyRecords);
         });
       }
     }
@@ -739,6 +746,10 @@ export default class RequestBox extends Component {
       && Object.keys(this.state.medicationRequest).length === 0 && Object.keys(this.state.medicationDispense).length === 0;
   }
 
+  updateDeidentifyCheckbox(elementName, value) {
+    this.setState({ deidentifyRecords: value });
+  }
+
   render() {
     const params = {};
     params['serverUrl'] = this.props.ehrUrl;
@@ -799,8 +810,17 @@ export default class RequestBox extends Component {
             <div>
               {this.renderPatientInfo()}
               {this.renderPrefetchedResources()}
-            </div> 
-             
+            </div>
+            <div>
+              <b>Deidentify Records</b>
+              <CheckBox
+                //extraClass = "deidentify-checkbox"
+                //extraInnerClass = "setting-inner-checkbox"
+                toggle = {this.state.deidentifyRecords}
+                updateCB={this.updateDeidentifyCheckbox}
+                elementName = "deidentifyCheckbox" 
+                />
+            </div>
           </div>
         </div>
         <button className={"submit-btn btn btn-class "} onClick={this.relaunch} disabled={disableLaunchDTR}>

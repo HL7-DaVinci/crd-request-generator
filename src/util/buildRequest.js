@@ -1,5 +1,26 @@
 
-export default function buildRequest(request, patient, ehrUrl, token, prefetch, includePrefetch, extraPrefetch, hook, hookConfig) {
+import deidentifyPatient from "./deidentifyPatient";
+import deidentifyCoverage from "./deidentifyCoverage";
+
+export default function buildRequest(request, patient, ehrUrl, token, inputPrefetch, includePrefetch, extraPrefetch, hook, hookConfig, deidentifyRecords) {
+    
+    // loop through the prefetch looking for the patient and the coverage
+    var prefetch = [];
+    inputPrefetch.forEach((resource) => {
+        let resourceType = resource.resource.resourceType;
+        if (resourceType === "Patient") {
+            let patient = deidentifyPatient(resource.resource);
+            let patientResource = { "resource" : patient };
+            prefetch.push(patientResource);
+        } else if (resourceType === "Coverage") {
+            let coverage = deidentifyCoverage(resource.resource);
+            let coverageResource = { "resource" : coverage };
+            prefetch.push(coverageResource);
+        } else {
+            prefetch.push(resource);
+        }
+    });
+
     const r4json = {
         "hookInstance": "d1577c69-dfbe-44ad-ba6d-3e05e953b2ea",
         "fhirServer": ehrUrl,
