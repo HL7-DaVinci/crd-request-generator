@@ -38,7 +38,6 @@ export default function deidentifyPatient(patient) {
                         // append to the existing profile list
                         meta[profileKey].push(profile);
                     }
-
                 } else {
                     // add the profile to meta
                     meta[profileKey] = [ profile ];

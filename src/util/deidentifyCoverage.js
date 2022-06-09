@@ -13,8 +13,11 @@ export default function deidentifyCoverage(coverage) {
                 let meta = coverage[key];
 
                 if (profileKey in meta) {
-                    // append to the existing profile list
-                    meta[profileKey].push(profile);
+                    // make sure the profile is not already in the list
+                    if (!meta[profileKey].includes(profile)) {
+                        // append to the existing profile list
+                        meta[profileKey].push(profile);
+                    }
                 } else {
                     // add the profile to meta
                     meta[profileKey] = [ profile ];
