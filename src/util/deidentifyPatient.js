@@ -7,7 +7,7 @@ export default function deidentifyPatient(patient) {
 
     for (const key in patient) {
         // remove: text, identifier, name, telecom, deceased, multipleBirth, photo, contact, link
-        if ((key !== "text") && (key !== "identifier") && (key !== "name") && (key !== "deceased") && (key !== "multipleBirth") && (key !== "photo") && (key !== "contact") && (key !== "link")) {
+        if ((key !== "text") && (key !== "identifier") && (key !== "name") && (key !== "telecom") && (key !== "deceased") && (key !== "multipleBirth") && (key !== "photo") && (key !== "contact") && (key !== "link")) {
             // handle birthDate
             if (key === "birthDate") {
                 newPatient[key] = processDate(patient[key]);
@@ -33,8 +33,12 @@ export default function deidentifyPatient(patient) {
                 let meta = patient[key];
 
                 if (profileKey in meta) {
-                    // append to the existing profile list
-                    meta[profileKey].push(profile);
+                    // make sure the profile is not already in the list
+                    if (!meta[profileKey].includes(profile)) {
+                        // append to the existing profile list
+                        meta[profileKey].push(profile);
+                    }
+
                 } else {
                     // add the profile to meta
                     meta[profileKey] = [ profile ];
