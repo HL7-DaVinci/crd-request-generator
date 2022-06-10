@@ -64,7 +64,6 @@ export default class RequestBuilder extends Component {
         this.requestBox = React.createRef();
     }
 
-
     componentDidMount() {
         this.setState({ config });
         let ehr_base = (process.env.REACT_APP_EHR_BASE ? process.env.REACT_APP_EHR_BASE : config.ehr_base);
@@ -82,23 +81,6 @@ export default class RequestBuilder extends Component {
             // fails when keycloak isn't running, add dummy token
             this.setState({ token: {access_token: ""}})
         })
-    }
-
-    getDeviceRequest(patientId, client) {
-        client.request(`DeviceRequest?subject=Patient/${patientId}`,
-            {
-                resolveReferences: ["subject", "performer"],
-                graph: false,
-                flat: true
-            })
-            .then((result) => {
-                this.setState(prevState => ({
-                    deviceRequests: {
-                        ...prevState.deviceRequests,
-                        [patientId]: result
-                    }
-                }));
-            });
     }
 
     consoleLog(content, type) {
@@ -151,7 +133,8 @@ export default class RequestBuilder extends Component {
             "Content-Type": "application/json",
             "authorization": jwt
         });
-        this.consoleLog("Fetching response from " + cdsUrl, types.info)
+        this.consoleLog("Fetching response from " + cdsUrl, types.info);
+        this.consoleLog("Using body " + JSON.stringify(json_request));
         try {
             fetch(cdsUrl, {
                 method: "POST",
