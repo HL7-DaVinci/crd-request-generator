@@ -90,7 +90,7 @@ export default function buildRequest(request, patient, ehrUrl, token, prefetch, 
             });
         } else if(key === 'Coverage') {
           r4json.prefetch.push({
-              "coverage": {
+              "coverageBundle": {
                   "resourceType": "Bundle",
                   "type": "collection",
                   "entry": resource
