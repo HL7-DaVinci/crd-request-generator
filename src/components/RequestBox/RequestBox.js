@@ -55,7 +55,7 @@ export default class RequestBox extends Component {
     const preppedResources = new Map();
     Object.keys(this.state.prefetchedResources).forEach((resourceKey) => {
       const resourceList = this.state.prefetchedResources[resourceKey].map((resource) => {
-        return resource.resource;
+        return resource;
       })
       preppedResources.set(resourceKey, resourceList);
     });
