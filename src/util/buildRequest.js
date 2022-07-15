@@ -52,50 +52,42 @@ export default function buildRequest(request, patient, ehrUrl, token, prefetch, 
     }
 
     if(includePrefetch){
-      r4json.prefetch = [];
+      r4json.prefetch = {};
 
       prefetch.forEach((resource, key) => {
         console.log(resource);
         if (key === 'DeviceRequest') {
-          r4json.prefetch.push({
-              "deviceRequestBundle": {
+          r4json.prefetch.deviceRequestBundle = {
                   "resourceType": "Bundle",
                   "type": "collection",
                   "entry": resource
-              }
-          });
+              };
         } else if (key === 'ServiceRequest') {
-            r4json.prefetch.push({
-                "serviceRequestBundle": {
+            r4json.prefetch.serviceRequestBundle = {
                     "resourceType": "Bundle",
                     "type": "collection",
                     "entry": resource
-                }
-            });
+                };
         } else if(key === 'MedicationRequest') {
-            r4json.prefetch.push({
-                "medicationRequestBundle": {
+            r4json.prefetch.medicationRequestBundle = {
                     "resourceType": "Bundle",
                     "type": "collection",
                     "entry": resource
-                }
-            });
-        } else if(key === 'MedicationDispense') {
-            r4json.prefetch.push({
-                "medicationDispenseBundle": {
+                };
+        } else if (key === 'MedicationDispense') {
+            r4json.prefetch.medicationDispenseBundle = {
                     "resourceType": "Bundle",
                     "type": "collection",
                     "entry": resource
-                }
-            });
-        } else if(key === 'Coverage') {
-          r4json.prefetch.push({
-              "coverageBundle": {
+                };
+        } else if (key === 'Coverage') {
+          r4json.prefetch.coverageBundle = {
                   "resourceType": "Bundle",
                   "type": "collection",
                   "entry": resource
-              }
-          });
+              };
+        } else {
+          console.error("Invalid prefetch key used: " + key + ".");
         }
       });
     }
