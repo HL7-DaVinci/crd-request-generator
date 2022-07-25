@@ -9,28 +9,7 @@ const Login = (props) => {
   const [message, setMessage] = useState(null);
   const [username, _setUsername] = useState('');
   const [password, _setPassword] = useState('');
-  const handleClose = useCallback(() => setMessage(null));
-
-  useEffect(() => {
-    const listener = event => {
-      if (event.code === 'Enter' || event.code === 'NumpadEnter') {
-        event.preventDefault();
-        onSubmit();
-      }
-    };
-    document.addEventListener('keydown', listener);
-    return () => {
-      document.removeEventListener('keydown', listener);
-    };
-  }, [username, password]);
-
-  const setUsername = useCallback(event => {
-    _setUsername(event.target.value);
-  });
-
-  const setPassword = useCallback(event => {
-    _setPassword(event.target.value);
-  });
+  const handleClose = () => setMessage(null);
 
   const onSubmit = useCallback(() => {
     if (username && password) {
@@ -53,7 +32,30 @@ const Login = (props) => {
           console.error(err);
         });
     }
-  }, [username, password]);
+  }, [username, password, props]);
+
+  useEffect(() => {
+    const listener = event => {
+      if (event.code === 'Enter' || event.code === 'NumpadEnter') {
+        event.preventDefault();
+        onSubmit();
+      }
+    };
+    document.addEventListener('keydown', listener);
+    return () => {
+      document.removeEventListener('keydown', listener);
+    };
+  }, [username, password, onSubmit]);
+
+  const setUsername = (event => {
+    _setUsername(event.target.value);
+  });
+
+  const setPassword = (event => {
+    _setPassword(event.target.value);
+  });
+
+ 
 
   return (
     <div className={classes.background}>

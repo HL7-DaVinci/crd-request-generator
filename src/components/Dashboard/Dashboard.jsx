@@ -1,15 +1,11 @@
-import React, { memo, useCallback, useState, useEffect } from 'react';
-import { TextField, Button } from '@material-ui/core';
-import axios from 'axios';
-
+import React, { memo, useState, useEffect } from 'react';
 import useStyles from './styles';
 import DashboardElement from './DashboardElement';
-import { client } from 'fhirclient';
 const Dashboard = (props) => {
   const classes = useStyles();
   const [resources, setResources] = useState([]);
   const [message, setMessage] = useState("Loading...")
-  const addResources = useCallback((bundle)=>{
+  const addResources = (bundle)=>{
       if(bundle.entry){
           bundle.entry.forEach((e) => {
             const resource = e.resource;
@@ -18,12 +14,17 @@ const Dashboard = (props) => {
             }
           }) 
       }
-  })
+  }
   useEffect(() => {
-    props.client.patient.request('QuestionnaireResponse', {'pageLimit': 0, 'onPage': addResources}).then(() => {
-      setMessage("No QuestionnaireResponses Found for user with patientId: " + props.client.patient.id);
-    });
-  }, [])
+    if(props.client.patient.id) {
+      props.client.patient.request('QuestionnaireResponse', {'pageLimit': 0, 'onPage': addResources}).then(() => {
+        setMessage("No QuestionnaireResponses Found for user with patientId: " + props.client.patient.id);
+      });
+    } else {
+      setMessage("Invalid patient: No patientId provided")
+    }
+
+  }, [props.client.patient])
 
   return (
     <div className={classes.dashboardArea}>

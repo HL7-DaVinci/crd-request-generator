@@ -1,4 +1,4 @@
-import { createMuiTheme } from '@material-ui/core/styles';
+import { createTheme } from '@material-ui/core/styles';
 const colors = {
   white: '#fff',
   offWhite: '#f5f5fa',
@@ -92,7 +92,7 @@ const materialUiOverridesBase = {
   }
 };
 
-const theme = createMuiTheme({
+const theme = createTheme({
   palette: { ...paletteBase },
   overrides: { ...materialUiOverridesBase }
 });

@@ -1,12 +1,9 @@
-import React, { memo, useCallback, useState, useEffect } from 'react';
-import { TextField, Button } from '@material-ui/core';
-import axios from 'axios';
+import React, { memo, useState, useEffect } from 'react';
 import useStyles from './styles/styles';
 import FHIR from "fhirclient";
 import config from '../properties.json';
 import Login from '../components/Auth/Login';
 import Dashboard from '../components/Dashboard/Dashboard';
-import theme from './styles/theme';
 const PatientPortal = () => {
     const classes = useStyles();
     const [token, setToken] = useState(null);

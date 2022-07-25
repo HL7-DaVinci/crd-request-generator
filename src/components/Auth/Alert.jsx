@@ -21,7 +21,7 @@ function Alert(props) {
 }
 
 Alert.propTypes = {
-  message: PropTypes.string.isRequired,
+  message: PropTypes.string,
   handleClose: PropTypes.func.isRequired
 };
 

@@ -11,7 +11,7 @@ export default class App extends Component {
         return (
                 <Router>
                     <Routes>
-                        <Route exact path='/' exact element={<RequestBuilder />} />
+                        <Route path='/' exact element={<RequestBuilder />} />
                         
                         <Route exact path='/patient-portal' element={
                         <ThemeProvider theme={theme}>

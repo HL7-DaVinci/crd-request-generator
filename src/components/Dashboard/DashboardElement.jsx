@@ -1,6 +1,4 @@
-import React, { memo, useCallback, useState, useEffect } from 'react';
-import { TextField, Button } from '@material-ui/core';
-import axios from 'axios';
+import React, { memo } from 'react';
 
 import useStyles from './styles';
 const DashboardElement = (props) => {
