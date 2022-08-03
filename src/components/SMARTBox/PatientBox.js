@@ -99,10 +99,8 @@ export default class SMARTBox extends Component {
   updatePrefetchRequest(request) {
     this.props.callback(request.resourceType, request);
     const queries = this.props.updatePrefetchCallback(request, request.resourceType, "Coverage");
-    console.log("Queries: " + queries);
     queries.forEach((query, queryKey) => {
       const urlQuery = this.props.ehrUrl + '/' + query;
-      console.log(urlQuery);
       fetch(urlQuery, {
         method: "GET",
       }).then((response) => {

@@ -55,7 +55,6 @@ export default function buildRequest(request, patient, ehrUrl, token, prefetch, 
       r4json.prefetch = {};
 
       prefetch.forEach((resource, key) => {
-        console.log(resource);
         if (key === 'DeviceRequest') {
           r4json.prefetch.deviceRequestBundle = {
                   "resourceType": "Bundle",

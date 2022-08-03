@@ -134,7 +134,6 @@ export default class RequestBuilder extends Component {
             "authorization": jwt
         });
         this.consoleLog("Fetching response from " + cdsUrl, types.info);
-        this.consoleLog("Using body " + JSON.stringify(json_request));
         try {
             fetch(cdsUrl, {
                 method: "POST",

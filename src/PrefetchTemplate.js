@@ -108,7 +108,6 @@ export class PrefetchTemplate {
         var resolvedQuery = resolvedQuery.replace('{{' + unresolvedParameter + '}}', resolvedParameter);
       }
       resolvedQueries.set(prefetchKey, resolvedQuery);
-      console.log(resolvedQueries);
     }
     return resolvedQueries;
   }
