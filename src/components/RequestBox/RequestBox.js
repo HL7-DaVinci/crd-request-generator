@@ -7,6 +7,7 @@ import { defaultValues, shortNameMap } from "../../util/data";
 import { getAge } from "../../util/fhir";
 import _ from "lodash";
 import "./request.css";
+import { PrefetchTemplate } from "../../PrefetchTemplate";
 import axios from 'axios';
 
 export default class RequestBox extends Component {
@@ -16,28 +17,18 @@ export default class RequestBox extends Component {
       openPatient: false,
       patientList: [],
       patient: {},
-      practitioner: {},
-      deviceRequest: {},
-      coverage: {},
-      otherResources: [],
+      prefetchedResources: new Map(),
       codeValues: defaultValues,
-      patientState: null,
-      practitionerState: null,
       code: null,
       codeSystem: null,
       display: null,
-      serviceRequest: {},
-      insurance: {},
-      medicationRequest: {},
-      medicationDispense: {},
+      request: {},
       gatherCount: 0,
       response: {},
       deidentifyRecords: false
     };
 
     this.renderRequestResources = this.renderRequestResources.bind(this);
-    this.addReferencesToList = this.addReferencesToList.bind(this);
-    this.checkForReferences = this.checkForReferences.bind(this);
     this.renderPatientInfo = this.renderPatientInfo.bind(this);
     this.renderOtherInfo = this.renderOtherInfo.bind(this);
     this.renderResource = this.renderResource.bind(this);
@@ -49,25 +40,12 @@ export default class RequestBox extends Component {
 
   // TODO - see how to submit response for alternative therapy
   replaceRequestAndSubmit(request) {
-    let resourceType = request.resourceType.toUpperCase();
     console.log("replaceRequestAndSubmit: " + request.resourceType);
-
-    // replace the request in the state with the new one
-    if (resourceType === "DEVICEREQUEST") {
-      this.setState({ deviceRequest: request });
-    } else if (resourceType === "SERVICEREQUEST") {
-      this.setState({ serviceRequest: request });
-    } else if (resourceType === "MEDICATIONREQUEST") {
-        this.setState({ medicationRequest: request });
-    } else if (resourceType === "MEDICATIONDISPENSE") {
-      this.setState({ medicationDispense: request });
-    }
-
-    // build the prefetch
-    const prefetch = this.makePrefetch(request);
-
-    // submit the CRD request
-    this.props.submitInfo(prefetch, request, this.state.patient, null, "order-sign", this.state.deidentifyRecords);
+    this.setState({ request: request });
+    // Prepare the prefetch.
+    const prefetch = this.prepPrefetch();
+    // Submit the CRD request.
+    this.props.submitInfo(prefetch, request, this.state.patient, "order-sign", this.state.deidentifyRecords);
   }
 
   componentDidMount() {}
@@ -76,79 +54,23 @@ export default class RequestBox extends Component {
     this.setState({ openPatient: false });
   };
 
-  wrapPrefetchItems(resources) {
-    return resources.reduce((pre, resource) => {
-      if (resource.id) {
-        pre.push({ resource });
-      }
-      return pre;
-    }, []);
-  }
-
-  makePrefetch(request) {
-    let resourceType = request.resourceType.toUpperCase();
-
-    if ( (resourceType === "DEVICEREQUEST") 
-      || (resourceType === "SERVICEREQUEST") 
-      || (resourceType === "MEDICATIONREQUEST") ) {
-      
-      const resources = [
-        this.state.patient,
-        request,
-        this.state.coverage,
-        this.state.practitioner,
-        ...this.state.otherResources,
-      ];
-
-      return this.wrapPrefetchItems(resources);
-
-    } else if (resourceType === "MEDICATIONDISPENSE") {
-
-      
-      const medicationDispenseResources = [
-        this.state.patient,
-        request,
-        this.state.practitioner,
-        ...this.state.otherResources,
-      ];
-      return this.wrapPrefetchItems(medicationDispenseResources);
-    }
+  prepPrefetch() {
+    const preppedResources = new Map();
+    Object.keys(this.state.prefetchedResources).forEach((resourceKey) => {
+      const resourceList = this.state.prefetchedResources[resourceKey].map((resource) => {
+        return resource;
+      })
+      preppedResources.set(resourceKey, resourceList);
+    });
+    return preppedResources;
   }
 
   submit = () => {
-    if (!_.isEmpty(this.state.deviceRequest)) {
+    if (!_.isEmpty(this.state.request)) {
       this.props.submitInfo(
-        this.makePrefetch(this.state.deviceRequest),
-        this.state.deviceRequest,
+        this.prepPrefetch(),
+        this.state.request,
         this.state.patient,
-        null,
-        "order-sign",
-        this.state.deidentifyRecords
-      );
-    } else if (!_.isEmpty(this.state.serviceRequest)) {
-      this.props.submitInfo(
-        this.makePrefetch(this.state.serviceRequest),
-        this.state.serviceRequest,
-        this.state.patient,
-        null,
-        "order-sign",
-        this.state.deidentifyRecords
-      );
-    } else if (!_.isEmpty(this.state.medicationRequest)) {
-      this.props.submitInfo(
-        this.makePrefetch(this.state.medicationRequest),
-        this.state.medicationRequest,
-        this.state.patient,
-        null,
-        "order-sign",
-        this.state.deidentifyRecords
-      );
-    } else if (!_.isEmpty(this.state.medicationDispense)) {
-      this.props.submitInfo(
-        this.makePrefetch(this.state.medicationDispense),
-        this.state.medicationDispense,
-        this.state.patient,
-        null,
         "order-sign",
         this.state.deidentifyRecords
       );
@@ -160,318 +82,28 @@ export default class RequestBox extends Component {
   };
 
   updateStateList = (elementName, text) => {
-    this.setState((prevState) => ({
-      [elementName]: [...prevState[elementName], text],
-    }));
+    this.setState((prevState) => {
+      return {[elementName]: [...prevState[elementName], text]}
+    });
+  };
+
+  updateStateMap = (elementName, key, text) => {
+    this.setState((prevState) => {
+      if(!prevState[elementName][key]){
+        prevState[elementName][key] = [];
+      }
+      return {[elementName]: {...prevState[elementName], [key]: [...prevState[elementName][key], text]}};
+    });
   };
 
   clearState = () => {
     this.setState({
-      otherResources: [],
+      prefetchedResources: new Map(),
       practitioner: {},
-      deviceRequest: {},
       coverage: {},
-      serviceRequest: {},
-      medicationRequest: {},
-      medicationDispense: {},
       response: {}
     });
   };
-
-  addReferencesToList(data) {
-    Object.keys(data).forEach((refKey) => {
-      this.updateStateList("otherResources", data[refKey]);
-    });
-  }
-
-  checkIfGatherCompleted(client, request) {
-    // decrement the gatherCount and prepare to send the order select if the gathers have finished
-    this.setState({ gatherCount: (this.state.gatherCount - 1) })
-    if (this.state.gatherCount === 0) {
-
-      // currently only MedicationRequest has a use case for the OrderSelect hook
-      if (request.resourceType.toUpperCase() === "MEDICATIONREQUEST") {
-
-        // retrieve the MedicationStatements
-        client.request(`MedicationStatement?subject=${this.state.patient.id}&_include=MedicationStatement:patient`, {
-          graph: false,
-          flat: true
-        })
-        .then((result) => {
-
-          const extraPrefetch = this.wrapPrefetchItems(result);
-
-          // build the prefetch
-          const prefetch = this.makePrefetch(request);
-
-          // submit the OrderSelect hook CRD request
-          this.props.submitInfo(prefetch, request, this.state.patient, extraPrefetch, "order-select", this.state.deidentifyRecords);
-        });
-      }
-    }
-  }
-
-  gatherDeviceRequestResources = (deviceRequest) => {
-    const client = FHIR.client({
-      serverUrl: this.props.ehrUrl,
-      tokenResponse: {
-        access_token: this.props.access_token.access_token,
-      },
-    });
-    // If the device request is provided it has the pertinent information.
-    // this is for STU3
-    // TODO: Update for R4
-    this.setState({ gatherCount: 1 });
-    client
-      .request(`DeviceRequest/${deviceRequest.id}`, {
-        resolveReferences: ["performer", "insurance.0"],
-        graph: false,
-        flat: true,
-      })
-      .then((result) => {
-        const references = result.references;
-        Object.keys(references).forEach((refKey) => {
-          const ref = references[refKey];
-          if (ref.resourceType === "Coverage") {
-            // keep track of whether gathering is completed
-            this.setState({ gatherCount: (this.state.gatherCount + 1) })
-            client
-              .request(`Coverage/${ref.id}`, {
-                resolveReferences: ["payor"],
-                graph: false,
-                flat: true,
-              })
-              .then((result) => {
-                this.addReferencesToList(result.references);
-              })
-              .finally((info) => { this.checkIfGatherCompleted(client, deviceRequest); });
-            this.setState({ coverage: ref });
-          } else if (ref.resourceType === "Practitioner") {
-            this.setState({ practitioner: ref });
-            // find pracRoles
-            // keep track of whether gathering is completed
-            this.setState({ gatherCount: (this.state.gatherCount + 1) })
-            client
-              .request(`PractitionerRole?practitioner=${ref.id}`, {
-                resolveReferences: ["location"],
-                graph: false,
-                flat: true,
-              })
-              .then((result) => {
-                // TODO: Better logic here
-                this.addReferencesToList(result.references);
-                this.addReferencesToList(result.data);
-              })
-              .finally((info) => { this.checkIfGatherCompleted(client, deviceRequest); });
-          }
-        });
-      })
-      .finally((info) => { this.checkIfGatherCompleted(client, deviceRequest); });
-  };
-
-  gatherServiceRequestResources = (serviceRequest) => {
-    const client = FHIR.client({
-      serverUrl: this.props.ehrUrl,
-      tokenResponse: {
-        access_token: this.props.access_token.access_token,
-      },
-    });
-
-    // If the service request is provided it has the pertinent information.
-    // this is for R4
-    this.setState({ gatherCount: 1 });
-    client
-      .request(`ServiceRequest/${serviceRequest.id}`, {
-        resolveReferences: ["performer", "insurance.0"],
-        graph: false,
-        flat: true,
-      })
-      .then((result) => {
-        const references = result.references;
-        Object.keys(references).forEach((refKey) => {
-          const ref = references[refKey];
-          if (ref.resourceType === "Coverage") {
-            // keep track of whether gathering is completed
-            this.setState({ gatherCount: (this.state.gatherCount + 1) })
-            client
-              .request(`Coverage/${ref.id}`, {
-                resolveReferences: ["payor"],
-                graph: false,
-                flat: true,
-              })
-              .then((result) => {
-                this.addReferencesToList(result.references);
-              })
-              .finally((info) => { this.checkIfGatherCompleted(client, serviceRequest); });
-            this.setState({ coverage: ref });
-          } else if (ref.resourceType === "Practitioner") {
-            this.setState({ practitioner: ref });
-            // find pracRoles
-            // keep track of whether gathering is completed
-            this.setState({ gatherCount: (this.state.gatherCount + 1) })
-            client
-              .request(`PractitionerRole?practitioner=${ref.id}`, {
-                resolveReferences: ["location"],
-                graph: false,
-                flat: true,
-              })
-              .then((result) => {
-                // TODO: Better logic here
-                this.addReferencesToList(result.references);
-                this.addReferencesToList(result.data);
-              })
-              .finally((info) => { this.checkIfGatherCompleted(client, serviceRequest); });
-          }
-        });
-      })
-      .finally((info) => { this.checkIfGatherCompleted(client, serviceRequest); });
-  };
-
-  gatherMedicationRequestResources = (medicationRequest) => {
-    const client = FHIR.client({
-      serverUrl: this.props.ehrUrl,
-      tokenResponse: {
-        access_token: this.props.access_token.access_token,
-      },
-    });
-
-    this.setState({ gatherCount: 1 });
-    client
-      .request(`MedicationRequest/${medicationRequest.id}`, {
-        resolveReferences: ["requester", "insurance.0"],
-        graph: false,
-        flat: true,
-      })
-      .then((result) => {
-        const references = result.references;
-        Object.keys(references).forEach((refKey) => {
-          const ref = references[refKey];
-          if (ref.resourceType === "Coverage") {
-            // keep track of whether gathering is completed
-            this.setState({ gatherCount: (this.state.gatherCount + 1) })
-            client
-              .request(`Coverage/${ref.id}`, {
-                resolveReferences: ["payor"],
-                graph: false,
-                flat: true,
-              })
-              .then((result) => {
-                this.addReferencesToList(result.references);
-              })
-              .finally((info) => { this.checkIfGatherCompleted(client, medicationRequest); });
-            this.setState({ coverage: ref });
-          } else if (ref.resourceType === "Practitioner") {
-            // keep track of whether gathering is completed
-            this.setState({ gatherCount: (this.state.gatherCount + 1) })
-            this.setState({ practitioner: ref });
-            // find pracRoles
-            client
-              .request(`PractitionerRole?practitioner=${ref.id}`, {
-                resolveReferences: ["location"],
-                graph: false,
-                flat: true,
-              })
-              .then((result) => {
-                // TODO: Better logic here
-                this.addReferencesToList(result.references);
-                this.addReferencesToList(result.data);
-              })
-              .finally((info) => { this.checkIfGatherCompleted(client, medicationRequest); });
-          }
-        });
-      })
-      .finally((info) => { this.checkIfGatherCompleted(client, medicationRequest); });
-  };
-
-  gatherMedicationDispenseResources = (medicationDispense) => {
-    const client = FHIR.client({
-      serverUrl: this.props.ehrUrl,
-      tokenResponse: {
-        access_token: this.props.access_token.access_token,
-      },
-    });
-
-    this.setState({ gatherCount: 1 });
-    // authorizingPrescription reference can't be resolved. 
-    // An issue is opened in fhir client repo: https://github.com/smart-on-fhir/client-js/issues/131
-    client
-      .request(`MedicationDispense/${medicationDispense.id}`, {
-        resolveReferences: ["performer.0.actor", "authorizingPrescription.0"], 
-        graph: false,
-        flat: true,
-      })
-      .then((result) => {
-        const references = result.references;
-        Object.keys(references).forEach((refKey) => {
-          const ref = references[refKey];
-          if (ref.resourceType === "Practitioner") {
-            this.setState({ practitioner: ref });
-            // find pracRoles
-            // keep track of whether gathering is completed
-            this.state.gatherCount = this.state.gatherCount + 1;
-            client
-              .request(`PractitionerRole?practitioner=${ref.id}`, {
-                resolveReferences: ["location"],
-                graph: false,
-                flat: true,
-              })
-              .then((result) => {
-                // TODO: Better logic here
-                this.addReferencesToList(result.references);
-                this.addReferencesToList(result.data);
-              })
-              .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense); });
-          }
-        });
-
-        // work around authorizingPrescription reference can not be resolved issue 
-        if (medicationDispense.authorizingPrescription != undefined && medicationDispense.authorizingPrescription.length > 0) {
-          let medicationRequestReference = medicationDispense.authorizingPrescription[0].reference;
-          if (medicationRequestReference) {
-            this.state.gatherCount = this.state.gatherCount + 1;
-            client
-              .request(medicationRequestReference, {
-                resolveReferences: ["insurance.0"],
-                graph: false,
-                flat: true,
-              })
-              .then((result) => {
-                this.state.gatherCount = this.state.gatherCount + 1;
-                let coverageReference = result.references;
-                Object.keys(coverageReference).forEach((refKey) => {
-                  const ref = coverageReference[refKey];
-                  if (ref.resourceType === "Coverage") {
-                    client
-                      .request(`Coverage/${ref.id}`, {
-                        resolveReferences: ["payor"],
-                        graph: false,
-                        flat: true,
-                      })
-                      .then((result) => {
-                        this.addReferencesToList(result.references);
-                      })
-                      .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense); });
-                  }
-                });
-              })
-              .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense); });
-          }
-        }
-      })
-      .finally((info) => { this.checkIfGatherCompleted(client, medicationDispense); });
-  };
-
-  checkForReferences(client, resource, references) {
-    client
-      .request(`${resource.resourceType}/${resource.id}`, {
-        resolveReferences: references,
-        graph: false,
-        flat: true,
-      })
-      .then((result) => {
-        console.log(result);
-      });
-  }
 
   getPatients = () => {
     console.log(this.props.access_token.access_token);
@@ -570,90 +202,58 @@ export default class RequestBox extends Component {
   }
 
   renderPrefetchedResources() {
-    const deviceRequestResources = [
-      "patient",
-      "deviceRequest",
-      "coverage",
-      "practitioner",
-    ];
-    const serviceRequestResources = [
-      "patient",
-      "serviceRequest",
-      "coverage",
-      "practitioner",
-    ];
-    const medicationRequestResources = [
-      "patient",
-      "medicationRequest",
-      "coverage",
-      "practitioner",
-    ];
-    const medicationDispenseResources = [
-      "patient",
-      "medicationDispense",
-      "practitioner",
-    ];
-    if (!_.isEmpty(this.state.deviceRequest)) {
-      return this.renderRequestResources(deviceRequestResources);
-    } else if (!_.isEmpty(this.state.serviceRequest)) {
-      return this.renderRequestResources(serviceRequestResources);
-    } else if (!_.isEmpty(this.state.medicationRequest)) {
-      return this.renderRequestResources(medicationRequestResources);
-    } else if (!_.isEmpty(this.state.medicationDispense)) {
-      return this.renderRequestResources(medicationDispenseResources);
+    const prefetchMap = new Map(Object.entries(this.state.prefetchedResources));
+    if (prefetchMap.size > 0) {
+      return this.renderRequestResources(prefetchMap);
     }
   }
 
-  renderRequestResources(requestReources) {
+  renderRequestResources(requestResources) {
+    var renderedPrefetches = new Map();
+    requestResources.forEach((resourceList, resourceKey) => {
+      const renderedList = [];
+      resourceList.forEach((resource) => {
+        console.log("Request resources:" + JSON.stringify(requestResources));
+        console.log("Request key:" + resourceKey);
+        renderedList.push(this.renderResource(resource))
+      });
+      renderedPrefetches.set(resourceKey, renderedList);
+    });
+    console.log(renderedPrefetches);
+    console.log(Object.entries(renderedPrefetches));
     return (
       <div className="prefetched">
         <div className="prefetch-header">Prefetched</div>
-        {requestReources.map((resource) => {
-          return this.renderResource(resource);
-        })}
-        <div className="prefetch-header">Other Resources</div>
-        {this.state.otherResources.map((resource) => {
-          return this.renderOtherResources(resource);
+        {Array.from(renderedPrefetches.keys()).map((resourceKey) => {
+          const currentRenderedPrefetch = renderedPrefetches.get(resourceKey);
+          {console.log(currentRenderedPrefetch)};
+          return (<div><div className="prefetch-subheader">{resourceKey + " Resources"}</div>
+            {currentRenderedPrefetch}</div>);
         })}
       </div>
     );
   }
 
-  renderResource(resourceType) {
+  renderResource(resource) {
     let value = <div>N/A</div>;
-    if (this.state[resourceType].id) {
+    if (!resource.id) {
+      resource = resource.resource;
+    }
+    if (resource.id) {
+      var resourceId = resource.id;
+      var resourceType = resource.resourceType;
       value = (
-        <div key={this.state[resourceType].id}>
+        <div key={resourceId}>
           <span style={{ textTransform: "capitalize" }}>{resourceType}</span>:{" "}
-          {this.state[resourceType].resourceType}/{this.state[resourceType].id}{" "}
+          {resourceType}/{resourceId}{" "}
           .....<span className="checkmark glyphicon glyphicon-ok"></span>
         </div>
       );
     } else {
       value = (
-        <div key={resourceType}>
-          <span style={{ textTransform: "capitalize" }}>{resourceType}</span>{" "}
+        <div key={"UNKNOWN"}>
+          <span style={{ textTransform: "capitalize" }}>{"UNKNOWN"}</span>{" "}
           .....<span className="remove glyphicon glyphicon-remove"></span>
-        </div>
-      );
-    }
-    return value;
-  }
-
-  renderOtherResources(resource, name) {
-    let value = <div>N/A</div>;
-    if (resource.id) {
-      value = (
-        <div key={resource.id}>
-          {resource.resourceType}/{resource.id} .....
-          <span className="checkmark glyphicon glyphicon-ok"></span>
-        </div>
-      );
-    } else {
-      value = (
-        <div key={name}>
-          <span style={{ textTransform: "capitalize" }}>{name}</span> .....
-          <span className="remove glyphicon glyphicon-remove"></span>
         </div>
       );
     }
@@ -683,26 +283,11 @@ export default class RequestBox extends Component {
     let order = undefined, coverage = undefined, response = undefined;
 
     if (!this.isOrderNotSelected()) {
-      if (Object.keys(this.state.deviceRequest).length > 0) {
-        order = `${this.state.deviceRequest.resourceType}/${this.state.deviceRequest.id}`;
-
-        if (this.state.deviceRequest.insurance && this.state.deviceRequest.insurance.length > 0) {
-          coverage = `${this.state.deviceRequest.insurance[0].reference}`;
+      if (Object.keys(this.state.request).length > 0) {
+        order = `${this.state.request.resourceType}/${this.state.request.id}`;
+        if (this.state.request.insurance && this.state.request.insurance.length > 0) {
+          coverage = `${this.state.request.insurance[0].reference}`;
         }
-      } else if (Object.keys(this.state.serviceRequest).length > 0) {
-        order = `${this.state.serviceRequest.resourceType}/${this.state.serviceRequest.id}`;
-
-        if (this.state.serviceRequest.insurance && this.state.serviceRequest.insurance.length > 0) {
-          coverage = `${this.state.serviceRequest.insurance[0].reference}`;
-        }
-      } else if (Object.keys(this.state.medicationRequest).length > 0) {
-        order = `${this.state.medicationRequest.resourceType}/${this.state.medicationRequest.id}`;
-
-        if (this.state.medicationRequest.insurance && this.state.medicationRequest.insurance.length > 0) {
-          coverage = `${this.state.medicationRequest.insurance[0].reference}`;
-        }
-      } else if (Object.keys(this.state.medicationDispense).length > 0) {
-        order = `${this.state.medicationDispense.resourceType}/${this.state.medicationDispense.id}`;
       }
     }
 
@@ -742,8 +327,7 @@ export default class RequestBox extends Component {
   }
 
   isOrderNotSelected() {
-    return Object.keys(this.state.deviceRequest).length === 0 && Object.keys(this.state.serviceRequest).length === 0
-      && Object.keys(this.state.medicationRequest).length === 0 && Object.keys(this.state.medicationDispense).length === 0;
+    return Object.keys(this.state.request).length === 0;
   }
 
   updateDeidentifyCheckbox(elementName, value) {
@@ -774,17 +358,10 @@ export default class RequestBox extends Component {
                             patient={patient}
                             params = {params}
                             callback={this.updateStateElement}
-                            updateDeviceRequestCallback={
-                              this.gatherDeviceRequestResources
-                            }
-                            updateServiceRequestCallback={
-                              this.gatherServiceRequestResources
-                            }
-                            updateMedicationRequestCallback={
-                              this.gatherMedicationRequestResources
-                            }
-                            updateMedicationDispenseCallback={
-                              this.gatherMedicationDispenseResources
+                            callbackList={this.updateStateList}
+                            callbackMap={this.updateStateMap}
+                            updatePrefetchCallback={
+                              PrefetchTemplate.generateQueries
                             }
                             clearCallback={this.clearState}
                             ehrUrl={this.props.ehrUrl}
@@ -814,8 +391,6 @@ export default class RequestBox extends Component {
             <div>
               <b>Deidentify Records</b>
               <CheckBox
-                //extraClass = "deidentify-checkbox"
-                //extraInnerClass = "setting-inner-checkbox"
                 toggle = {this.state.deidentifyRecords}
                 updateCB={this.updateDeidentifyCheckbox}
                 elementName = "deidentifyCheckbox" 

@@ -2,30 +2,28 @@
 import deidentifyPatient from "./deidentifyPatient";
 import deidentifyCoverage from "./deidentifyCoverage";
 
-export default function buildRequest(request, patient, ehrUrl, token, inputPrefetch, includePrefetch, extraPrefetch, hook, hookConfig, deidentifyRecords) {
-    
-    var prefetch = [];
+export default function buildRequest(request, patient, ehrUrl, token, prefetch, includePrefetch, hook, hookConfig, deidentifyRecords) {
 
     if (deidentifyRecords) {
         console.log("Deidentify Patient and Coverage Resources to remove PHI");
         // loop through the prefetch looking for the patient and the coverage
-        inputPrefetch.forEach((resource) => {
-            let resourceType = resource.resource.resourceType;
-            if (resourceType === "Patient") {
-                let patient = deidentifyPatient(resource.resource);
-                let patientResource = { "resource" : patient };
-                prefetch.push(patientResource);
-            } else if (resourceType === "Coverage") {
-                let coverage = deidentifyCoverage(resource.resource);
-                let coverageResource = { "resource" : coverage };
-                prefetch.push(coverageResource);
-            } else {
-                prefetch.push(resource);
-            }
+        prefetch.forEach((bundle) => {
+            bundle.forEach((resource) => {
+                let resourceType = resource.resource.resourceType;
+                if (resourceType == "Patient") {
+                    // deidentify the patient
+                    let patient = deidentifyPatient(resource.resource);
+                    // replace the patient resource with the deidentified version
+                    resource.resource = patient
+                } else if (resourceType === "Coverage") {
+                    // deidentify the coverage
+                    let coverage = deidentifyCoverage(resource.resource);
+                    // replace the coverage resource with the deidentified version
+                    resource.resource = coverage
+                }
+            })
         });
-    } else {
-        prefetch = inputPrefetch;
-    }
+    } 
 
     const r4json = {
         "hookInstance": "d1577c69-dfbe-44ad-ba6d-3e05e953b2ea",
@@ -79,54 +77,43 @@ export default function buildRequest(request, patient, ehrUrl, token, inputPrefe
     }
 
     if(includePrefetch){
-        if(request.resourceType === 'DeviceRequest') {
-            r4json.prefetch = {
-                "deviceRequestBundle": {
+      r4json.prefetch = {};
+
+      prefetch.forEach((resource, key) => {
+        if (key === 'DeviceRequest') {
+          r4json.prefetch.deviceRequestBundle = {
+                  "resourceType": "Bundle",
+                  "type": "collection",
+                  "entry": resource
+              };
+        } else if (key === 'ServiceRequest') {
+            r4json.prefetch.serviceRequestBundle = {
                     "resourceType": "Bundle",
                     "type": "collection",
-                    "entry": prefetch
-                }
-            }
-        } else if(request.resourceType === 'ServiceRequest') {
-            r4json.prefetch = {
-                "serviceRequestBundle": {
+                    "entry": resource
+                };
+        } else if(key === 'MedicationRequest') {
+            r4json.prefetch.medicationRequestBundle = {
                     "resourceType": "Bundle",
                     "type": "collection",
-                    "entry": prefetch
-                }
-            }
-        } else if(request.resourceType === 'MedicationRequest') {
-            if (extraPrefetch != null) {
-                r4json.prefetch = {
-                    "medicationRequestBundle": {
-                        "resourceType": "Bundle",
-                        "type": "collection",
-                        "entry": prefetch
-                    },
-                    "medicationStatementBundle": {
-                        "resourceType": "Bundle",
-                        "type": "collection",
-                        "entry": extraPrefetch
-                    }
-                }
-            } else {
-                r4json.prefetch = {
-                    "medicationRequestBundle": {
-                        "resourceType": "Bundle",
-                        "type": "collection",
-                        "entry": prefetch
-                    }
-                }
-            }
-        } else if(request.resourceType === 'MedicationDispense') {
-            r4json.prefetch = {
-                "medicationDispenseBundle": {
+                    "entry": resource
+                };
+        } else if (key === 'MedicationDispense') {
+            r4json.prefetch.medicationDispenseBundle = {
                     "resourceType": "Bundle",
                     "type": "collection",
-                    "entry": prefetch
-                }
-            }
+                    "entry": resource
+                };
+        } else if (key === 'Coverage') {
+          r4json.prefetch.coverageBundle = {
+                  "resourceType": "Bundle",
+                  "type": "collection",
+                  "entry": resource
+              };
+        } else {
+          console.error("Invalid prefetch key used: " + key + ".");
         }
+      });
     }
 
     console.log(r4json);
