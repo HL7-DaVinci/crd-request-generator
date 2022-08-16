@@ -64,6 +64,12 @@
     border-bottom: 1px solid black;
 }
 
+.prefetch-subheader{ 
+  text-align: left;
+  font-weight: bold;
+  border-bottom: .5px solid black;
+}
+
 .checkmark {
     float: right;
     color: #28a745;
