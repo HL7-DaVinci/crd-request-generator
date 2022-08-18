@@ -1,13 +1,17 @@
 
 import deidentifyPatient from "./deidentifyPatient";
 import deidentifyCoverage from "./deidentifyCoverage";
+import clone from 'clone'
+
 
 export default function buildRequest(request, patient, ehrUrl, token, prefetch, includePrefetch, hook, hookConfig, deidentifyRecords) {
-
     if (deidentifyRecords) {
+        // make a copy of the resources before modifying
+        let newPrefetch = clone(prefetch);
+
         console.log("Deidentify Patient and Coverage Resources to remove PHI");
         // loop through the prefetch looking for the patient and the coverage
-        prefetch.forEach((bundle) => {
+        newPrefetch.forEach((bundle) => {
             bundle.forEach((resource) => {
                 let resourceType = resource.resource.resourceType;
                 if (resourceType == "Patient") {
@@ -23,7 +27,10 @@ export default function buildRequest(request, patient, ehrUrl, token, prefetch, 
                 }
             })
         });
-    } 
+
+        // set the prefetch reference to the modified copy
+        prefetch = newPrefetch
+    }
 
     const r4json = {
         "hookInstance": "d1577c69-dfbe-44ad-ba6d-3e05e953b2ea",
