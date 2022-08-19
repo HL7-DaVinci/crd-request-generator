@@ -7,6 +7,7 @@
     "axios": "^0.18.0",
     "base64url": "^3.0.0",
     "classnames": "^2.2.6",
+    "clone": "^2.1.2",
     "fhirclient": "^2.3.1",
     "json-server": "^0.16.3",
     "jsrsasign": "^10.2.0",
