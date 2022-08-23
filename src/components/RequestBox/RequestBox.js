@@ -745,7 +745,7 @@ export default class RequestBox extends Component {
     if (this.props.access_token) {
         params['tokenResponse'] = {access_token: this.props.access_token.access_token};
     }
-    const disableSendToCRD = this.isOrderNotSelected();
+    const disableSendToCRD = this.isOrderNotSelected() || this.props.loading ;
     const disableLaunchDTR = this.isOrderNotSelected() && Object.keys(this.state.response).length === 0;
     return (
       <div>
@@ -803,6 +803,9 @@ export default class RequestBox extends Component {
              
           </div>
         </div>
+        <div id="fse" className={"spinner " + (this.props.loading ? "visible" : "invisible")}>
+          <div class="ui active right inline loader"></div>
+        </div> 
         <button className={"submit-btn btn btn-class "} onClick={this.relaunch} disabled={disableLaunchDTR}>
           Relaunch DTR
         </button>
