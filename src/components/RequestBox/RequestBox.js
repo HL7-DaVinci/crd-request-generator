@@ -384,7 +384,7 @@ export default class RequestBox extends Component {
           </div>
         </div>
         <div id="fse" className={"spinner " + (this.props.loading ? "visible" : "invisible")}>
-          <div class="ui active right inline loader"></div>
+          <div className="ui active right inline loader"></div>
         </div> 
         <button className={"submit-btn btn btn-class "} onClick={this.relaunch} disabled={disableLaunchDTR}>
           Relaunch DTR
