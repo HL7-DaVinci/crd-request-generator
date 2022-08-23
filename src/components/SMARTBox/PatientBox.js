@@ -20,10 +20,7 @@ export default class SMARTBox extends Component {
 
     this.handleRequestChange = this.handleRequestChange.bind(this);
 
-    this.updateDeviceRequest = this.updateDeviceRequest.bind(this);
-    this.updateServiceRequest = this.updateServiceRequest.bind(this);
-    this.updateMedicationRequest = this.updateMedicationRequest.bind(this);
-    this.updateMedicationDispense = this.updateMedicationDispense.bind(this);
+    this.updatePrefetchRequest = this.updatePrefetchRequest.bind(this);
     this.getDeviceRequest = this.getDeviceRequest.bind(this);
     this.getServiceRequest = this.getServiceRequest.bind(this);
     this.getMedicationRequest = this.getMedicationRequest.bind(this);
@@ -40,9 +37,8 @@ export default class SMARTBox extends Component {
       code = request.codeCodeableConcept.coding[0];
     } else if (request.resourceType === "ServiceRequest") {
       code = request.code.coding[0];
-    } else if (request.resourceType === "MedicationRequest") {
-      code = request.medicationCodeableConcept.coding[0];
-    } else if (request.resourceType === "MedicationDispense") {
+    } else if (request.resourceType === "MedicationRequest"
+        || request.resourceType === "MedicationDispense") {
       code = request.medicationCodeableConcept.coding[0];
     }
     if (code) {
@@ -83,19 +79,12 @@ export default class SMARTBox extends Component {
     this.props.clearCallback();
     if(this.state.request !== "none" ) {
       const request = JSON.parse(this.state.request);
-      if (request.resourceType === "DeviceRequest") {
-        this.updateDeviceRequest(patient, request);
-      } else if (request.resourceType === "ServiceRequest") {
-        this.updateServiceRequest(patient, request);
-      } else if (request.resourceType === "MedicationRequest") {
-        this.updateMedicationRequest(patient, request);
-      } else if (request.resourceType === "MedicationDispense") {
-        this.updateMedicationDispense(patient, request);
-      } 
-        else {
+      if (request.resourceType === "DeviceRequest" || request.resourceType === "ServiceRequest" || request.resourceType === "MedicationRequest" || request.resourceType === "MedicationDispense") {
+        this.updatePrefetchRequest(request);
+      } else {
         this.props.clearCallback();
       }
-    } 
+    }
     
     if(this.state.response !== "none") {
       const response = JSON.parse(this.state.response);
@@ -107,188 +96,27 @@ export default class SMARTBox extends Component {
     this.props.callback("response", response);
   }
 
-  updateServiceRequest(patient, serviceRequest, response) {
-    this.props.callback("serviceRequest", serviceRequest);
-    this.props.updateServiceRequestCallback(serviceRequest, response);
-    const coding = this.getCoding(serviceRequest);
-    const code = coding.code;
-    const system = coding.system;
-    const text = coding.display;
-    this.props.callback("code", code);
-    this.props.callback("codeSystem", system);
-    this.props.callback("display", text);
-    if (
-      this.props.options.filter((e) => {
-        return e.value === code && e.codeSystem === system;
-      }).length === 0
-    ) {
-      this.props.callback("codeValues", [
-        { key: text, codeSystem: system, value: code },
-        ...this.props.options,
-      ]);
-    }
-    if (patient.address && patient.address[0].state) {
-      this.props.callback("patientState", patient.address[0].state);
-    } else {
-      this.props.callback("patientState", "");
-    }
-    if (serviceRequest.performer) {
-      if (serviceRequest.performer[0].reference) {
-        fetch(`${this.props.ehrUrl}/${serviceRequest.performer[0].reference}`, {
-          method: "GET",
-        })
-          .then((response) => {
-            return response.json();
-          })
-          .then((json) => {
-            if (json.address && json.address[0].state) {
-              this.props.callback("practitionerState", json.address[0].state);
-            } else {
-              this.props.callback("practitionerState", "");
-            }
-          });
-      }
-    } else {
-      this.props.callback("practitionerState", "");
-    }
-  }
-
-  updateDeviceRequest(patient, deviceRequest, response) {
-    this.props.callback("deviceRequest", deviceRequest);
-    this.props.updateDeviceRequestCallback(deviceRequest, response);
-    const coding = this.getCoding(deviceRequest);
-    const code = coding.code;
-    const system = coding.system;
-    const text = coding.display;
-    this.props.callback("code", code);
-    this.props.callback("codeSystem", system);
-    this.props.callback("display", text);
-    if (
-      this.props.options.filter((e) => {
-        return e.value === code && e.codeSystem === system;
-      }).length === 0
-    ) {
-      this.props.callback("codeValues", [
-        { key: text, codeSystem: system, value: code },
-        ...this.props.options,
-      ]);
-    }
-    if (patient.address && patient.address[0].state) {
-      this.props.callback("patientState", patient.address[0].state);
-    } else {
-      this.props.callback("patientState", "");
-    }
-    if (deviceRequest.performer) {
-      if (deviceRequest.performer.reference) {
-        fetch(`${this.props.ehrUrl}/${deviceRequest.performer.reference}`, {
-          method: "GET",
-        })
-          .then((response) => {
-            return response.json();
-          })
-          .then((json) => {
-            if (json.address && json.address[0].state) {
-              this.props.callback("practitionerState", json.address[0].state);
-            } else {
-              this.props.callback("practitionerState", "");
-            }
-          });
-      }
-    } else {
-      this.props.callback("practitionerState", "");
-    }
-  }
-
-  updateMedicationRequest(patient, medicationRequest, response) {
-    this.props.callback("medicationRequest", medicationRequest);
-    this.props.updateMedicationRequestCallback(medicationRequest);
-    const coding = this.getCoding(medicationRequest);
-    const code = coding.code;
-    const system = coding.system;
-    const text = coding.display;
-    this.props.callback("code", code);
-    this.props.callback("codeSystem", system);
-    this.props.callback("display", text);
-    if (
-      this.props.options.filter((e) => {
-        return e.value === code && e.codeSystem === system;
-      }).length === 0
-    ) {
-      this.props.callback("codeValues", [
-        { key: text, codeSystem: system, value: code },
-        ...this.props.options,
-      ]);
-    }
-    if (patient.address && patient.address[0].state) {
-      this.props.callback("patientState", patient.address[0].state);
-    } else {
-      this.props.callback("patientState", "");
-    }
-    if (medicationRequest.requester) {
-      if (medicationRequest.requester.reference) {
-        fetch(`${this.props.ehrUrl}/${medicationRequest.requester.reference}`, {
-          method: "GET",
-        })
-          .then((response) => {
-            return response.json();
-          })
-          .then((json) => {
-            if (json.address && json.address[0].state) {
-              this.props.callback("practitionerState", json.address[0].state);
-            } else {
-              this.props.callback("practitionerState", "");
-            }
-          });
-      }
-    } else {
-      this.props.callback("practitionerState", "");
-    }
-  }
-
-  updateMedicationDispense(patient, medicationDispense) {
-    this.props.callback("medicationDispense", medicationDispense);
-    this.props.updateMedicationDispenseCallback(medicationDispense);
-    const coding = this.getCoding(medicationDispense);
-    const code = coding.code;
-    const system = coding.system;
-    const text = coding.display;
-    this.props.callback("code", code);
-    this.props.callback("codeSystem", system);
-    this.props.callback("display", text);
-    if (
-      this.props.options.filter((e) => {
-        return e.value === code && e.codeSystem === system;
-      }).length === 0
-    ) {
-      this.props.callback("codeValues", [
-        { key: text, codeSystem: system, value: code },
-        ...this.props.options,
-      ]);
-    }
-    if (patient.address && patient.address[0].state) {
-      this.props.callback("patientState", patient.address[0].state);
-    } else {
-      this.props.callback("patientState", "");
-    }
-    if (medicationDispense.performer) {
-      if (medicationDispense.performer[0].actor.reference) {
-        fetch(`${this.props.ehrUrl}/${medicationDispense.performer[0].actor.reference}`, {
-          method: "GET",
-        })
-          .then((response) => {
-            return response.json();
-          })
-          .then((json) => {
-            if (json.address && json.address[0].state) {
-              this.props.callback("practitionerState", json.address[0].state);
-            } else {
-              this.props.callback("practitionerState", "");
-            }
-          });
-      }
-    } else {
-      this.props.callback("practitionerState", "");
-    }
+  updatePrefetchRequest(request) {
+    this.props.callback(request.resourceType, request);
+    const queries = this.props.updatePrefetchCallback(request, request.resourceType, "Coverage");
+    queries.forEach((query, queryKey) => {
+      const urlQuery = this.props.ehrUrl + '/' + query;
+      fetch(urlQuery, {
+        method: "GET",
+      }).then((response) => {
+        const responseJson = response.json()
+        return responseJson;
+      }).then((bundle) => {
+        bundle['entry'].forEach((fullResource) => {
+          this.props.callbackMap("prefetchedResources", queryKey, fullResource);
+        });
+      });
+    });
+    this.props.callback("request", request);
+    const coding = this.getCoding(request);
+    this.props.callback("code", coding.code);
+    this.props.callback("codeSystem", coding.system);
+    this.props.callback("display", coding.display);
   }
 
   getDeviceRequest(patientId, client) {
@@ -350,6 +178,9 @@ export default class SMARTBox extends Component {
       //console.log(request.resourceType + " for code " + coding.code + " selected");
       this.setState({
         request: data.value,
+        code: coding.code,
+        system: coding.system,
+        display: coding.display,
         response: "none"
       });
     }

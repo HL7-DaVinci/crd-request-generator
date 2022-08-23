@@ -24,7 +24,7 @@ export default class RequestBuilder extends Component {
             response: null,
             token: null,
             oauth: false,
-            prefetch: true,
+            sendPrefetch: true,
             loading: false,
             logs: [],
             keypair: null,
@@ -39,10 +39,8 @@ export default class RequestBuilder extends Component {
             patientList: [],
             openPatient: false,
             patient: {},
-            deviceRequests: {},
             codeValues: defaultValues,
             currentPatient: null,
-            currentDeviceRequest: null,
             baseUrl: null,
             serviceRequests: {},
             currentServiceRequest: null,
@@ -66,7 +64,6 @@ export default class RequestBuilder extends Component {
         this.requestBox = React.createRef();
     }
 
-
     componentDidMount() {
         this.setState({ config });
         let ehr_base = (process.env.REACT_APP_EHR_BASE ? process.env.REACT_APP_EHR_BASE : config.ehr_base);
@@ -84,23 +81,6 @@ export default class RequestBuilder extends Component {
             // fails when keycloak isn't running, add dummy token
             this.setState({ token: {access_token: ""}})
         })
-    }
-
-    getDeviceRequest(patientId, client) {
-        client.request(`DeviceRequest?subject=Patient/${patientId}`,
-            {
-                resolveReferences: ["subject", "performer"],
-                graph: false,
-                flat: true
-            })
-            .then((result) => {
-                this.setState(prevState => ({
-                    deviceRequests: {
-                        ...prevState.deviceRequests,
-                        [patientId]: result
-                    }
-                }));
-            });
     }
 
     consoleLog(content, type) {
@@ -137,14 +117,14 @@ export default class RequestBuilder extends Component {
             "includeConfig": this.state.includeConfig,
             "alternativeTherapy": this.state.alternativeTherapy
         }
-        let json_request = buildRequest(request, patient, this.state.ehrUrl, this.state.token, prefetch, this.state.prefetch, extraPrefetch, hook, hookConfig);
+        let json_request = buildRequest(request, patient, this.state.ehrUrl, this.state.token, prefetch, this.state.sendPrefetch, hook, hookConfig);
         let cdsUrl = this.state.cdsUrl;
         if (hook === "order-sign") {
             cdsUrl = cdsUrl + "/" + this.state.orderSign;
         } else if (hook === "order-select") {
             cdsUrl = cdsUrl + "/" + this.state.orderSelect;
         } else {
-            this.consoleLog("ERROR: unknown hook type", hook);
+            this.consoleLog("ERROR: unknown hook type: '", hook, "'");
             return;
         }
         let baseUrl = this.state.baseUrl;
@@ -154,7 +134,7 @@ export default class RequestBuilder extends Component {
             "Content-Type": "application/json",
             "authorization": jwt
         });
-        this.consoleLog("Fetching response from " + cdsUrl, types.info)
+        this.consoleLog("Fetching response from " + cdsUrl, types.info);
         try {
             fetch(cdsUrl, {
                 method: "POST",
@@ -340,11 +320,11 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
                 "value": this.state.alternativeTherapy,
                 "key": "alternativeTherapy"
             },
-            "prefetch": {
+            "sendPrefetch": {
               "type": "check",
               "display": "Send Prefetch",
-              "value": this.state.prefetch,
-              "key": "prefetch"
+              "value": this.state.sendPrefetch,
+              "key": "sendPrefetch"
           }
         }
 
