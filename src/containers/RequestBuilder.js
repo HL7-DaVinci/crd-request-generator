@@ -109,7 +109,7 @@ export default class RequestBuilder extends Component {
 
     }
 
-    submit_info(prefetch, request, patient, extraPrefetch, hook) {
+    submit_info(prefetch, request, patient, hook) {
         this.setState({loading: true});
         this.consoleLog("Initiating form submission", types.info);
         this.setState({patient});
