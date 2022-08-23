@@ -7,6 +7,7 @@ import { getAge } from "../../util/fhir";
 import _ from "lodash";
 import "./request.css";
 import { PrefetchTemplate } from "../../PrefetchTemplate";
+import { retrieveLaunchContext } from "../../util/util";
 import axios from 'axios';
 
 export default class RequestBox extends Component {
@@ -313,7 +314,7 @@ export default class RequestBox extends Component {
 
     let linkCopy = Object.assign({}, link);
    
-    return this.props.retrieveLaunchContext(
+    return retrieveLaunchContext(
       linkCopy, this.props.fhirAccessToken,
         this.state.patient.id, this.props.fhirServerUrl, this.props.fhirVersion
     ).then((result) => {

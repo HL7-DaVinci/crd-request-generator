@@ -24,7 +24,6 @@ const PatientPortal = () => {
 
       }, [token])
 
-
     return (
         <div className={classes.background}>
 

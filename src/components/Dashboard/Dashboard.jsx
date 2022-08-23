@@ -30,7 +30,7 @@ const Dashboard = (props) => {
     <div className={classes.dashboardArea}>
         {resources.length > 0?
         resources.map((e) => {
-          return <DashboardElement key = {e.id} resource = {e}/>
+          return <DashboardElement key = {e.id} resource = {e} client={props.client}/>
         }): <div>{message}</div>}
     </div>
   );
