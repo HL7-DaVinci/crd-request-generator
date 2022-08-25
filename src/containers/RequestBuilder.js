@@ -109,7 +109,8 @@ export default class RequestBuilder extends Component {
 
     }
 
-    submit_info(prefetch, request, patient, hook) {
+
+    submit_info(prefetch, request, patient, hook, deidentifyRecords) {
         this.setState({loading: true});
         this.consoleLog("Initiating form submission", types.info);
         this.setState({patient});
@@ -117,7 +118,7 @@ export default class RequestBuilder extends Component {
             "includeConfig": this.state.includeConfig,
             "alternativeTherapy": this.state.alternativeTherapy
         }
-        let json_request = buildRequest(request, patient, this.state.ehrUrl, this.state.token, prefetch, this.state.sendPrefetch, hook, hookConfig);
+        let json_request = buildRequest(request, patient, this.state.ehrUrl, this.state.token, prefetch, this.state.sendPrefetch, hook, hookConfig, deidentifyRecords);
         let cdsUrl = this.state.cdsUrl;
         if (hook === "order-sign") {
             cdsUrl = cdsUrl + "/" + this.state.orderSign;
