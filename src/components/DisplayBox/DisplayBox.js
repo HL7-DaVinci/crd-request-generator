@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
 import axios from 'axios';
 import SMARTBox from '../SMARTBox/SMARTBox';
 import ReactMarkdown from 'react-markdown';
+import { retrieveLaunchContext } from '../../util/util';
 import './displayBox.css';
 
 const propTypes = {
@@ -202,7 +203,7 @@ export default class DisplayBox extends Component{
         let linkCopy = Object.assign({}, link);
 
         if (link.type === 'smart' && (this.props.fhirAccessToken || this.props.ehrLaunch) && !this.state.smartLink) {
-          this.props.retrieveLaunchContext(
+          retrieveLaunchContext(
             linkCopy, this.props.fhirAccessToken,
             this.props.patientId, this.props.fhirServerUrl, this.props.fhirVersion
           ).then((result) => {
