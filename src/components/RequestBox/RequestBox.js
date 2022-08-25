@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import FHIR from "fhirclient";
 import SMARTBox from "../SMARTBox/SMARTBox";
 import PatientBox from "../SMARTBox/PatientBox";
+import CheckBox from '../Inputs/CheckBox';
 import { defaultValues, shortNameMap } from "../../util/data";
 import { getAge } from "../../util/fhir";
 import _ from "lodash";
@@ -23,7 +24,8 @@ export default class RequestBox extends Component {
       display: null,
       request: {},
       gatherCount: 0,
-      response: {}
+      response: {},
+      deidentifyRecords: false
     };
 
     this.renderRequestResources = this.renderRequestResources.bind(this);
@@ -33,6 +35,7 @@ export default class RequestBox extends Component {
     this.renderPrefetchedResources = this.renderPrefetchedResources.bind(this);
     this.renderError = this.renderError.bind(this);
     this.buildLaunchLink = this.buildLaunchLink.bind(this);
+    this.updateDeidentifyCheckbox = this.updateDeidentifyCheckbox.bind(this);
   }
 
   // TODO - see how to submit response for alternative therapy
@@ -42,7 +45,7 @@ export default class RequestBox extends Component {
     // Prepare the prefetch.
     const prefetch = this.prepPrefetch();
     // Submit the CRD request.
-    this.props.submitInfo(prefetch, request, this.state.patient, "order-sign");
+    this.props.submitInfo(prefetch, request, this.state.patient, "order-sign", this.state.deidentifyRecords);
   }
 
   componentDidMount() {}
@@ -68,7 +71,8 @@ export default class RequestBox extends Component {
         this.prepPrefetch(),
         this.state.request,
         this.state.patient,
-        "order-sign"
+        "order-sign",
+        this.state.deidentifyRecords
       );
     }
   };
@@ -326,6 +330,10 @@ export default class RequestBox extends Component {
     return Object.keys(this.state.request).length === 0;
   }
 
+  updateDeidentifyCheckbox(elementName, value) {
+    this.setState({ deidentifyRecords: value });
+  }
+
   render() {
     const params = {};
     params['serverUrl'] = this.props.ehrUrl;
@@ -379,8 +387,15 @@ export default class RequestBox extends Component {
             <div>
               {this.renderPatientInfo()}
               {this.renderPrefetchedResources()}
-            </div> 
-             
+            </div>
+            <div>
+              <b>Deidentify Records</b>
+              <CheckBox
+                toggle = {this.state.deidentifyRecords}
+                updateCB={this.updateDeidentifyCheckbox}
+                elementName = "deidentifyCheckbox" 
+                />
+            </div>
           </div>
         </div>
         <button className={"submit-btn btn btn-class "} onClick={this.relaunch} disabled={disableLaunchDTR}>
