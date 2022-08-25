@@ -109,7 +109,9 @@ export default class RequestBuilder extends Component {
 
     }
 
+
     submit_info(prefetch, request, patient, hook, deidentifyRecords) {
+        this.setState({loading: true});
         this.consoleLog("Initiating form submission", types.info);
         this.setState({patient});
         const hookConfig = {
@@ -363,6 +365,7 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
                             launchUrl={this.state.launchUrl}
                             responseExpirationDays={this.state.responseExpirationDays}
                             ref={this.requestBox}
+                            loading={this.state.loading}
                         />
 
                     </div>
