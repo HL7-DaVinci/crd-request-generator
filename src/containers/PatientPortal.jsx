@@ -4,35 +4,63 @@ import FHIR from "fhirclient";
 import config from '../properties.json';
 import Login from '../components/Auth/Login';
 import Dashboard from '../components/Dashboard/Dashboard';
+import AccountBoxIcon from '@mui/icons-material/AccountBox';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import Typography from '@mui/material/Typography';
 const PatientPortal = () => {
     const classes = useStyles();
     const [token, setToken] = useState(null);
     const [client, setClient] = useState(null);
+    const [patientName, setPatientName] = useState(null);
 
     useEffect(() => {
         if(token) {
             const data = JSON.parse(Buffer.from(token.split('.')[1], 'base64'))
-            setClient(FHIR.client({
+            const client = FHIR.client({
                 serverUrl: config.ehr_base,
                 tokenResponse: {
                     type: 'bearer',
                     access_token: token,
                     patient: data.patientId
                 },
-              }));
+            });
+            client.request(`Patient/${client.patient.id}`).then((patient) => {
+                setPatientName(getName(patient));
+            });
+            setClient(client);
         }
 
       }, [token])
 
+    const getName = (patient) => {
+        const name = [];
+        if(patient.name) {
+            if(patient.name[0].given) {
+                name.push(patient.name[0].given[0]);
+            }
+            if(patient.name[0].family){
+                name.push(patient.name[0].family);
+            }
+        }
+        return name.join(' ');
+    }
     return (
         <div className={classes.background}>
-
-            <div className={classes.adminBar}>
-                <span className={classes.adminBarText}>
+            <AppBar position="fixed" sx={{ zIndex: 1300, backgroundColor: '#bb3551', height:'95px'}}>
+                <Toolbar>
+                <Typography variant="h5" noWrap component="div" sx={{lineHeight: '95px'}}>
                     <strong>REMS</strong> Patient Portal
-                </span>
-            </div>
-
+                </Typography>
+                {patientName ? 
+                                <span className={classes.loginIcon}>
+                                    <AccountBoxIcon  sx={{ fontSize: 60, verticalAlign: 'middle'}}/> {patientName}
+                                </span>
+                                :
+                                null
+                }
+                </Toolbar>
+            </AppBar>
                 {token && client ?
                     <Dashboard client={client}></Dashboard>
                     :

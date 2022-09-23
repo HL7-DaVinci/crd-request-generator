@@ -12,23 +12,43 @@ export default makeStyles(
       fontFamily: '"Gill Sans", sans-serif'
     },
     dashboardArea: {
-      backgroundColor: 'white',
-      margin: '80px',
-      padding: '20px'
+      backgroundColor: '#fdfdfd',
+      margin: '80px 60px 0px 60px',
+      padding: '20px',
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      height: '75vh',
     },
     dashboardElement: {
       height: '100px',
       width: '100%',
       padding: '10px',
-      border: '1px solid black',
-      borderLeft: '3px solid #f50057',
       margin: '5px',
-      backgroundColor: '#fafafa',
+      fontSize: '18px',
+      cursor:'pointer',
       '&:hover': {
-        backgroundColor: '#fff'
+        boxShadow: '0px 2px 1px 1px rgb(0 0 0 / 40%), 0px 1px 1px 0px rgb(0 0 0 / 28%), 0px 1px 3px 0px rgb(0 0 0 / 24%)'
       }
     },
+    elementHeader: {
+      marginLeft: '5px',
+      display: 'inline-block',
+    },
+    elementIcon: {
+      verticalAlign: 'middle'
+    },
+    listItemText:{
+      fontSize:'4.2em',//Insert your required size
+    },
+    progressBubble: {
+      height: '12px',
+      width: '12px',
+      borderRadius: '12px',
+      float: 'right'
+    },
+    spacer: {
 
+    }
   }),
 
   { name: 'Dashboard', index: 1 }

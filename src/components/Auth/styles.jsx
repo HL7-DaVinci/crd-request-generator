@@ -3,7 +3,8 @@ export default makeStyles(
   theme => ({
     background: {
       backgroundColor: theme.palette.common.offWhite,
-      height: '100vh'
+      height: '100vh',
+      overflow: 'hidden'
     },
     formFont: {
       fontFamily: '"Gill Sans", sans-serif'
@@ -23,7 +24,7 @@ export default makeStyles(
       height: '700px',
       boxShadow: '0 4px 4px rgba(0, 0, 0, 0.10)',
       backgroundColor: theme.palette.common.white,
-      margin: '40px auto',
+      margin: '150px auto 0px auto',
       paddingLeft: '75px',
       paddingTop: '90px',
       textAlign: 'left'

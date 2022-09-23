@@ -22,6 +22,15 @@ export default makeStyles(
     formFont: {
       fontFamily: '"Gill Sans", sans-serif'
     },
+    loginIcon: {
+      color: theme.palette.common.white,
+      fontSize: '19px',
+      marginLeft: 'auto',
+      fontFamily: 'Verdana',
+      float: 'right',
+      marginRight: '20px',
+      verticalAlign: 'middle'
+    }
   }),
 
   { name: 'PatientPortal', index: 1 }
