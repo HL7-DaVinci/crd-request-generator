@@ -30,7 +30,7 @@ export default class CheckBox extends Component {
             className={toggleClass +" btn-class btn " + this.props.extraClass}
             name={this.props.elementName}
             onClick={this.onInputChange}
-            >{this.props.displayName} <a className={indicatorClass + " onOffState " + this.props.extraInnerClass} ></a></button>
+            >{this.props.displayName} <span className={indicatorClass + " onOffState " + this.props.extraInnerClass} ></span></button>
             </span>
         )
     }

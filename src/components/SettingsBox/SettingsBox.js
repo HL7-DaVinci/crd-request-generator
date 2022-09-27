@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import './SettingsBox.css';
 import InputBox from '../Inputs/InputBox';
 import CheckBox from '../Inputs/CheckBox';
-import { StatisticValue } from 'semantic-ui-react';
 export default class SettingsBox extends Component {
     constructor(props) {
         super(props);

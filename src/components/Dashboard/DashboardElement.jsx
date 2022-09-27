@@ -1,4 +1,4 @@
-import React, { memo, useState, useEffect } from 'react';
+import React, { memo } from 'react';
 import { retrieveLaunchContext } from '../../util/util';
 import { headers } from '../../util/data.js';
 

@@ -14,7 +14,7 @@ export default function buildRequest(request, patient, ehrUrl, token, prefetch, 
         newPrefetch.forEach((bundle) => {
             bundle.forEach((resource) => {
                 let resourceType = resource.resource.resourceType;
-                if (resourceType == "Patient") {
+                if (resourceType === "Patient") {
                     // deidentify the patient
                     let patient = deidentifyPatient(resource.resource);
                     // replace the patient resource with the deidentified version

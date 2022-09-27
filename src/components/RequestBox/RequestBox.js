@@ -9,7 +9,6 @@ import _ from "lodash";
 import "./request.css";
 import { PrefetchTemplate } from "../../PrefetchTemplate";
 import { retrieveLaunchContext } from "../../util/util";
-import axios from 'axios';
 
 export default class RequestBox extends Component {
   constructor(props) {
@@ -227,8 +226,7 @@ export default class RequestBox extends Component {
         <div className="prefetch-header">Prefetched</div>
         {Array.from(renderedPrefetches.keys()).map((resourceKey) => {
           const currentRenderedPrefetch = renderedPrefetches.get(resourceKey);
-          {console.log(currentRenderedPrefetch)};
-          return (<div><div className="prefetch-subheader">{resourceKey + " Resources"}</div>
+          return (<div key = {resourceKey}><div className="prefetch-subheader">{resourceKey + " Resources"}</div>
             {currentRenderedPrefetch}</div>);
         })}
       </div>
