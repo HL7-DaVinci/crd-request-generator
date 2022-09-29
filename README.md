@@ -4,7 +4,7 @@ This subproject provides a small web application that is capable of generating C
 ## Running the request generator standalone
 1. Install node.js
 2. Clone the repository
-  * `git clone https://github.com/HL7-DaVinci/crd-request-generator.git`
+  * `git clone https://github.com/mcode/crd-request-generator.git`
 3. Install the dependencies
   * `cd request-generator`
   * `npm install`
