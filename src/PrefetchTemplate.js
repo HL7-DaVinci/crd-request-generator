@@ -105,7 +105,7 @@ export class PrefetchTemplate {
       for (var j = 0; j < parametersToFill.length; j++) {
         var unresolvedParameter = parametersToFill[j];
         var resolvedParameter = PrefetchTemplate.resolveParameter(unresolvedParameter, requestBundle);
-        var resolvedQuery = resolvedQuery.replace('{{' + unresolvedParameter + '}}', resolvedParameter);
+        resolvedQuery = resolvedQuery.replace('{{' + unresolvedParameter + '}}', resolvedParameter);
       }
       resolvedQueries.set(prefetchKey, resolvedQuery);
     }

@@ -6,7 +6,6 @@ import TerraCard from 'terra-card';
 import Text from 'terra-text';
 import PropTypes from 'prop-types';
 import axios from 'axios';
-import SMARTBox from '../SMARTBox/SMARTBox';
 import ReactMarkdown from 'react-markdown';
 import { retrieveLaunchContext } from '../../util/util';
 import './displayBox.css';
@@ -121,9 +120,10 @@ export default class DisplayBox extends Component{
         });
 
         // handle each action from the suggestion
+        var uri = '';
         suggestion.actions.forEach((action) => {
           if (action.type.toUpperCase() === "DELETE") {
-            var uri = action.resource.resourceType + "/" + action.resource.id;
+            uri = action.resource.resourceType + "/" + action.resource.id;
             console.log("completing suggested action DELETE: " + uri);
             client.delete(uri).then((result) => {
               console.log("suggested action DELETE result:");
@@ -131,7 +131,7 @@ export default class DisplayBox extends Component{
             });
 
           } else if (action.type.toUpperCase() === "CREATE") {
-            var uri = action.resource.resourceType;
+            uri = action.resource.resourceType;
             console.log("completing suggested action CREATE: " + uri);
             client.create(action.resource).then((result) => {
               console.log("suggested action CREATE result:");
@@ -144,7 +144,7 @@ export default class DisplayBox extends Component{
             });
 
           } else if (action.type.toUpperCase() === "UPDATE") {
-            var uri = action.resource.resourceType + "/" + action.resource.id;
+            uri = action.resource.resourceType + "/" + action.resource.id;
             console.log("completing suggested action UPDATE: " + uri);
             client.update(action.resource).then((result) => {
               console.log("suggested action UPDATE result:");

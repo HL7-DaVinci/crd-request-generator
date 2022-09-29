@@ -260,29 +260,29 @@ export default class SMARTBox extends Component {
     if (this.state.deviceRequests.data) {
       returned = true;
       console.log(this.state.deviceRequests);
-      this.state.deviceRequests.data.map((e) => {
+      this.state.deviceRequests.data.forEach((e) => {
         this.makeOption(e, options);
       });
     }
     if (this.state.serviceRequests.data) {
-      this.state.serviceRequests.data.map((e) => {
+      this.state.serviceRequests.data.forEach((e) => {
         this.makeOption(e, options);
       });
     }
     if (this.state.medicationRequests.data) {
-        this.state.medicationRequests.data.map((e) => {
+        this.state.medicationRequests.data.forEach((e) => {
         this.makeOption(e, options);
       });
     }
 
     if (this.state.medicationDispenses.data) {
-      this.state.medicationDispenses.data.map((e) => {
+      this.state.medicationDispenses.data.forEach((e) => {
       this.makeOption(e, options);
     })};
 
     if(this.state.questionnaireResponses.data) {
       returned = true;
-      this.state.questionnaireResponses.data.map(qr => this.makeQROption(qr, responseOptions));
+      this.state.questionnaireResponses.data.forEach(qr => this.makeQROption(qr, responseOptions));
     }
     
     let noResults = 'No results found.'
