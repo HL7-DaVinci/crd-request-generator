@@ -404,7 +404,7 @@ export default class RequestBox extends Component {
           Relaunch DTR
         </button>
         <button className={"submit-btn btn btn-class "} onClick={this.submit} disabled={disableSendToCRD}>
-          Submit to CRD
+          Submit to CRDasdf
         </button>
       </div>
     );
