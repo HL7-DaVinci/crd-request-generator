@@ -98,7 +98,7 @@ export default class SMARTBox extends Component {
 
   updatePrefetchRequest(request) {
     this.props.callback(request.resourceType, request);
-    const queries = this.props.updatePrefetchCallback(request, request.resourceType, "Coverage");
+    const queries = this.props.updatePrefetchCallback(request, "request", "patient", "practitioner");
     queries.forEach((query, queryKey) => {
       const urlQuery = this.props.ehrUrl + '/' + query;
       fetch(urlQuery, {
@@ -106,10 +106,8 @@ export default class SMARTBox extends Component {
       }).then((response) => {
         const responseJson = response.json()
         return responseJson;
-      }).then((bundle) => {
-        bundle['entry'].forEach((fullResource) => {
-          this.props.callbackMap("prefetchedResources", queryKey, fullResource);
-        });
+      }).then((resource) => {
+        this.props.callbackMap("prefetchedResources", queryKey, resource);
       });
     });
     this.props.callback("request", request);
