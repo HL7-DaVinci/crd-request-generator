@@ -44,7 +44,7 @@ export default function buildRequest(request, patient, ehrUrl, token, prefetch, 
             "subject": "cds-service4"
         },
         "context": {
-            "userId": "Practitioner/example",
+            "userId": request.requester.reference,
             "patientId": patient.id,
             "encounterId": "enc89284"
         }

@@ -57,9 +57,15 @@ export default class RequestBox extends Component {
   prepPrefetch() {
     const preppedResources = new Map();
     Object.keys(this.state.prefetchedResources).forEach((resourceKey) => {
-      const resourceList = this.state.prefetchedResources[resourceKey].map((resource) => {
-        return resource;
-      })
+      let resourceList = []
+      if(Array.isArray(this.state.prefetchedResources[resourceKey])){
+        resourceList = this.state.prefetchedResources[resourceKey].map((resource) => {
+          return resource;
+        })
+      } else {
+        resourceList = this.state.prefetchedResources[resourceKey]
+      }
+
       preppedResources.set(resourceKey, resourceList);
     });
     return preppedResources;
@@ -92,7 +98,7 @@ export default class RequestBox extends Component {
       if(!prevState[elementName][key]){
         prevState[elementName][key] = [];
       }
-      return {[elementName]: {...prevState[elementName], [key]: [...prevState[elementName][key], text]}};
+      return {[elementName]: {...prevState[elementName], [key]: text}};
     });
   };
 
@@ -212,11 +218,16 @@ export default class RequestBox extends Component {
     var renderedPrefetches = new Map();
     requestResources.forEach((resourceList, resourceKey) => {
       const renderedList = [];
-      resourceList.forEach((resource) => {
-        console.log("Request resources:" + JSON.stringify(requestResources));
-        console.log("Request key:" + resourceKey);
-        renderedList.push(this.renderResource(resource))
-      });
+      if(Array.isArray(resourceList)){
+        resourceList.forEach((resource) => {
+          console.log("Request resources:" + JSON.stringify(requestResources));
+          console.log("Request key:" + resourceKey);
+          renderedList.push(this.renderResource(resource))
+        });
+      } else {
+        renderedList.push(this.renderResource(resourceList))
+      }
+
       renderedPrefetches.set(resourceKey, renderedList);
     });
     console.log(renderedPrefetches);
