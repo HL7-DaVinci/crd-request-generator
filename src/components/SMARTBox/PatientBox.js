@@ -38,7 +38,7 @@ export default class SMARTBox extends Component {
     } else if (request.resourceType === "ServiceRequest") {
       code = request.code.coding[0];
     } else if (request.resourceType === "MedicationRequest"
-        || request.resourceType === "MedicationDispense") {
+      || request.resourceType === "MedicationDispense") {
       code = request.medicationCodeableConcept.coding[0];
     }
     if (code) {
@@ -77,7 +77,7 @@ export default class SMARTBox extends Component {
     this.props.callback("patient", patient);
     this.props.callback("openPatient", false);
     this.props.clearCallback();
-    if(this.state.request !== "none" ) {
+    if (this.state.request !== "none") {
       const request = JSON.parse(this.state.request);
       if (request.resourceType === "DeviceRequest" || request.resourceType === "ServiceRequest" || request.resourceType === "MedicationRequest" || request.resourceType === "MedicationDispense") {
         this.updatePrefetchRequest(request);
@@ -85,8 +85,8 @@ export default class SMARTBox extends Component {
         this.props.clearCallback();
       }
     }
-    
-    if(this.state.response !== "none") {
+
+    if (this.state.response !== "none") {
       const response = JSON.parse(this.state.response);
       this.updateQRResponse(patient, response);
     }
@@ -161,7 +161,7 @@ export default class SMARTBox extends Component {
         flat: true,
       })
       .then((result) => {
-        this.setState({ medicationDispenses: result});
+        this.setState({ medicationDispenses: result });
       });
   }
 
@@ -189,17 +189,17 @@ export default class SMARTBox extends Component {
       this.setState({
         response: "none"
       });
-    } else { 
+    } else {
       this.setState({
         response: data.value
       });
     }
   }
-  
+
   getRequests() {
     const client = FHIR.client(
-        this.props.params
-      );
+      this.props.params
+    );
     const patientId = this.props.patient.id;
     this.getDeviceRequest(patientId, client);
     this.getServiceRequest(patientId, client);
@@ -233,7 +233,7 @@ export default class SMARTBox extends Component {
     const display = `${qr.questionnaire}: created at ${qr.authored}`;
     let option = {
       key: qr.id,
-      text: display, 
+      text: display,
       value: JSON.stringify(qr),
       content: (
         <Header content={"QuestionnaireResponse"} subheader={display} />
@@ -268,24 +268,25 @@ export default class SMARTBox extends Component {
       });
     }
     if (this.state.medicationRequests.data) {
-        this.state.medicationRequests.data.forEach((e) => {
+      this.state.medicationRequests.data.forEach((e) => {
         this.makeOption(e, options);
       });
     }
 
     if (this.state.medicationDispenses.data) {
       this.state.medicationDispenses.data.forEach((e) => {
-      this.makeOption(e, options);
-    })};
+        this.makeOption(e, options);
+      })
+    };
 
-    if(this.state.questionnaireResponses.data) {
+    if (this.state.questionnaireResponses.data) {
       returned = true;
       this.state.questionnaireResponses.data.forEach(qr => this.makeQROption(qr, responseOptions));
     }
-    
+
     let noResults = 'No results found.'
-    if(!returned) {
-        noResults = 'Loading...';
+    if (!returned) {
+      noResults = 'Loading...';
     }
 
     return (
@@ -319,10 +320,10 @@ export default class SMARTBox extends Component {
             <span style={{ fontWeight: "bold", marginRight: "5px" }}>
               Request:
             </span>
-            <Dropdown 
+            <Dropdown
               search searchInput={{ type: 'text' }}
-              selection fluid options={options} 
-              placeholder='Choose an option' 
+              selection fluid options={options}
+              placeholder='Choose an option'
               noResultsMessage={noResults}
               onChange={this.handleRequestChange}
               onOpen={this.getRequests}
@@ -332,10 +333,10 @@ export default class SMARTBox extends Component {
             <span style={{ fontWeight: "bold", marginRight: "5px" }}>
               In Progress Form:
             </span>
-            <Dropdown 
+            <Dropdown
               search searchInput={{ type: 'text' }}
-              selection fluid options={responseOptions} 
-              placeholder='Choose an option' 
+              selection fluid options={responseOptions}
+              placeholder='Choose an option'
               noResultsMessage={noResults}
               onChange={this.handleResponseChange}
               onOpen={this.getResponses}
