@@ -144,16 +144,18 @@ export default class RequestBuilder extends Component {
                 body: JSON.stringify(json_request)
             }).then(response => {
                 response.json().then((fhirResponse) => {
-                    this.consoleLog('fhirresponse')
-                    this.consoleLog(fhirResponse)
-                    // if (fhirResponse && fhirResponse.status) {
-                    // } else {
-                    //     this.setState({ response: fhirResponse });
-                    // }
+                    if (fhirResponse && fhirResponse.status) {
+                        this.consoleLog("Server returned status "
+                            + fhirResponse.status + ": "
+                            + fhirResponse.error, types.error);
+                        this.consoleLog(fhirResponse.message, types.error);
+                    } else {
+                        this.setState({ response: fhirResponse });
+                    }
                     this.setState({ loading: false });
                 })
             }).catch(() => {
-                this.consoleLog("No response recieved from the server", types.error);
+                this.consoleLog("No response received from the server", types.error);
                 this.setState({loading: false});
             });
         } catch (error) {
