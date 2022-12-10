@@ -8,12 +8,9 @@ export class PrefetchTemplate {
 
     const PRACTITIONER_PREFETCH = new PrefetchTemplate(
       "{{context.userId}}");
-    const REQUEST_PREFETCH = new PrefetchTemplate(
-      "MedicationRequest/{{context.medications.MedicationRequest.id}}");
     const PATIENT_PREFETCH = new PrefetchTemplate("{{context.patientId}}");
 
     // prefetchMap.set("Coverage", COVERAGE_PREFETCH_QUERY);
-    prefetchMap.set("request", REQUEST_PREFETCH);
     prefetchMap.set("practitioner", PRACTITIONER_PREFETCH);
     prefetchMap.set("patient", PATIENT_PREFETCH);
     // prefetchMap.set("ServiceRequest", SERVICE_REQUEST_BUNDLE);
