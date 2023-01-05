@@ -8,6 +8,7 @@ export class PrefetchTemplate {
 
     const PRACTITIONER_PREFETCH = new PrefetchTemplate(
       "{{context.userId}}");
+
     const REQUEST_PREFETCH = new PrefetchTemplate(
       "MedicationRequest/{{context.medications.MedicationRequest.id}}");
     const PATIENT_PREFETCH = new PrefetchTemplate("{{context.patientId}}");
