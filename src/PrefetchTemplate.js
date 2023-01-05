@@ -6,83 +6,29 @@ export class PrefetchTemplate {
 
     const prefetchMap = new Map();
 
-    const COVERAGE_PREFETCH_QUERY = new PrefetchTemplate(
-      "Coverage?patient={{context.patientId}}");
+    const PRACTITIONER_PREFETCH = new PrefetchTemplate(
+      "{{context.userId}}");
+    const PATIENT_PREFETCH = new PrefetchTemplate("{{context.patientId}}");
 
-    const DEVICE_REQUEST_BUNDLE = new PrefetchTemplate(
-      "DeviceRequest?_id={{context.draftOrders.DeviceRequest.id}}"
-      + "&_include=DeviceRequest:patient"
-      + "&_include=DeviceRequest:performer"
-      + "&_include=DeviceRequest:requester"
-      + "&_include=DeviceRequest:device"
-      + "&_include:iterate=PractitionerRole:organization"
-      + "&_include:iterate=PractitionerRole:practitioner");
-
-    const MEDICATION_REQUEST_BUNDLE = new PrefetchTemplate(
-      "MedicationRequest?_id={{context.medications.MedicationRequest.id}}"
-      + "&_include=MedicationRequest:patient"
-      + "&_include=MedicationRequest:intended-dispenser"
-      + "&_include=MedicationRequest:requester:PractitionerRole"
-      + "&_include=MedicationRequest:medication"
-      + "&_include:iterate=PractitionerRole:organization"
-      + "&_include:iterate=PractitionerRole:practitioner");
-
-    const MEDICATION_DISPENSE_BUNDLE = new PrefetchTemplate(
-      "MedicationDispense?_id={{context.medications.MedicationDispense.id}}"
-      + "&_include=MedicationDispense:patient"
-      + "&_include=MedicationDispense:intended-dispenser"
-      + "&_include=MedicationDispense:requester:PractitionerRole"
-      + "&_include=MedicationDispense:medication"
-      + "&_include:iterate=PractitionerRole:organization"
-      + "&_include:iterate=PractitionerRole:practitioner");
-
-    const NUTRITION_ORDER_BUNDLE = new PrefetchTemplate(
-      "NutritionOrder?_id={{context.draftOrders.NutritionOrder.id}}"
-      + "&_include=NutritionOrder:patient"
-      + "&_include=NutritionOrder:provider"
-      + "&_include=NutritionOrder:requester"
-      + "&_include=PractitionerRole:organization"
-      + "&_include=PractitionerRole:practitioner"
-      + "&_include=NutritionOrder:encounter"
-      + "&_include=Encounter:location");
-
-    const SERVICE_REQUEST_BUNDLE = new PrefetchTemplate(
-      "ServiceRequest?_id={{context.draftOrders.ServiceRequest.id}}"
-      + "&_include=ServiceRequest:patient"
-      + "&_include=ServiceRequest:performer"
-      + "&_include=ServiceRequest:requester"
-      + "&_include:iterate=PractitionerRole:organization"
-      + "&_include:iterate=PractitionerRole:practitioner");
-
-    const APPOINTMENT_BUNDLE = new PrefetchTemplate(
-      "appointmentBundle",
-      "Appointment?_id={{context.appointments.Appointment.id}}"
-      + "&_include=Appointment:patient"
-      + "&_include=Appointment:practitioner:PractitionerRole"
-      + "&_include:iterate=PractitionerRole:organization"
-      + "&_include:iterate=PractitionerRole:practitioner"
-      + "&_include=Appointment:location");
-
-    const ENCOUNTER_BUNDLE = new PrefetchTemplate(
-      "encounterBundle",
-      "Encounter?_id={{context.encounterId}}"
-      + "&_include=Encounter:patient"
-      + "&_include=Encounter:service-provider"
-      + "&_include=Encounter:practitioner"
-      + "&_include=Encounter:location");
-
-    prefetchMap.set("Coverage", COVERAGE_PREFETCH_QUERY);
-    prefetchMap.set("DeviceRequest", DEVICE_REQUEST_BUNDLE);
-    prefetchMap.set("MedicationRequest", MEDICATION_REQUEST_BUNDLE);
-    prefetchMap.set("MedicationDispense", MEDICATION_DISPENSE_BUNDLE);
-    prefetchMap.set("ServiceRequest", SERVICE_REQUEST_BUNDLE);
-    prefetchMap.set("Encounter", ENCOUNTER_BUNDLE);
+    // prefetchMap.set("Coverage", COVERAGE_PREFETCH_QUERY);
+    prefetchMap.set("practitioner", PRACTITIONER_PREFETCH);
+    prefetchMap.set("patient", PATIENT_PREFETCH);
+    // prefetchMap.set("ServiceRequest", SERVICE_REQUEST_BUNDLE);
+    // prefetchMap.set("Encounter", ENCOUNTER_BUNDLE);
 
     return prefetchMap;
   }
 
   static generateParamElementMap() {
     const paramElementMap = new Map();
+    // TODO - this should just be inferred based on context.  Or rather
+    // the instructions from the hook about what context to fill in
+    // Quite literally, the "context" here refers to the "context" of the
+    // cds-hook, which as of now is just hard-coded in buildRequest.js
+    // Rather than do this, which searches the request resource for information,
+    // the cds-hook should be constructed and then the context used to actually make
+    // the appropriate requests.
+    paramElementMap.set('context.userId', ['requester', 'reference'])
     paramElementMap.set('context.draftOrders.DeviceRequest.id', ['id']);
     paramElementMap.set('context.medications.MedicationRequest.id', ['id']);
     paramElementMap.set('context.medications.MedicationDispense.id', ['id']);
