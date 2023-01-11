@@ -138,11 +138,13 @@ export default class RequestBuilder extends Component {
             "authorization": jwt
         });
         try {
-            fetch(cdsUrl, {signal: this.timeout(10).signal},{
+            fetch(cdsUrl, {
                 method: "POST",
                 headers: myHeaders,
-                body: JSON.stringify(json_request)
+                body: JSON.stringify(json_request),
+                signal: this.timeout(10).signal //Timeout set to 10 seconds
             }).then(response => {
+                clearTimeout(this.timeout)
                 response.json().then((fhirResponse) => {
                     if (fhirResponse && fhirResponse.status) {
                         this.consoleLog("Server returned status "
