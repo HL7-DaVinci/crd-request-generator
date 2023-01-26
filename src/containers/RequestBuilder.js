@@ -45,7 +45,8 @@ export default class RequestBuilder extends Component {
             includeConfig: true,
             alternativeTherapy: headers.alternativeTherapy.value,
             launchUrl: headers.launchUrl.value,
-            responseExpirationDays: headers.responseExpirationDays.value
+            responseExpirationDays: headers.responseExpirationDays.value,
+            pimsUrl: headers.pimsUrl.value
         };
         this.validateMap = {
             age: (foo => { return isNaN(foo) }),
@@ -252,6 +253,12 @@ export default class RequestBuilder extends Component {
                 "value": this.state.responseExpirationDays,
                 "key": "responseExpirationDays"
             },
+            "pimsUrl": {
+                "type": "input",
+                "display": "PIMS Server",
+                "value": this.state.pimsUrl,
+                "key": "pimsUrl"
+            },
             "includeConfig": {
                 "type": "check",
                 "display": "Include Configuration in CRD Request",
@@ -306,8 +313,10 @@ export default class RequestBuilder extends Component {
                             patientId={this.state.patient.id}
                             launchUrl={this.state.launchUrl}
                             responseExpirationDays={this.state.responseExpirationDays}
+                            pimsUrl={this.state.pimsUrl}
                             ref={this.requestBox}
                             loading={this.state.loading}
+                            consoleLog={this.consoleLog}
                         />
 
                     </div>
