@@ -105,12 +105,9 @@
   }
 
   function quantityUnitOfMeasureFromDrugFormCode(dispenseRequest) {
-    console.log(dispenseRequest);
     // Switch on Orderable Drug Form codes from: 
     // https://terminology.hl7.org/5.0.0/CodeSystem-v3-orderableDrugForm.html
     // Return NCPDP QuantityUnitOfMeasure
-    console.log(dispenseRequest.quantity.system);
-    console.log(dispenseRequest.quantity.system.toLowerCase());
     if (dispenseRequest.quantity.system.toLowerCase().endsWith("v3-orderableDrugForm".toLowerCase())) {
       // is a subset of the codes, not a complete list
       switch (dispenseRequest.quantity.code.toUpperCase()) {
