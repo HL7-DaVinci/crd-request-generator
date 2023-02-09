@@ -379,7 +379,7 @@ export default class RequestBox extends Component {
   resetRemsAdmin = (e) => {
     console.log("reset rems admin: " + "localhost:8090/etasu/reset");
 
-    fetch("localhost:8090/etasu/reset", {
+    fetch("http://localhost:8090/etasu/reset", {
       method: 'POST',
     })
     .then(response => {
