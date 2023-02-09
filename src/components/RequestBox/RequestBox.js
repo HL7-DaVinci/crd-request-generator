@@ -375,6 +375,27 @@ export default class RequestBox extends Component {
 
   }
 
+
+  resetRemsAdmin = (e) => {
+    console.log("reset rems admin: " + "localhost:8090/etasu/reset");
+
+    fetch("localhost:8090/etasu/reset", {
+      method: 'POST',
+    })
+    .then(response => {
+      console.log("Reset rems admin etasy: ");
+      console.log(response);
+      this.props.consoleLog("Successfully reset rems admin etasu", types.info);
+    })
+    .catch(error => {
+      console.log("Reset rems admin error: ");
+      this.props.consoleLog("Server returned error when resetting rems admin etasu: ", types.error);
+      this.props.consoleLog(error.message);
+      console.log(error);
+    });
+
+  }
+
   xmlAddTextNode(xmlDoc, parent, sectionName, value) {
     var section = xmlDoc.createElement(sectionName);
     var textNode = xmlDoc.createTextNode(value);
@@ -588,7 +609,10 @@ export default class RequestBox extends Component {
           Relaunch DTR
         </button>
         <button className={"submit-btn btn btn-class "} onClick={this.submit} disabled={disableSendToCRD}>
-          Submit to CRD
+          Submit to REMS-Admin
+        </button>
+        <button className={"submit-btn btn btn-class "} onClick={this.resetRemsAdmin} disabled={disableSendToCRD}>
+          Reset REMS-Admin Database
         </button>
       </div>
     );
