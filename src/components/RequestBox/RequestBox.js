@@ -5,11 +5,11 @@ import PatientBox from "../SMARTBox/PatientBox";
 import CheckBox from '../Inputs/CheckBox';
 import { types, defaultValues, shortNameMap } from "../../util/data";
 import { getAge } from "../../util/fhir";
+import buildNewRxRequest from '../../util/buildScript.2017071.js';
 import _ from "lodash";
 import "./request.css";
 import { PrefetchTemplate } from "../../PrefetchTemplate";
 import { retrieveLaunchContext } from "../../util/util";
-import { Message } from "semantic-ui-react";
 
 export default class RequestBox extends Component {
   constructor(props) {
@@ -36,9 +36,7 @@ export default class RequestBox extends Component {
     this.renderPrefetchedResources = this.renderPrefetchedResources.bind(this);
     this.renderError = this.renderError.bind(this);
     this.buildLaunchLink = this.buildLaunchLink.bind(this);
-    this.buildNewRxRequest = this.buildNewRxRequest.bind(this);
     this.updateDeidentifyCheckbox = this.updateDeidentifyCheckbox.bind(this);
-    this.xmlAddTextNode = this.xmlAddTextNode.bind(this);
   }
 
   // TODO - see how to submit response for alternative therapy
@@ -346,7 +344,9 @@ export default class RequestBox extends Component {
     console.log("sendRx: " + this.props.pimsUrl);
 
     // build the NewRx Message
-    var newRx = this.buildNewRxRequest();
+    var newRx = buildNewRxRequest(this.state.prefetchedResources.patient, 
+      this.state.prefetchedResources.practitioner,
+      this.state.request);
     console.log(newRx);
     const serializer = new XMLSerializer();
     
@@ -375,7 +375,6 @@ export default class RequestBox extends Component {
 
   }
 
-
   resetRemsAdmin = (e) => {
     console.log("reset rems admin: " + "localhost:8090/etasu/reset");
 
@@ -394,136 +393,6 @@ export default class RequestBox extends Component {
       console.log(error);
     });
 
-  }
-
-  xmlAddTextNode(xmlDoc, parent, sectionName, value) {
-    var section = xmlDoc.createElement(sectionName);
-    var textNode = xmlDoc.createTextNode(value);
-    section.appendChild(textNode);
-    parent.appendChild(section);
-  }
-
-  buildNewRxRequest() {
-    var doc = document.implementation.createDocument("", "", null);
-    var message = doc.createElement("Message");
-
-    // Header
-    var header = doc.createElement("Header");
-    // generate the message id (just get the milliseconds since epoch and use that)
-    const d1 = new Date();
-    const messageIdValue = d1.getTime();
-    // console.log(messageIdValue);
-    this.xmlAddTextNode(doc, header, "MessageID", messageIdValue);
-    message.appendChild(header);
-
-    // Body
-    var body = doc.createElement("Body");
-    var newRx = doc.createElement("NewRx");
-
-    //   Patient
-    const patientResource = this.state.prefetchedResources.patient;
-    var patient = doc.createElement("Patient");
-    var humanPatient = doc.createElement("HumanPatient");
-
-    //     Patient Name
-    var patientNames = doc.createElement("Names");
-    var patientName = doc.createElement("Name");
-    this.xmlAddTextNode(doc, patientName, "LastName", patientResource.name[0].family);
-    this.xmlAddTextNode(doc, patientName, "FirstName", patientResource.name[0].given[0]);
-    patientNames.appendChild(patientName);
-    humanPatient.appendChild(patientNames);
-
-    //     Patient Birth Date
-    var dateOfBirth = doc.createElement("DateOfBirth");
-    this.xmlAddTextNode(doc, dateOfBirth, "Date", patientResource.birthDate);
-    humanPatient.appendChild(dateOfBirth);
-    patient.appendChild(humanPatient);
-    newRx.appendChild(patient);
-
-    //   Prescriber
-    const practitionerResource = this.state.prefetchedResources.practitioner;
-    // console.log(practitionerResource);
-    var prescriber = doc.createElement("Prescriber");
-    var nonVeterinarian = doc.createElement("NonVeterinarian");
-
-    //     Prescriber Identifier
-    for (let i = 0; i < practitionerResource.identifier.length; i++) {
-      let id = practitionerResource.identifier[i];
-      if ((id.system) && (id.system.includes("us-npi"))) {
-        var identification = doc.createElement("Identification");
-        this.xmlAddTextNode(doc, identification, "NPI", id.value);
-        nonVeterinarian.appendChild(identification);
-      }
-    }
-
-    //     Prescriber Name
-    var prescriberNames = doc.createElement("Names");
-    var prescriberName = doc.createElement("Name");
-    this.xmlAddTextNode(doc, prescriberName, "LastName", practitionerResource.name[0].family);
-    this.xmlAddTextNode(doc, prescriberName, "FirstName", practitionerResource.name[0].given[0]);
-    prescriberNames.appendChild(prescriberName);
-    nonVeterinarian.appendChild(prescriberNames);
-
-    //     Prescriber Address
-    const practitionerAddress = practitionerResource.address[0];
-    var address = doc.createElement("Address");
-    this.xmlAddTextNode(doc, address, "AddressLine1", practitionerAddress.line[0]);
-    this.xmlAddTextNode(doc, address, "City", practitionerAddress.city);
-    this.xmlAddTextNode(doc, address, "StateProvince", practitionerAddress.state);
-    this.xmlAddTextNode(doc, address, "PostalCode", practitionerAddress.postalCode);
-    this.xmlAddTextNode(doc, address, "Country", "US"); // assume US for now
-    nonVeterinarian.appendChild(address);
-
-    //     Prescriber Phone Number and Email
-    var communicationNumbers = doc.createElement("CommunicationNumbers");
-    for (let i = 0; i < practitionerResource.telecom.length; i++) {
-      const telecom = practitionerResource.telecom[i];
-      if (telecom.system == "phone") {
-        var primaryTelephone = doc.createElement("PrimaryTelephone");
-        this.xmlAddTextNode(doc, primaryTelephone, "Number", telecom.value);
-        communicationNumbers.appendChild(primaryTelephone);
-      } else if (telecom.system == "email") {
-        this.xmlAddTextNode(doc, communicationNumbers, "ElectronicMail", telecom.value);
-      }
-    }
-    nonVeterinarian.appendChild(communicationNumbers)
-
-    prescriber.appendChild(nonVeterinarian);
-    newRx.appendChild(prescriber);
-
-    //   Medication
-    const medicationRequestResource = this.state.request;
-    // console.log(medicationRequestResource);
-    var medicationPrescribed = doc.createElement("MedicationPrescribed");
-
-
-    //     Medication Drug Description
-    const coding = medicationRequestResource.medicationCodeableConcept.coding[0];
-    this.xmlAddTextNode(doc, medicationPrescribed, "DrugDescription", coding.display);
-
-    //     Medication Product
-    var product = doc.createElement("Product");
-    var drugCoded = doc.createElement("DrugCoded");
-    var productCode = doc.createElement("ProductCode");
-    this.xmlAddTextNode(doc, productCode, "Code", coding.code);
-    this.xmlAddTextNode(doc, productCode, "Qualifier", coding.system);
-    drugCoded.appendChild(productCode);
-    product.appendChild(drugCoded);
-    medicationPrescribed.appendChild(product);
-
-    //     Medication Quantity
-    var quantity = doc.createElement("Quantity");
-    this.xmlAddTextNode(doc, quantity, "Value", medicationRequestResource.dispenseRequest.quantity.value);
-    medicationPrescribed.appendChild(quantity);
-
-    newRx.appendChild(medicationPrescribed);
-
-    body.appendChild(newRx);
-    message.appendChild(body);
-
-    doc.appendChild(message);
-
-    return doc;
   }
 
   isOrderNotSelected() {
