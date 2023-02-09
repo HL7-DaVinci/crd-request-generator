@@ -14,5 +14,5 @@
   "alt_drug": true, 
   "launch_url": "http://localhost:3005/launch",
   "response_expiration_days": 30,
-  "pims_server": "http://localhost:3010"
+  "pims_server": "http://localhost:5051/doctorOrders/api/addRx"
 }
