@@ -382,7 +382,7 @@ export default class RequestBox extends Component {
       method: 'POST',
     })
     .then(response => {
-      console.log("Reset rems admin etasy: ");
+      console.log("Reset rems admin etasu: ");
       console.log(response);
       this.props.consoleLog("Successfully reset rems admin etasu", types.info);
     })
