@@ -45,7 +45,8 @@ export default class RequestBuilder extends Component {
             includeConfig: true,
             alternativeTherapy: headers.alternativeTherapy.value,
             launchUrl: headers.launchUrl.value,
-            responseExpirationDays: headers.responseExpirationDays.value
+            responseExpirationDays: headers.responseExpirationDays.value,
+            pimsUrl: headers.pimsUrl.value
         };
         this.validateMap = {
             age: (foo => { return isNaN(foo) }),
@@ -107,6 +108,11 @@ export default class RequestBuilder extends Component {
 
     }
 
+    timeout = (time) => {
+        let controller = new AbortController();
+        setTimeout(()=>controller.abort(), time * 1000);
+        return controller;
+    }
 
     submit_info(prefetch, request, patient, hook, deidentifyRecords) {
         this.setState({loading: true});
@@ -128,21 +134,19 @@ export default class RequestBuilder extends Component {
         }
         let baseUrl = this.state.baseUrl;
         const jwt = "Bearer " + createJwt(this.state.keypair, baseUrl, cdsUrl);
-        console.log(jwt);
         var myHeaders = new Headers({
             "Content-Type": "application/json",
             "authorization": jwt
         });
-        this.consoleLog("Fetching response from " + cdsUrl, types.info);
         try {
             fetch(cdsUrl, {
                 method: "POST",
                 headers: myHeaders,
-                body: JSON.stringify(json_request)
+                body: JSON.stringify(json_request),
+                signal: this.timeout(10).signal //Timeout set to 10 seconds
             }).then(response => {
-                this.consoleLog("Received response", types.info);
+                clearTimeout(this.timeout)
                 response.json().then((fhirResponse) => {
-                    console.log(fhirResponse);
                     if (fhirResponse && fhirResponse.status) {
                         this.consoleLog("Server returned status "
                             + fhirResponse.status + ": "
@@ -153,16 +157,17 @@ export default class RequestBuilder extends Component {
                     }
                     this.setState({ loading: false });
                 })
-            }).catch(() => this.consoleLog("No response recieved from the server", types.error));
+            }).catch(() => {
+                this.consoleLog("No response received from the server", types.error);
+                this.setState({loading: false});
+            });
         } catch (error) {
             this.setState({ loading: false });
             this.consoleLog("Unexpected error occured", types.error)
-            // this.consoleLog(e.,types.error);
             if (error instanceof TypeError) {
                 this.consoleLog(error.name + ": " + error.message, types.error);
             }
         }
-
     }
 
     takeSuggestion(resource) {
@@ -248,6 +253,12 @@ export default class RequestBuilder extends Component {
                 "value": this.state.responseExpirationDays,
                 "key": "responseExpirationDays"
             },
+            "pimsUrl": {
+                "type": "input",
+                "display": "PIMS Server",
+                "value": this.state.pimsUrl,
+                "key": "pimsUrl"
+            },
             "includeConfig": {
                 "type": "check",
                 "display": "Include Configuration in CRD Request",
@@ -302,8 +313,10 @@ export default class RequestBuilder extends Component {
                             patientId={this.state.patient.id}
                             launchUrl={this.state.launchUrl}
                             responseExpirationDays={this.state.responseExpirationDays}
+                            pimsUrl={this.state.pimsUrl}
                             ref={this.requestBox}
                             loading={this.state.loading}
+                            consoleLog={this.consoleLog}
                         />
 
                     </div>

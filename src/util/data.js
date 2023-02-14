@@ -48,6 +48,11 @@ const headers = {
         "display": "In Progress Form Expiration Days",
         "value": (process.env.FORM_EXPIRATION_DAYS ? process.env.FORM_EXPIRATION_DAYS : config.response_expiration_days),
         "key": "responseExpirationDays"
+    },
+    "pimsUrl" : {
+        "display": "PIMS Server",
+        "value": (process.env.PIMS_URL ? process.env.PIMS_URL : config.pims_server),
+        "key": "pimsUrl"
     }
 }
 

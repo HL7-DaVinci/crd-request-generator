@@ -3,8 +3,9 @@ import FHIR from "fhirclient";
 import SMARTBox from "../SMARTBox/SMARTBox";
 import PatientBox from "../SMARTBox/PatientBox";
 import CheckBox from '../Inputs/CheckBox';
-import { defaultValues, shortNameMap } from "../../util/data";
+import { types, defaultValues, shortNameMap } from "../../util/data";
 import { getAge } from "../../util/fhir";
+import buildNewRxRequest from '../../util/buildScript.2017071.js';
 import _ from "lodash";
 import "./request.css";
 import { PrefetchTemplate } from "../../PrefetchTemplate";
@@ -57,9 +58,15 @@ export default class RequestBox extends Component {
   prepPrefetch() {
     const preppedResources = new Map();
     Object.keys(this.state.prefetchedResources).forEach((resourceKey) => {
-      const resourceList = this.state.prefetchedResources[resourceKey].map((resource) => {
-        return resource;
-      })
+      let resourceList = []
+      if(Array.isArray(this.state.prefetchedResources[resourceKey])){
+        resourceList = this.state.prefetchedResources[resourceKey].map((resource) => {
+          return resource;
+        })
+      } else {
+        resourceList = this.state.prefetchedResources[resourceKey]
+      }
+
       preppedResources.set(resourceKey, resourceList);
     });
     return preppedResources;
@@ -92,7 +99,7 @@ export default class RequestBox extends Component {
       if(!prevState[elementName][key]){
         prevState[elementName][key] = [];
       }
-      return {[elementName]: {...prevState[elementName], [key]: [...prevState[elementName][key], text]}};
+      return {[elementName]: {...prevState[elementName], [key]: text}};
     });
   };
 
@@ -212,11 +219,16 @@ export default class RequestBox extends Component {
     var renderedPrefetches = new Map();
     requestResources.forEach((resourceList, resourceKey) => {
       const renderedList = [];
-      resourceList.forEach((resource) => {
-        console.log("Request resources:" + JSON.stringify(requestResources));
-        console.log("Request key:" + resourceKey);
-        renderedList.push(this.renderResource(resource))
-      });
+      if(Array.isArray(resourceList)){
+        resourceList.forEach((resource) => {
+          console.log("Request resources:" + JSON.stringify(requestResources));
+          console.log("Request key:" + resourceKey);
+          renderedList.push(this.renderResource(resource))
+        });
+      } else {
+        renderedList.push(this.renderResource(resourceList))
+      }
+
       renderedPrefetches.set(resourceKey, renderedList);
     });
     console.log(renderedPrefetches);
@@ -325,6 +337,64 @@ export default class RequestBox extends Component {
     });
   }
 
+  /**
+   * Send the NewRxRequestMessage to the Pharmacy Information System (PIMS)
+   */
+  sendRx = (e) => {
+    console.log("sendRx: " + this.props.pimsUrl);
+
+    // build the NewRx Message
+    var newRx = buildNewRxRequest(this.state.prefetchedResources.patient, 
+      this.state.prefetchedResources.practitioner,
+      this.state.request);
+    console.log(newRx);
+    const serializer = new XMLSerializer();
+    
+    // send the message to the prescriber
+    this.props.consoleLog("Sending Rx to PIMS", types.info);
+    fetch(this.props.pimsUrl, {
+      method: 'POST',
+      //mode: 'no-cors',
+      headers: {
+        'Accept': 'application/xml',
+        'Content-Type': 'application/xml'
+      },
+      body: serializer.serializeToString(newRx)
+    })
+    .then(response => {
+      console.log("sendRx response: ");
+      console.log(response);
+      this.props.consoleLog("Successfully sent Rx to PIMS", types.info);
+    })
+    .catch(error => {
+      console.log("sendRx error: ");
+      this.props.consoleLog("Server returned error sending Rx to PIMS: ", types.error);
+      this.props.consoleLog(error.message);
+      console.log(error);
+    });
+
+  }
+
+  resetRemsAdmin = (e) => {
+    console.log("reset rems admin: " + "localhost:8090/etasu/reset");
+
+    fetch("http://localhost:8090/etasu/reset", {
+      method: 'POST',
+    })
+    .then(response => {
+      console.log("Reset rems admin etasu: ");
+      console.log(response);
+      this.props.consoleLog("Successfully reset rems admin etasu", types.info);
+    })
+    .catch(error => {
+      console.log("Reset rems admin error: ");
+      this.props.consoleLog("Server returned error when resetting rems admin etasu: ", types.error);
+      this.props.consoleLog(error.message);
+      console.log(error);
+    });
+
+  }
+
   isOrderNotSelected() {
     return Object.keys(this.state.request).length === 0;
   }
@@ -341,6 +411,7 @@ export default class RequestBox extends Component {
     }
     const disableSendToCRD = this.isOrderNotSelected() || this.props.loading ;
     const disableLaunchDTR = this.isOrderNotSelected() && Object.keys(this.state.response).length === 0;
+    const disableSendRx = this.isOrderNotSelected() || this.props.loading;
     return (
       <div>
         <div className="request">
@@ -400,11 +471,17 @@ export default class RequestBox extends Component {
         <div id="fse" className={"spinner " + (this.props.loading ? "visible" : "invisible")}>
           <div className="ui active right inline loader"></div>
         </div> 
+        <button className={"submit-btn btn btn-class "} onClick={this.sendRx} disabled={disableSendRx}>
+          Send Rx to PIMS
+        </button>
         <button className={"submit-btn btn btn-class "} onClick={this.relaunch} disabled={disableLaunchDTR}>
           Relaunch DTR
         </button>
         <button className={"submit-btn btn btn-class "} onClick={this.submit} disabled={disableSendToCRD}>
-          Submit to CRD
+          Submit to REMS-Admin
+        </button>
+        <button className={"submit-btn btn btn-class "} onClick={this.resetRemsAdmin} disabled={disableSendToCRD}>
+          Reset REMS-Admin Database
         </button>
       </div>
     );
