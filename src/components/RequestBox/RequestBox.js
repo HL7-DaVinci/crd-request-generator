@@ -375,26 +375,6 @@ export default class RequestBox extends Component {
 
   }
 
-  resetRemsAdmin = (e) => {
-    console.log("reset rems admin: " + "localhost:8090/etasu/reset");
-
-    fetch("http://localhost:8090/etasu/reset", {
-      method: 'POST',
-    })
-    .then(response => {
-      console.log("Reset rems admin etasu: ");
-      console.log(response);
-      this.props.consoleLog("Successfully reset rems admin etasu", types.info);
-    })
-    .catch(error => {
-      console.log("Reset rems admin error: ");
-      this.props.consoleLog("Server returned error when resetting rems admin etasu: ", types.error);
-      this.props.consoleLog(error.message);
-      console.log(error);
-    });
-
-  }
-
   isOrderNotSelected() {
     return Object.keys(this.state.request).length === 0;
   }
@@ -479,9 +459,6 @@ export default class RequestBox extends Component {
         </button>
         <button className={"submit-btn btn btn-class "} onClick={this.submit} disabled={disableSendToCRD}>
           Submit to REMS-Admin
-        </button>
-        <button className={"submit-btn btn btn-class "} onClick={this.resetRemsAdmin} disabled={disableSendToCRD}>
-          Reset REMS-Admin Database
         </button>
       </div>
     );
