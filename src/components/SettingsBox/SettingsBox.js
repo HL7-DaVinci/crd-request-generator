@@ -27,10 +27,11 @@ export default class SettingsBox extends Component {
                 {Object.keys(headers).map((header)=>{
                     let value = headers[header].value;
                     let type = headers[header].type;
+                    let display = headers[header].display;
                     switch(type) {
                         case "input":
                             return <div key={header}>
-                                <p className="setting-header">{headers[header].display}</p>
+                                <p className="setting-header">{display}</p>
                                 <InputBox 
                                     extraClass = "setting-input"
                                     value = {value}
@@ -39,7 +40,7 @@ export default class SettingsBox extends Component {
                             </div>
                         case "check":
                             return <div key={header}>
-                                <p className="setting-header">{headers[header].display}
+                                <p className="setting-header">{display}
                                 <CheckBox
                                     extraClass = "setting-checkbox"
                                     extraInnerClass = "setting-inner-checkbox"
@@ -49,8 +50,16 @@ export default class SettingsBox extends Component {
                                     </p>
                                 <p>&nbsp;</p>
                             </div>
+                        case "button":
+                            return <div key={header}>
+                                <button className={"setting-btn btn btn-class"} onClick={value}>{display}</button>
+                                </div>
+                        case "spacer":
+                            return <div key={header}><br></br></div>
+                        case "line":
+                            return <div key={header}><hr></hr></div>
                         default:
-                            return <div key={header}><p className="setting-header">{headers[header].display}</p></div>
+                            return <div key={header}><p className="setting-header">{display}</p></div>
                     }
                     
                 })}
