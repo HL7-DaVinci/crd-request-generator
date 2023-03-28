@@ -21,3 +21,21 @@
     font-size:12px;
     margin:0;
 }
+
+.setting-btn {
+    margin-top: 6px;
+  }
+
+
+.setting-btn:hover{
+    border-width:1px 3px 1px 1px;
+    margin-left:2px;
+    margin-top:8px;
+}
+
+.setting-btn:disabled,
+.setting-btn[disabled] {
+    border: 1px solid #999999;
+    background-color: #333232;
+    color: #858282;
+}

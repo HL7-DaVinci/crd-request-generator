@@ -201,6 +201,27 @@ export default class RequestBuilder extends Component {
         this.setState({ openPatient: false })
     }
 
+    resetRemsAdmin = (e) => {
+        let url = new URL(this.state.cdsUrl);
+        const resetUrl = url.origin + "/etasu/reset";
+        console.log("reset rems admin: " + resetUrl);
+
+        fetch(resetUrl, {
+            method: 'POST',
+        })
+        .then(response => {
+            console.log("Reset rems admin etasu: ");
+            console.log(response);
+            this.consoleLog("Successfully reset rems admin etasu", types.info);
+        })
+        .catch(error => {
+            console.log("Reset rems admin error: ");
+            this.consoleLog("Server returned error when resetting rems admin etasu: ", types.error);
+            this.consoleLog(error.message);
+            console.log(error);
+        });
+    }
+
 
     render() {
         const header =
@@ -276,7 +297,17 @@ export default class RequestBuilder extends Component {
               "display": "Send Prefetch",
               "value": this.state.sendPrefetch,
               "key": "sendPrefetch"
-          }
+            },
+            "resetRemsAdmin": {
+                "type": "button",
+                "display": "Reset REMS-Admin Database",
+                "value": this.resetRemsAdmin,
+                "key": "resetRemsAdmin"
+            },
+            "endSpacer": {
+                "type": "line",
+                "key": "endSpacer"
+            }
         }
 
         return (
