@@ -50,7 +50,7 @@ const PatientPortal = () => {
             <AppBar position="fixed" sx={{ zIndex: 1300, backgroundColor: '#bb3551', height:'95px'}}>
                 <Toolbar>
                 <Typography variant="h5" noWrap component="div" sx={{lineHeight: '95px'}}>
-                    <strong>REMS</strong> Patient Portal
+                    <strong>EHR</strong> Patient Portal
                 </Typography>
                 {patientName ? 
                                 <span className={classes.loginIcon}>
