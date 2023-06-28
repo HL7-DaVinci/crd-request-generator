@@ -47,7 +47,9 @@ export default class RequestBuilder extends Component {
             alternativeTherapy: headers.alternativeTherapy.value,
             launchUrl: headers.launchUrl.value,
             responseExpirationDays: headers.responseExpirationDays.value,
-            pimsUrl: headers.pimsUrl.value
+            pimsUrl: headers.pimsUrl.value,
+            smartAppUrl: headers.smartAppUrl.value,
+            defaultUser: headers.defaultUser.value
         };
         this.validateMap = {
             age: (foo => { return isNaN(foo) }),
@@ -335,6 +337,18 @@ export default class RequestBuilder extends Component {
                 "value": this.state.pimsUrl,
                 "key": "pimsUrl"
             },
+            "smartAppUrl": {
+                "type": "input",
+                "display": "SMART App",
+                "value": this.state.smartAppUrl,
+                "key": "smartAppUrl"
+            },
+            "defaultUser": {
+                "type": "input",
+                "display": "Default User",
+                "value": this.state.defaultUser,
+                "key": "defaultUser"
+            },
             "includeConfig": {
                 "type": "check",
                 "display": "Include Configuration in CRD Request",
@@ -412,6 +426,8 @@ export default class RequestBuilder extends Component {
                             launchUrl={this.state.launchUrl}
                             responseExpirationDays={this.state.responseExpirationDays}
                             pimsUrl={this.state.pimsUrl}
+                            smartAppUrl={this.state.smartAppUrl}
+                            defaultUser={this.state.defaultUser}
                             ref={this.requestBox}
                             loading={this.state.loading}
                             consoleLog={this.consoleLog}
