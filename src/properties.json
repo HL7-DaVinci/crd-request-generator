@@ -14,5 +14,7 @@
   "alt_drug": true, 
   "launch_url": "http://localhost:3005/launch",
   "response_expiration_days": 30,
-  "pims_server": "http://localhost:5051/doctorOrders/api/addRx"
+  "pims_server": "http://localhost:5051/doctorOrders/api/addRx",
+  "smart_app_url": "http://localhost:4040/",
+  "default_user": "pra1234"
 }

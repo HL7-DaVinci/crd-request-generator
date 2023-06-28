@@ -54,6 +54,16 @@ const headers = {
         "display": "PIMS Server",
         "value": (process.env.REACT_APP_PIMS_SERVER),
         "key": "pimsUrl"
+    },
+    "smartAppUrl" : {
+        "display": "SMART App",
+        "value": (process.env.SMART_APP_URL ? process.env.SMART_APP_URL : config.smart_app_url),
+        "key": "smartAppUrl"
+    },
+    "defaultUser" : {
+        "display": "Default User",
+        "value": (process.env.DEFAULT_USER ? process.env.DEFAULT_USER : config.default_user),
+        "key": "defaultUser"
     }
 }
 
