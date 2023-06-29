@@ -211,7 +211,7 @@ export default class RequestBuilder extends Component {
     }
     
     clearQuestionnaireResponses = (e) => {
-        console.log("Clear QuestionnaireResponses from the EHR: " + this.state.ehrUrl);
+        console.log("Clear QuestionnaireResponses from the EHR: " + this.state.ehrUrl + " for author " + this.state.defaultUser);
         const params = {serverUrl: this.state.ehrUrl};
         if (this.state.access_token) {
             params["tokenResponse"] = {access_token: this.state.access_token}
@@ -220,7 +220,7 @@ export default class RequestBuilder extends Component {
             params
         );
         client
-            .request("QuestionnaireResponse", { flat: true })
+            .request("QuestionnaireResponse?author=" + this.state.defaultUser, { flat: true })
             .then((result) => {
                 console.log(result);
                 result.forEach((resource) => {
