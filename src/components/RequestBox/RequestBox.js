@@ -288,21 +288,20 @@ export default class RequestBox extends Component {
       userId = this.props.defaultUser;
     }
 
-    const link = {
+    let link = {
       appContext: "user=" + userId + "&patient=" + this.state.patient.id,
       type: "smart",
       url: this.props.smartAppUrl
     }
-    let linkCopy = Object.assign({}, link);
 
     retrieveLaunchContext(
-      linkCopy, this.props.fhirAccessToken,
+      link, this.props.fhirAccessToken,
         this.state.patient.id, this.props.fhirServerUrl, this.props.fhirVersion
     ).then((result) => {
-        linkCopy = result;
-        console.log(linkCopy);
+        link = result;
+        console.log(link);
         // launch the application in a new window
-        window.open(linkCopy.url, '_blank');
+        window.open(link.url, '_blank');
     });
   }
 
