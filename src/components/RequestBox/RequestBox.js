@@ -277,6 +277,32 @@ export default class RequestBox extends Component {
     );
   }
 
+  launchSmartOnFhirApp = () => {
+    console.log("Launch SMART on FHIR App");
+
+    let userId = this.state.prefetchedResources?.practitioner?.id;
+    if (!userId) {
+      console.log("Practitioner not populated from prefetch, using default from config: " + this.props.defaultUser);
+      userId = this.props.defaultUser;
+    }
+
+    let link = {
+      appContext: "user=" + userId + "&patient=" + this.state.patient.id,
+      type: "smart",
+      url: this.props.smartAppUrl
+    }
+
+    retrieveLaunchContext(
+      link, this.props.fhirAccessToken,
+        this.state.patient.id, this.props.fhirServerUrl, this.props.fhirVersion
+    ).then((result) => {
+        link = result;
+        console.log(link);
+        // launch the application in a new window
+        window.open(link.url, '_blank');
+    });
+  }
+
   /**
    * Relaunch DTR using the available context
    */
@@ -379,6 +405,10 @@ export default class RequestBox extends Component {
     return Object.keys(this.state.request).length === 0;
   }
 
+  isPatientNotSelected() {
+    return Object.keys(this.state.patient).length === 0;
+  }
+
   updateDeidentifyCheckbox(elementName, value) {
     this.setState({ deidentifyRecords: value });
   }
@@ -392,6 +422,7 @@ export default class RequestBox extends Component {
     const disableSendToCRD = this.isOrderNotSelected() || this.props.loading ;
     const disableLaunchDTR = this.isOrderNotSelected() && Object.keys(this.state.response).length === 0;
     const disableSendRx = this.isOrderNotSelected() || this.props.loading;
+    const disableLaunchSmartOnFhir = this.isPatientNotSelected();
     return (
       <div>
         <div className="request">
@@ -451,6 +482,9 @@ export default class RequestBox extends Component {
         <div id="fse" className={"spinner " + (this.props.loading ? "visible" : "invisible")}>
           <div className="ui active right inline loader"></div>
         </div> 
+        <button className={"submit-btn btn btn-class "} onClick={this.launchSmartOnFhirApp} disabled={disableLaunchSmartOnFhir}>
+          Launch SMART on FHIR App
+        </button>
         <button className={"submit-btn btn btn-class "} onClick={this.sendRx} disabled={disableSendRx}>
           Send Rx to PIMS
         </button>
