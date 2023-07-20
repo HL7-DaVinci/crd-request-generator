@@ -8,6 +8,9 @@ import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
+import dotenv from 'dotenv';
+dotenv.config();
+
 const PatientPortal = () => {
     const classes = useStyles();
     const [token, setToken] = useState(null);
@@ -18,7 +21,7 @@ const PatientPortal = () => {
         if(token) {
             const data = JSON.parse(Buffer.from(token.split('.')[1], 'base64'))
             const client = FHIR.client({
-                serverUrl: config.ehr_base,
+                serverUrl: process.env.REACT_APP_EHR_SERVER,
                 tokenResponse: {
                     type: 'bearer',
                     access_token: token,

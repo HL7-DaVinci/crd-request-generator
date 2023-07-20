@@ -11,7 +11,7 @@ const types = {
 const headers = {
     "ehrUrl": {
         "display": "EHR Server",
-        "value": (process.env.REACT_APP_EHR_SERVER ? process.env.REACT_APP_EHR_SERVER : config.ehr_server),
+        "value": (process.env.REACT_APP_EHR_SERVER),
         "key": "ehrUrl"
     },
     "cdsUrl": {
@@ -31,7 +31,7 @@ const headers = {
     },
     "authUrl": {
         "display": "Auth Server",
-        "value": (process.env.REACT_APP_AUTH ? process.env.REACT_APP_AUTH : config.auth),
+        "value": (process.env.REACT_APP_AUTH),
         "key": "authUrl"
     },
     "alternativeTherapy": {
@@ -41,7 +41,7 @@ const headers = {
     }, 
     "launchUrl" : {
         "display": "DTR Launch URL",
-        "value": (process.env.LAUNCH_URL ? process.env.LAUNCH_URL : config.launch_url),
+        "value": (process.env.LAUNCH_URL),
         "key": "launchUrl"
     },
     "responseExpirationDays" : {
@@ -51,7 +51,7 @@ const headers = {
     },
     "pimsUrl" : {
         "display": "PIMS Server",
-        "value": (process.env.PIMS_URL ? process.env.PIMS_URL : config.pims_server),
+        "value": (process.env.PIMS_SERVER),
         "key": "pimsUrl"
     }
 }

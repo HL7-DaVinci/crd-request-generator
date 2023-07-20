@@ -20,7 +20,7 @@ const Login = (props) => {
       params.append('client_id', config.client);
       axios
         .post(
-          `${config.auth}/realms/${config.realm}/protocol/openid-connect/token`,
+          `${process.env.REACT_APP_AUTH}/realms/${config.realm}/protocol/openid-connect/token`,
           params,
           { withCredentials: true }
         )
