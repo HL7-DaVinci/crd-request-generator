@@ -1,5 +1,7 @@
 import KJUR, { KEYUTIL } from 'jsrsasign';
 import config from '../properties.json';
+import dotenv from 'dotenv';
+dotenv.config();
 
 function makeid() {
     var text = [];
@@ -46,8 +48,9 @@ function createJwt(keypair, baseUrl, cdsUrl) {
         "alg": "RS256",
         "typ": "JWT",
         "kid": kid,
-        "jku": (process.env.REACT_APP_PUBLIC_KEYS ? process.env.REACT_APP_PUBLIC_KEYS : config.public_keys)
+        "jku": (process.env.REACT_APP_PUBLIC_KEYS)
     };
+    console.log("Auth PK ", header.jku);
 
     const body = {
         "iss": baseUrl,
@@ -78,7 +81,7 @@ function setupKeys(callback) {
     "id": kid
   };
 
-  fetch(`${(process.env.REACT_APP_PUBLIC_KEYS ? process.env.REACT_APP_PUBLIC_KEYS : config.public_keys)}/`, {
+  fetch(`${(process.env.REACT_APP_PUBLIC_KEYS)}/`, {
     "body": JSON.stringify(pubPem),
     "headers": {
         "Content-Type": "application/json"
@@ -86,6 +89,7 @@ function setupKeys(callback) {
     "method": "POST"
   }).then((response) => {
       callback(keypair);
+      console.log("Auth PK", process.env.REACT_APP_PUBLIC_KEYS);
   }).catch((error) => {
       console.log(error);
   })

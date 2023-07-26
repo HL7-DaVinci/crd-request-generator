@@ -10,6 +10,8 @@ import _ from "lodash";
 import "./request.css";
 import { PrefetchTemplate } from "../../PrefetchTemplate";
 import { retrieveLaunchContext } from "../../util/util";
+const dotenv = require("dotenv");
+dotenv.config();
 
 export default class RequestBox extends Component {
   constructor(props) {
@@ -325,6 +327,8 @@ export default class RequestBox extends Component {
       type: "smart",
       url: this.props.launchUrl
     }
+
+    console.log('requstBuilder launch ', link.url);
 
     let linkCopy = Object.assign({}, link);
    

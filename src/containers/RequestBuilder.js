@@ -10,6 +10,8 @@ import RequestBox from '../components/RequestBox/RequestBox';
 import buildRequest from '../util/buildRequest.js';
 import { types, headers, defaultValues } from '../util/data.js';
 import { createJwt, login, setupKeys } from '../util/auth';
+import dotenv from 'dotenv';
+dotenv.config();
 
 export default class RequestBuilder extends Component {
     constructor(props) {
@@ -48,6 +50,9 @@ export default class RequestBuilder extends Component {
             responseExpirationDays: headers.responseExpirationDays.value,
             pimsUrl: headers.pimsUrl.value
         };
+        console.log("ReqBuilder Launch ", headers.launchUrl.value);
+        console.log("ReqBuilder Cds ", headers.cdsUrl.value);
+        console.log("ReqBuilder auth ", headers.authUrl)
         this.validateMap = {
             age: (foo => { return isNaN(foo) }),
             gender: (foo => { return foo !== "male" && foo !== "female" }),
@@ -65,9 +70,9 @@ export default class RequestBuilder extends Component {
 
     componentDidMount() {
         this.setState({ config });
-        let ehr_base = (process.env.REACT_APP_EHR_BASE);
         let ehr_server = (process.env.REACT_APP_EHR_SERVER);
-        this.setState({baseUrl: ehr_base ? ehr_base : ehr_server})
+        console.log("ReqBuilder EHR ", process.env.REACT_APP_EHR_SERVER);
+        this.setState({baseUrl: ehr_server})
         const callback = (keypair) => {
             this.setState({ keypair });
         }
@@ -139,6 +144,7 @@ export default class RequestBuilder extends Component {
             "authorization": jwt
         });
         try {
+            console.log("reqBuilder cds", cdsUrl);
             fetch(cdsUrl, {
                 method: "POST",
                 headers: myHeaders,
@@ -203,6 +209,7 @@ export default class RequestBuilder extends Component {
 
     resetRemsAdmin = (e) => {
         let url = new URL(this.state.cdsUrl);
+        console.log("ReqBuilder cds ", this.state.cdsUrl);
         const resetUrl = url.origin + "/etasu/reset";
         console.log("reset rems admin: " + resetUrl);
 
