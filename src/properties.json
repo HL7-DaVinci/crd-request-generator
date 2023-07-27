@@ -1,7 +1,7 @@
 {
   "realm": "ClientFhirServer",
   "client": "app-login",
-  "auth": "http://localhost:8180/auth",
+  "auth": "http://localhost:8180",
   "server": "http://localhost:8090",
   "ehr_server": "http://localhost:8080/test-ehr/r4",
   "ehr_base": "http://localhost:8080/test-ehr/r4",
