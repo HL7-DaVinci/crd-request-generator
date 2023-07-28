@@ -5,12 +5,12 @@ import DisplayBox from '../components/DisplayBox/DisplayBox';
 import ConsoleBox from '../components/ConsoleBox/ConsoleBox';
 import '../index.css';
 import '../components/ConsoleBox/consoleBox.css';
-import config from '../properties.json';
 import SettingsBox from '../components/SettingsBox/SettingsBox';
 import RequestBox from '../components/RequestBox/RequestBox';
 import buildRequest from '../util/buildRequest.js';
 import { types, headers, defaultValues } from '../util/data.js';
 import { createJwt, login, setupKeys } from '../util/auth';
+import env from 'env-var';
 
 export default class RequestBuilder extends Component {
     constructor(props) {
@@ -67,10 +67,9 @@ export default class RequestBuilder extends Component {
     }
 
     componentDidMount() {
-        this.setState({ config });
-        let ehr_base = (process.env.REACT_APP_EHR_BASE ? process.env.REACT_APP_EHR_BASE : config.ehr_base);
-        let ehr_server = (process.env.REACT_APP_EHR_SERVER ? process.env.REACT_APP_EHR_SERVER : config.ehr_server);
-        this.setState({baseUrl: ehr_base ? ehr_base : ehr_server})
+        // this.setState({ env.get() });
+        let ehr_server = (env.get('REACT_APP_EHR_SERVER').asString());
+        this.setState({baseUrl: ehr_server})
         const callback = (keypair) => {
             this.setState({ keypair });
         }
@@ -261,7 +260,6 @@ export default class RequestBuilder extends Component {
     resetRemsAdmin = (e) => {
         let url = new URL(this.state.cdsUrl);
         const resetUrl = url.origin + "/etasu/reset";
-        console.log("reset rems admin: " + resetUrl);
 
         fetch(resetUrl, {
             method: 'POST',

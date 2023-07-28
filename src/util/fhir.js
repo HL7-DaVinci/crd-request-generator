@@ -1,3 +1,4 @@
+import env from 'env-var';
 function fhir(resource, ehrUrl, patient, auth) {
     const headers = {
         "Content-Type": "application/json"
@@ -28,12 +29,12 @@ function getAge(dateString) {
 
 function login() {
 
-    const tokenUrl = (process.env.REACT_APP_AUTH ? process.env.REACT_APP_AUTH : this.state.config.auth) + "/realms/" + (process.env.REACT_APP_REALM ? process.env.REACT_APP_REALM : this.state.config.realm) + "/protocol/openid-connect/token"
+    const tokenUrl = (env.get('REACT_APP_AUTH').asString()) + "/realms/" + (env.get('REACT_APP_REALM').asString()) + "/protocol/openid-connect/token"
     let params = {
         grant_type: "password",
-        username: "alice",
-        password: "alice",
-        client_id: (process.env.REACT_APP_CLIENT ? process.env.REACT_APP_CLIENT : this.state.config.client)
+        username: (env.get('REACT_APP_USER').asString()),
+        password: (env.get('REACT_APP_PASSWORD').asString()),
+        client_id: (env.get('REACT_APP_CLIENT').asString())
     }
 
     // Encodes the params to be compliant with
