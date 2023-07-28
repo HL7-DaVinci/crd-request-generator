@@ -10,6 +10,7 @@ import _ from "lodash";
 import "./request.css";
 import { PrefetchTemplate } from "../../PrefetchTemplate";
 import { retrieveLaunchContext } from "../../util/util";
+import env from 'env-var';
 
 export default class RequestBox extends Component {
   constructor(props) {
@@ -41,7 +42,6 @@ export default class RequestBox extends Component {
 
   // TODO - see how to submit response for alternative therapy
   replaceRequestAndSubmit(request) {
-    console.log("replaceRequestAndSubmit: " + request.resourceType);
     this.setState({ request: request });
     // Prepare the prefetch.
     const prefetch = this.prepPrefetch();
@@ -113,14 +113,11 @@ export default class RequestBox extends Component {
   };
 
   getPatients = () => {
-    console.log(this.props.access_token.access_token);
     this.setState({ openPatient: true });
-    const params = {serverUrl: this.props.ehrUrl};
-    console.log(this.props.access_token.access_token);
+    const params = {serverUrl: env.get('REACT_APP_EHR_SERVER').asString()};
     if (this.props.access_token.access_token) {
         params["tokenResponse"] = {access_token: this.props.access_token.access_token}
     }
-    console.log(params);
     const client = FHIR.client(
       params
     );

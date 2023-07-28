@@ -15,7 +15,6 @@
   }
 
   function buildNewRxAddress(doc, addressResource) {
-    // console.log(addressResource);
     var address = doc.createElement("Address");
     xmlAddTextNode(doc, address, "AddressLine1", addressResource.line[0]);
     xmlAddTextNode(doc, address, "City", addressResource.city);
@@ -26,7 +25,6 @@
   }
 
   function buildNewRxPatient(doc, patientResource) {
-    // console.log(patientResource);
     var patient = doc.createElement("Patient");
     var humanPatient = doc.createElement("HumanPatient");
 
@@ -60,7 +58,6 @@
   }
 
   function buildNewRxPrescriber(doc, practitionerResource) {
-    // console.log(practitionerResource);
     var prescriber = doc.createElement("Prescriber");
     var nonVeterinarian = doc.createElement("NonVeterinarian");
 
@@ -201,7 +198,6 @@
   }
 
   function buildNewRxMedication(doc, medicationRequestResource) {
-    // console.log(medicationRequestResource);
     var medicationPrescribed = doc.createElement("MedicationPrescribed");
 
     //     Medication Product
@@ -264,7 +260,6 @@
   }
 
   export default function buildNewRxRequest(patientResource, practitionerResource, medicationRequestResource) {
-    // console.log(medicationRequestResource);
     var doc = document.implementation.createDocument("", "", null);
     var message = doc.createElement("Message");
 
@@ -273,7 +268,6 @@
     // generate the message id (just get the milliseconds since epoch and use that)
     const d1 = new Date();
     const messageIdValue = d1.getTime();
-    // console.log(messageIdValue);
     xmlAddTextNode(doc, header, "MessageID", messageIdValue);
     message.appendChild(header);
 

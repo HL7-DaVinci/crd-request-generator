@@ -1,5 +1,4 @@
-import config from '../properties.json';
-
+import env from 'env-var';
 
 const types = {
     error: "errorClass",
@@ -11,57 +10,57 @@ const types = {
 const headers = {
     "ehrUrl": {
         "display": "EHR Server",
-        "value": (process.env.REACT_APP_EHR_SERVER ? process.env.REACT_APP_EHR_SERVER : config.ehr_server),
+        "value": (env.get('REACT_APP_EHR_SERVER').asString()),
         "key": "ehrUrl"
     },
     "cdsUrl": {
         "display": "CRD Server",
-        "value": (process.env.REACT_APP_CDS_SERVICE ? process.env.REACT_APP_CDS_SERVICE : config.cds_service),
+        "value": (env.get('REACT_APP_CDS_SERVICE').asString()),
         "key":"cdsUrl"
     },
     "orderSelect": {
         "display": "Order Select Rest End Point",
-        "value": (process.env.REACT_APP_ORDER_SELECT ? process.env.REACT_APP_ORDER_SELECT : config.order_select),
+        "value": (env.get('REACT_APP_ORDER_SELECT').asString()),
         "key":"orderSelect"
     },
     "orderSign": {
         "display": "Order Sign Rest End Point",
-        "value": (process.env.REACT_APP_ORDER_SIGN ? process.env.REACT_APP_ORDER_SIGN : config.order_sign),
+        "value": (env.get('REACT_APP_ORDER_SIGN').asString()),
         "key":"orderSign"
     },
     "authUrl": {
         "display": "Auth Server",
-        "value": (process.env.REACT_APP_AUTH ? process.env.REACT_APP_AUTH : config.auth),
+        "value": (env.get('REACT_APP_AUTH').asString()),
         "key": "authUrl"
     },
     "alternativeTherapy": {
         "display": "Alternative Therapy Cards Allowed",
-        "value": (process.env.REACT_APP_ALTERNATIVE_THERAPY? process.env.REACT_APP_ALTERNATIVE_THERAPY : config.alt_drug),
+        "value": (env.get('REACT_APP_ALT_DRUG').asBool()),
         "key": "alternativeTherapy"
     }, 
     "launchUrl" : {
         "display": "DTR Launch URL",
-        "value": (process.env.LAUNCH_URL ? process.env.LAUNCH_URL : config.launch_url),
+        "value": (env.get('REACT_APP_LAUNCH_URL').asString()),
         "key": "launchUrl"
     },
     "responseExpirationDays" : {
         "display": "In Progress Form Expiration Days",
-        "value": (process.env.FORM_EXPIRATION_DAYS ? process.env.FORM_EXPIRATION_DAYS : config.response_expiration_days),
+        "value": (env.get('REACT_APP_RESPONSE_EXPIRATION_DAYS').asInt()),
         "key": "responseExpirationDays"
     },
     "pimsUrl" : {
         "display": "PIMS Server",
-        "value": (process.env.PIMS_URL ? process.env.PIMS_URL : config.pims_server),
+        "value": (env.get('REACT_APP_PIMS_SERVER').asString()),
         "key": "pimsUrl"
     },
     "smartAppUrl" : {
         "display": "SMART App",
-        "value": (process.env.SMART_APP_URL ? process.env.SMART_APP_URL : config.smart_app_url),
+        "value": (env.get('REACT_APP_SMART_LAUNCH_URL').asString()),
         "key": "smartAppUrl"
     },
     "defaultUser" : {
         "display": "Default User",
-        "value": (process.env.DEFAULT_USER ? process.env.DEFAULT_USER : config.default_user),
+        "value": (env.get('REACT_APP_DEFAULT_USER').asString()),
         "key": "defaultUser"
     }
 }

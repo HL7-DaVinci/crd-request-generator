@@ -3,7 +3,8 @@ import { TextField, Button } from '@material-ui/core';
 import Alert from './Alert';
 import axios from 'axios';
 import useStyles from './styles';
-import config from '../../properties.json';
+import env from 'env-var';
+
 const Login = (props) => {
   const classes = useStyles();
   const [message, setMessage] = useState(null);
@@ -17,10 +18,10 @@ const Login = (props) => {
       params.append('username', username);
       params.append('password', password);
       params.append('grant_type', 'password');
-      params.append('client_id', config.client);
+      params.append('client_id', env.get('REACT_APP_CLIENT').asString());
       axios
         .post(
-          `${config.auth}/realms/${config.realm}/protocol/openid-connect/token`,
+          `${env.get('REACT_APP_AUTH').asString()}/realms/${env.get('REACT_APP_REALM').asString()}/protocol/openid-connect/token`,
           params,
           { withCredentials: true }
         )
