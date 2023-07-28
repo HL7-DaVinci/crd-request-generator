@@ -48,3 +48,4 @@ Following are a list of modifiable paths:
 | REACT_APP_URL          |  `http://localhost:3000`                         |
 | REACT_APP_URL_FILTER   |  `http://localhost:3000/*`                       |
 | REACT_APP_EHR_LINK     |  `http://localhost:8080/ehr-server/`             |
+| HTTS                   |  `false`                                         |
