@@ -10,8 +10,7 @@ import _ from "lodash";
 import "./request.css";
 import { PrefetchTemplate } from "../../PrefetchTemplate";
 import { retrieveLaunchContext } from "../../util/util";
-const dotenv = require("dotenv");
-dotenv.config();
+import env from 'env-var';
 
 export default class RequestBox extends Component {
   constructor(props) {
@@ -117,7 +116,7 @@ export default class RequestBox extends Component {
   getPatients = () => {
     console.log(this.props.access_token.access_token);
     this.setState({ openPatient: true });
-    const params = {serverUrl: this.props.ehrUrl};
+    const params = {serverUrl: env.get('REACT_APP_EHR_SERVER').asString()};
     console.log(this.props.access_token.access_token);
     if (this.props.access_token.access_token) {
         params["tokenResponse"] = {access_token: this.props.access_token.access_token}

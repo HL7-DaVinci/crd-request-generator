@@ -1,8 +1,7 @@
 import React, {Component} from 'react';
 import {fhir} from '../../util/fhir';
 import './smart.css';
-import dotenv from 'dotenv';
-dotenv.config();
+import env from 'env-var';
 
 export default class EHRLaunchBox extends Component {
     constructor(props){
@@ -20,7 +19,7 @@ export default class EHRLaunchBox extends Component {
                 <div>
                     <label className="ehr-setting">Select EHR: </label>
                     <select>
-                        <option value="${process.env.EHR_LINK}">Local</option>
+                        <option value={env.get('REACT_APP_EHR_LINK').asString()}>Local</option>
                     </select>
                     <div className="ehr-setting">
                         Note: Only the local EHR is supported at this time for EHR launch

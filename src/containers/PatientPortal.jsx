@@ -1,15 +1,13 @@
 import React, { memo, useState, useEffect } from 'react';
 import useStyles from './styles/styles';
 import FHIR from "fhirclient";
-import config from '../properties.json';
 import Login from '../components/Auth/Login';
 import Dashboard from '../components/Dashboard/Dashboard';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import dotenv from 'dotenv';
-dotenv.config();
+import env from 'env-var';
 
 const PatientPortal = () => {
     const classes = useStyles();
@@ -21,7 +19,7 @@ const PatientPortal = () => {
         if(token) {
             const data = JSON.parse(Buffer.from(token.split('.')[1], 'base64'))
             const client = FHIR.client({
-                serverUrl: process.env.REACT_APP_EHR_SERVER,
+                serverUrl: env.get('REACT_APP_EHR_BASE').asString(),
                 tokenResponse: {
                     type: 'bearer',
                     access_token: token,

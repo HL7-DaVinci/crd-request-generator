@@ -5,14 +5,12 @@ import DisplayBox from '../components/DisplayBox/DisplayBox';
 import ConsoleBox from '../components/ConsoleBox/ConsoleBox';
 import '../index.css';
 import '../components/ConsoleBox/consoleBox.css';
-import config from '../properties.json';
 import SettingsBox from '../components/SettingsBox/SettingsBox';
 import RequestBox from '../components/RequestBox/RequestBox';
 import buildRequest from '../util/buildRequest.js';
 import { types, headers, defaultValues } from '../util/data.js';
 import { createJwt, login, setupKeys } from '../util/auth';
-import dotenv from 'dotenv';
-dotenv.config();
+import env from 'env-var';
 
 export default class RequestBuilder extends Component {
     constructor(props) {
@@ -72,9 +70,10 @@ export default class RequestBuilder extends Component {
     }
 
     componentDidMount() {
-        this.setState({ config });
-        let ehr_server = (process.env.REACT_APP_EHR_SERVER);
-        console.log("ReqBuilder EHR ", process.env.REACT_APP_EHR_SERVER);
+        // this.setState({ env.get() });
+        let ehr_server = (env.get('REACT_APP_EHR_SERVER').asString());
+        console.log('ehr server --> ', ehr_server);
+        console.log('env get --> ', env.get('REACT_APP_EHR_SERVER').asString());
         this.setState({baseUrl: ehr_server})
         const callback = (keypair) => {
             this.setState({ keypair });

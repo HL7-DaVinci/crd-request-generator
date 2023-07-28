@@ -1,7 +1,5 @@
 import KJUR, { KEYUTIL } from 'jsrsasign';
-import config from '../properties.json';
-import dotenv from 'dotenv';
-dotenv.config();
+import env from 'env-var';
 
 function makeid() {
     var text = [];
@@ -15,12 +13,12 @@ function makeid() {
 
 function login() {
 
-    const tokenUrl = (process.env.REACT_APP_AUTH) + "/realms/" + (process.env.REACT_APP_REALM ? process.env.REACT_APP_REALM : config.realm) + "/protocol/openid-connect/token"
+    const tokenUrl = (env.get('REACT_APP_AUTH').asString()) + "/realms/" + (env.get('REACT_APP_REALM').asString()) + "/protocol/openid-connect/token"
     let params = {
         grant_type: "password",
-        username: (process.env.REACT_APP_USER ? process.env.REACT_APP_USER : config.user),
-        password: (process.env.REACT_APP_PASSWORD ? process.env.REACT_APP_PASSWORD : config.password),
-        client_id: (process.env.REACT_APP_CLIENT ? process.env.REACT_APP_CLIENT : config.client)
+        username: (env.get('REACT_APP_USER').asString()),
+        password: (env.get('REACT_APP_PASSWORD').asString()),
+        client_id: (env.get('REACT_APP_CLIENT').asString())
     }
 
     // Encodes the params to be compliant with
@@ -48,7 +46,7 @@ function createJwt(keypair, baseUrl, cdsUrl) {
         "alg": "RS256",
         "typ": "JWT",
         "kid": kid,
-        "jku": (process.env.REACT_APP_PUBLIC_KEYS)
+        "jku": (env.get('REACT_APP_PUBLIC_KEYS').asString())
     };
     console.log("Auth PK ", header.jku);
 
@@ -81,7 +79,7 @@ function setupKeys(callback) {
     "id": kid
   };
 
-  fetch(`${(process.env.REACT_APP_PUBLIC_KEYS)}/`, {
+  fetch(`${env.get('REACT_APP_PUBLIC_KEYS').asString()}/`, {
     "body": JSON.stringify(pubPem),
     "headers": {
         "Content-Type": "application/json"
@@ -89,7 +87,7 @@ function setupKeys(callback) {
     "method": "POST"
   }).then((response) => {
       callback(keypair);
-      console.log("Auth PK", process.env.REACT_APP_PUBLIC_KEYS);
+      console.log("Auth PK", env.get('REACT_APP_PUBLIC_KEYS').asString());
   }).catch((error) => {
       console.log(error);
   })
