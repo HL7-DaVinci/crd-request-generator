@@ -8,7 +8,7 @@
             "type": "chrome",
             "request": "launch",
             "name": "Debug CRD-Request-Generator (Launch Docker)",
-            "url": "${process.env.REACT_APP_URL}",
+            "url": "http://localhost:3000",
             "webRoot": "${workspaceFolder}",
             "sourceMapPathOverrides": {
                 "/home/node/app/crd-request-generator/*": "${webRoot}/*",
@@ -22,7 +22,7 @@
             "request": "attach",
             "name": "Debug CRD-Request-Generator (Attach Docker)",
             "port": 9222,
-            "urlFilter": "${process.env.REACT_APP_URL_FILTER}",
+            "urlFilter": "http://localhost:3000/*",
             "webRoot": "${workspaceFolder}",
             "sourceMapPathOverrides": {
                 "/home/node/app/crd-request-generator/*": "${webRoot}/*",
@@ -32,7 +32,7 @@
             "type": "chrome",
             "request": "launch",
             "name": "Debug CRD-Request-Generator (Launch Local)",
-            "url": "${process.env.REACT_APP_URL}",
+            "url": "http://localhost:3000",
             "webRoot": "${workspaceFolder}",
             "runtimeArgs": [
                 "--remote-debugging-port=9222"
@@ -43,7 +43,7 @@
             "request": "attach",
             "port": 9222,
             "name": "Debug CRD-Request-Generator (Attach Local)",
-            "urlFilter": "${process.env.REACT_APP_URL_FILTER}",
+            "urlFilter": "http://localhost:3000/*",
             "webRoot": "${workspaceFolder}",
         }
     ]
