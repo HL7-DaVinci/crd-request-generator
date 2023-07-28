@@ -11,7 +11,7 @@ This subproject provides a small web application that is capable of generating C
 4. Run the application
   * `npm start`
 
-This should open a browser window directed to http://localhost:3000. The request-generator assumes the CRD server is running on `localhost:8090`. This can be changed in the properties file [.env](./.env).
+This should open a browser window directed to the value set in `REACT_APP_URL`. The request-generator assumes the CRD server is running on the default value set for `REACT_APP_SERVER`. This can be changed in the properties file [.env](./.env). [The following section](./README.md#how-to-override-defaults) lists the default values for these environment variables.
 
 ## Versions
 This application requires node v20.0 or greater.
@@ -19,7 +19,7 @@ This application requires node v20.0 or greater.
 
 ### How To Override Defaults
 The .env file contains the default URI paths, these can be overwritten from the start command as follows:
- `REACT_APP_REMS_HOOKS_PATH=http://example.com PORT=6000 npm start`
+ `REACT_APP_LAUNCH_URL=http://example.com PORT=6000 npm start`
  
 Following are a list of modifiable paths: 
 
@@ -39,7 +39,6 @@ Following are a list of modifiable paths:
 | REACT_APP_ORDER_SELECT |  `rems-order-select`                             |
 | REACT_APP_USER         |  `alice`                                         |
 | REACT_APP_PASSWORD     |  `alice`                                         |
-| REACT_APP_PUBLIC_KEYS  |  `http://localhost:3001/public_keys`             |
 | REACT_APP_ALT_DRUG     |  `true`                                          |
 | REACT_APP_SMART_LAUNCH_URL   |  `http://localhost:4040/`                  |
 | REACT_APP_DEFAULT_USER |  `pra1234`                                       |
@@ -48,4 +47,6 @@ Following are a list of modifiable paths:
 | REACT_APP_URL          |  `http://localhost:3000`                         |
 | REACT_APP_URL_FILTER   |  `http://localhost:3000/*`                       |
 | REACT_APP_EHR_LINK     |  `http://localhost:8080/ehr-server/`             |
-| HTTS                   |  `false`                                         |
+| HTTPS                  |  `false`                                         |
+| HTTPS_KEY_PATH         |  `server.key`                                    |
+| HTTPS_CERT_PATH        |  `server.cert`                                   |
