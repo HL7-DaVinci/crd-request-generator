@@ -30,7 +30,6 @@ function getAge(dateString) {
 function login() {
 
     const tokenUrl = (env.get('REACT_APP_AUTH').asString()) + "/realms/" + (env.get('REACT_APP_REALM').asString()) + "/protocol/openid-connect/token"
-    console.log("check auth ", tokenUrl);
     let params = {
         grant_type: "password",
         username: (env.get('REACT_APP_USER').asString()),

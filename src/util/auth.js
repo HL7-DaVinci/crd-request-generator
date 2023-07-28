@@ -48,8 +48,6 @@ function createJwt(keypair, baseUrl, cdsUrl) {
         "kid": kid,
         "jku": (env.get('REACT_APP_PUBLIC_KEYS').asString())
     };
-    console.log("Auth PK ", header.jku);
-
     const body = {
         "iss": baseUrl,
         "aud": cdsUrl,
@@ -87,7 +85,6 @@ function setupKeys(callback) {
     "method": "POST"
   }).then((response) => {
       callback(keypair);
-      console.log("Auth PK", env.get('REACT_APP_PUBLIC_KEYS').asString());
   }).catch((error) => {
       console.log(error);
   })

@@ -51,9 +51,6 @@ export default class RequestBuilder extends Component {
             smartAppUrl: headers.smartAppUrl.value,
             defaultUser: headers.defaultUser.value
         };
-        console.log("ReqBuilder Launch ", headers.launchUrl.value);
-        console.log("ReqBuilder Cds ", headers.cdsUrl.value);
-        console.log("ReqBuilder auth ", headers.authUrl)
         this.validateMap = {
             age: (foo => { return isNaN(foo) }),
             gender: (foo => { return foo !== "male" && foo !== "female" }),
@@ -72,8 +69,6 @@ export default class RequestBuilder extends Component {
     componentDidMount() {
         // this.setState({ env.get() });
         let ehr_server = (env.get('REACT_APP_EHR_SERVER').asString());
-        console.log('ehr server --> ', ehr_server);
-        console.log('env get --> ', env.get('REACT_APP_EHR_SERVER').asString());
         this.setState({baseUrl: ehr_server})
         const callback = (keypair) => {
             this.setState({ keypair });
@@ -146,7 +141,6 @@ export default class RequestBuilder extends Component {
             "authorization": jwt
         });
         try {
-            console.log("reqBuilder cds", cdsUrl);
             fetch(cdsUrl, {
                 method: "POST",
                 headers: myHeaders,
@@ -265,9 +259,7 @@ export default class RequestBuilder extends Component {
 
     resetRemsAdmin = (e) => {
         let url = new URL(this.state.cdsUrl);
-        console.log("ReqBuilder cds ", this.state.cdsUrl);
         const resetUrl = url.origin + "/etasu/reset";
-        console.log("reset rems admin: " + resetUrl);
 
         fetch(resetUrl, {
             method: 'POST',

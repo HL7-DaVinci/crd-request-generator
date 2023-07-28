@@ -1,8 +1,4 @@
 import env from 'env-var';
-const dotenv = require("dotenv");
-dotenv.config();
-
-console.log('process env --> ', process.env);
 
 const types = {
     error: "errorClass",
@@ -59,12 +55,12 @@ const headers = {
     },
     "smartAppUrl" : {
         "display": "SMART App",
-        "value": (process.env.SMART_APP_URL ? process.env.SMART_APP_URL : config.smart_app_url),
+        "value": (env.get('REACT_APP_SMART_LAUNCH_URL').asString()),
         "key": "smartAppUrl"
     },
     "defaultUser" : {
         "display": "Default User",
-        "value": (process.env.DEFAULT_USER ? process.env.DEFAULT_USER : config.default_user),
+        "value": (env.get('REACT_APP_DEFAULT_USER').asString()),
         "key": "defaultUser"
     }
 }
