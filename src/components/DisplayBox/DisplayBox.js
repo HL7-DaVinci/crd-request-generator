@@ -90,8 +90,6 @@ export default class DisplayBox extends Component{
    */
   takeSuggestion(suggestion, url, buttonId, suggestionCount, cardNum, selectionBehavior) {
     if (!this.props.isDemoCard) {
-      console.log("taking suggestion");
-
       if (selectionBehavior === 'at-most-one') {
         // disable all suggestion buttons for this card
         for (var i = 0; i < suggestionCount; i++) {

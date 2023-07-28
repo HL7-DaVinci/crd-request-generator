@@ -349,8 +349,6 @@ export default class RequestBox extends Component {
       url: this.props.launchUrl
     }
 
-    console.log('requstBuilder launch ', link.url);
-
     let linkCopy = Object.assign({}, link);
    
     return retrieveLaunchContext(
