@@ -67,7 +67,6 @@ export default class RequestBuilder extends Component {
     }
 
     componentDidMount() {
-        // this.setState({ env.get() });
         let ehr_server = (env.get('REACT_APP_EHR_SERVER').asString());
         this.setState({baseUrl: ehr_server})
         const callback = (keypair) => {
