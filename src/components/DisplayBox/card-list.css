@@ -34,8 +34,8 @@
   }
   
   .source-link {
-    color: blue;
-    text-decoration: none;
+    /* color: blue; */
+    /* text-decoration: none; */
   }
   
   .card-summary {
@@ -56,4 +56,15 @@
   
   .alert-error {
     border-left-color: #333;
+  }
+
+  .link-section {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .form-link {
+    display: flex;
+    align-items: center;
+    margin-right: 5px;
   }
