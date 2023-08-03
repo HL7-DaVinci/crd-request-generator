@@ -1,12 +1,15 @@
-import React, {Component} from 'react';
+import React, { Component, ReactElement } from 'react';
 import FHIR from "fhirclient";
 import styles from './card-list.css';
-import Button from 'terra-button';
+// import Button from 'terra-button';
+
+import { Button, Card, CardActions, CardContent, Typography } from '@mui/material';
 import TerraCard from 'terra-card';
 import Text from 'terra-text';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { retrieveLaunchContext } from '../../util/util';
 import './displayBox.css';
 
@@ -165,6 +168,7 @@ export default class DisplayBox extends Component{
    * @param {*} e - Event emitted when source link is clicked
    */
   launchSource(e) {
+    console.log('inside of launch source ----- ');
     e.preventDefault();
   }
 
@@ -228,15 +232,18 @@ export default class DisplayBox extends Component{
    * @param {*} source - Object as part of the card to build the UI for
    */
     renderSource(source) {
+      console.log('source 0-- > ', source);
         if (!source.label) { return null; }
         let icon;
         if (source.icon) {
           icon = <img className={styles['card-icon']} src={source.icon} alt="Could not fetch icon" width="100" height="100" />;
         }
+        console.log('props demo card -- > ', this.props.isDemoCard);
         if (!this.props.isDemoCard) {
+          console.log('inside of if -- for source rendering');
           return (
             <div className={styles['card-source']}>
-              Source: <a className={styles['source-link']} href={source.url || '#'} onClick={e => this.launchSource(e)}>{source.label}</a>
+              Source: <a href={source.url || '#'} onClick={e => this.launchSource(e)}>{source.label}</a>
               {icon}
             </div>
           );
@@ -278,6 +285,7 @@ export default class DisplayBox extends Component{
             .sort((b, a) => indicators[a.indicator] - indicators[b.indicator])
             .forEach((c, cardInd) => {
               const card = JSON.parse(JSON.stringify(c));
+              console.log('card -- > ', card);
       
               // -- Summary --
               const summarySection = <Text fontSize={18} weight={700} color={summaryColors[card.indicator]}>{card.summary}</Text>;
@@ -299,10 +307,9 @@ export default class DisplayBox extends Component{
                     <Button
                       key={ind}
                       onClick={() => this.takeSuggestion(item, card.serviceUrl, buttonId, card.suggestions.length, cardInd, card.selectionBehavior)}
-                      text={item.label}
-                      variant={Button.Opts.Variants.EMPHASIS}
+                      variant="contained"
                       id={buttonId}
-                    />
+                    >{item.label}</Button>
                   );
                 });
               }
@@ -311,27 +318,56 @@ export default class DisplayBox extends Component{
               let linksSection;
               if (card.links) {
                 card.links = this.modifySmartLaunchUrls(card) || card.links;
-                linksSection = card.links.map((link, ind) => (
-                  <Button
-                    key={ind}
-                    onClick={e => this.launchLink(e, link)}
-                    text={link.label}
-                    variant={Button.Opts.Variants['DE-EMPHASIS']}
-                  />
-                ));
-              }
-
-              // -- Type --
-              var typeSection = "";
-              if (card.source.hasOwnProperty("topic")) {
-                typeSection = card.source.topic.display ? <div style={{color: summaryColors.info}}><ReactMarkdown source={card.source.topic.display} /></div> : <Text color='grey'>None</Text>;
+                linksSection = card.links.map((link, ind) => {
+                  if (link.type === 'smart') {
+                    return (
+                      <Button
+                      key={ind}
+                      variant="outlined"
+                      onClick={e => this.launchLink(e, link)}
+                      >
+                        {link.label}
+                      </Button>
+                    )
+                  }
+                  const pdfIcon = <PictureAsPdfIcon />;
+                  return (
+                    <Button
+                      key={ind}
+                      onClick={e => this.launchLink(e, link)}
+                      endIcon={pdfIcon}
+                    >{link.label}</Button>)
+                  }
+                );
               }
     
               const cardSectionHeaderStyle = { marginBottom: '2px', color: 'black' };
 
               const builtCard = (
-                <TerraCard key={cardInd} className='decision-card alert-info'>
-                  <h4 style={cardSectionHeaderStyle}>Summary</h4>
+                <Card variant='outlined' key={cardInd} className='decision-card alert-info'>
+                  <React.Fragment>
+                    <CardContent>
+                      <Typography style={cardSectionHeaderStyle} gutterBottom>
+                        Summary
+                      </Typography>
+                      <Typography variant="h5" component="div">
+                        {summarySection}
+                      </Typography>
+                      <br/>
+                      <Typography style={cardSectionHeaderStyle}gutterBottom>
+                        Details
+                      </Typography>
+                      <Typography variant="div">{detailSection}</Typography>
+                      <br/>
+                      <Typography variant="div" gutterBottom>
+                        {sourceSection}
+                      </Typography>
+                    </CardContent>
+                    <CardActions className={styles['links-section']}>
+                      {linksSection}
+                    </CardActions>
+                  </React.Fragment>
+                  {/* <h4 style={cardSectionHeaderStyle}>Summary</h4>
                   <div>{summarySection}</div>
 
                   <h4 style={cardSectionHeaderStyle}>Details</h4>
@@ -345,10 +381,8 @@ export default class DisplayBox extends Component{
                   </div>
                   <div className={styles['links-section']}>
                     {linksSection}
-                  </div>
-                  <h4 style={cardSectionHeaderStyle}>Type</h4>
-                  <div>{typeSection}</div>
-                </TerraCard>);
+                  </div> */}
+                </Card>);
       
               renderedCards.push(builtCard);
             });
