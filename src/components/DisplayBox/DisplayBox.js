@@ -1,11 +1,7 @@
-import React, { Component, ReactElement } from 'react';
+import React, { Component } from 'react';
 import FHIR from "fhirclient";
-import styles from './card-list.css';
-// import Button from 'terra-button';
-
+import './card-list.css';
 import { Button, Card, CardActions, CardContent, Typography } from '@mui/material';
-import TerraCard from 'terra-card';
-import Text from 'terra-text';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
@@ -167,9 +163,9 @@ export default class DisplayBox extends Component{
    * Prevent the source link from opening in the same tab
    * @param {*} e - Event emitted when source link is clicked
    */
-  launchSource(e) {
-    console.log('inside of launch source ----- ');
+  launchSource(e, link) {
     e.preventDefault();
+    window.open(link.url, '_blank');
   }
 
   exitSmart(e) {
@@ -232,29 +228,26 @@ export default class DisplayBox extends Component{
    * @param {*} source - Object as part of the card to build the UI for
    */
     renderSource(source) {
-      console.log('source 0-- > ', source);
         if (!source.label) { return null; }
         let icon;
         if (source.icon) {
-          icon = <img className={styles['card-icon']} src={source.icon} alt="Could not fetch icon" width="100" height="100" />;
+          icon = <img className={'card-icon'} src={source.icon} alt="Could not fetch icon" width="100" height="100" />;
         }
-        console.log('props demo card -- > ', this.props.isDemoCard);
         if (!this.props.isDemoCard) {
-          console.log('inside of if -- for source rendering');
           return (
-            <div className={styles['card-source']}>
-              Source: <a href={source.url || '#'} onClick={e => this.launchSource(e)}>{source.label}</a>
+            <div className='card-source'>
+              Source: <a className='source-link' href={source.url || '#'} onClick={e => this.launchSource(e, source)}>{source.label}</a>
               {icon}
             </div>
           );
         }
         return (
-          <div className={styles['card-source']}>
+          <div className='card-source'>
             Source:
             <a // eslint-disable-line jsx-a11y/anchor-is-valid
-              className={styles['source-link']}
+              className='source-link'
               href="#"
-              onClick={e => this.launchSource(e)}
+              onClick={e => this.launchSource(e, source)}
             >
               {source.label}
             </a>
@@ -285,16 +278,15 @@ export default class DisplayBox extends Component{
             .sort((b, a) => indicators[a.indicator] - indicators[b.indicator])
             .forEach((c, cardInd) => {
               const card = JSON.parse(JSON.stringify(c));
-              console.log('card -- > ', card);
       
               // -- Summary --
-              const summarySection = <Text fontSize={18} weight={700} color={summaryColors[card.indicator]}>{card.summary}</Text>;
+              const summarySection = <p>{card.summary}</p>;
 
               // -- Source --
               const sourceSection = card.source && Object.keys(card.source).length ? this.renderSource(card.source) : '';
 
               // -- Detail (ReactMarkdown supports Github-flavored markdown) --
-              const detailSection = card.detail ? <div style={{color: summaryColors.info}}><ReactMarkdown source={card.detail} /></div> : <Text color='grey'>None</Text>;
+              const detailSection = card.detail ? <div><ReactMarkdown source={card.detail} /></div> : <p style={{color: 'grey'}}>None</p>;
       
               // -- Suggestions --
               let suggestionsSection = [];
@@ -363,25 +355,10 @@ export default class DisplayBox extends Component{
                         {sourceSection}
                       </Typography>
                     </CardContent>
-                    <CardActions className={styles['links-section']}>
+                    <CardActions className={'links-section'}>
                       {linksSection}
                     </CardActions>
                   </React.Fragment>
-                  {/* <h4 style={cardSectionHeaderStyle}>Summary</h4>
-                  <div>{summarySection}</div>
-
-                  <h4 style={cardSectionHeaderStyle}>Details</h4>
-                  <div>{detailSection}</div>
-
-                  <br/>
-                  <div>{sourceSection}</div>
-
-                  <div className={styles['suggestions-section']}>
-                    {suggestionsSection}
-                  </div>
-                  <div className={styles['links-section']}>
-                    {linksSection}
-                  </div> */}
                 </Card>);
       
               renderedCards.push(builtCard);
