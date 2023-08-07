@@ -1,12 +1,11 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import FHIR from "fhirclient";
-import styles from './card-list.css';
-import Button from 'terra-button';
-import TerraCard from 'terra-card';
-import Text from 'terra-text';
+import './card-list.css';
+import { Button, Card, CardActions, CardContent, Typography } from '@mui/material';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import { retrieveLaunchContext } from '../../util/util';
 import './displayBox.css';
 
@@ -164,8 +163,9 @@ export default class DisplayBox extends Component{
    * Prevent the source link from opening in the same tab
    * @param {*} e - Event emitted when source link is clicked
    */
-  launchSource(e) {
+  launchSource(e, link) {
     e.preventDefault();
+    window.open(link.url, '_blank');
   }
 
   exitSmart(e) {
@@ -231,23 +231,23 @@ export default class DisplayBox extends Component{
         if (!source.label) { return null; }
         let icon;
         if (source.icon) {
-          icon = <img className={styles['card-icon']} src={source.icon} alt="Could not fetch icon" width="100" height="100" />;
+          icon = <img className={'card-icon'} src={source.icon} alt="Could not fetch icon" width="100" height="100" />;
         }
         if (!this.props.isDemoCard) {
           return (
-            <div className={styles['card-source']}>
-              Source: <a className={styles['source-link']} href={source.url || '#'} onClick={e => this.launchSource(e)}>{source.label}</a>
+            <div className='card-source'>
+              Source: <a className='source-link' href={source.url || '#'} onClick={e => this.launchSource(e, source)}>{source.label}</a>
               {icon}
             </div>
           );
         }
         return (
-          <div className={styles['card-source']}>
+          <div className='card-source'>
             Source:
             <a // eslint-disable-line jsx-a11y/anchor-is-valid
-              className={styles['source-link']}
+              className='source-link'
               href="#"
-              onClick={e => this.launchSource(e)}
+              onClick={e => this.launchSource(e, source)}
             >
               {source.label}
             </a>
@@ -280,13 +280,13 @@ export default class DisplayBox extends Component{
               const card = JSON.parse(JSON.stringify(c));
       
               // -- Summary --
-              const summarySection = <Text fontSize={18} weight={700} color={summaryColors[card.indicator]}>{card.summary}</Text>;
+              const summarySection = <p>{card.summary}</p>;
 
               // -- Source --
               const sourceSection = card.source && Object.keys(card.source).length ? this.renderSource(card.source) : '';
 
               // -- Detail (ReactMarkdown supports Github-flavored markdown) --
-              const detailSection = card.detail ? <div style={{color: summaryColors.info}}><ReactMarkdown source={card.detail} /></div> : <Text color='grey'>None</Text>;
+              const detailSection = card.detail ? <div><ReactMarkdown source={card.detail} /></div> : <p style={{color: 'grey'}}>None</p>;
       
               // -- Suggestions --
               let suggestionsSection = [];
@@ -299,10 +299,9 @@ export default class DisplayBox extends Component{
                     <Button
                       key={ind}
                       onClick={() => this.takeSuggestion(item, card.serviceUrl, buttonId, card.suggestions.length, cardInd, card.selectionBehavior)}
-                      text={item.label}
-                      variant={Button.Opts.Variants.EMPHASIS}
+                      variant="contained"
                       id={buttonId}
-                    />
+                    >{item.label}</Button>
                   );
                 });
               }
@@ -311,44 +310,56 @@ export default class DisplayBox extends Component{
               let linksSection;
               if (card.links) {
                 card.links = this.modifySmartLaunchUrls(card) || card.links;
-                linksSection = card.links.map((link, ind) => (
-                  <Button
-                    key={ind}
-                    onClick={e => this.launchLink(e, link)}
-                    text={link.label}
-                    variant={Button.Opts.Variants['DE-EMPHASIS']}
-                  />
-                ));
-              }
-
-              // -- Type --
-              var typeSection = "";
-              if (card.source.hasOwnProperty("topic")) {
-                typeSection = card.source.topic.display ? <div style={{color: summaryColors.info}}><ReactMarkdown source={card.source.topic.display} /></div> : <Text color='grey'>None</Text>;
+                linksSection = card.links.map((link, ind) => {
+                  if (link.type === 'smart') {
+                    return (
+                      <Button
+                      key={ind}
+                      variant="outlined"
+                      onClick={e => this.launchLink(e, link)}
+                      >
+                        {link.label}
+                      </Button>
+                    )
+                  }
+                  const pdfIcon = <PictureAsPdfIcon />;
+                  return (
+                    <Button
+                      key={ind}
+                      onClick={e => this.launchLink(e, link)}
+                      endIcon={pdfIcon}
+                    >{link.label}</Button>)
+                  }
+                );
               }
     
               const cardSectionHeaderStyle = { marginBottom: '2px', color: 'black' };
 
               const builtCard = (
-                <TerraCard key={cardInd} className='decision-card alert-info'>
-                  <h4 style={cardSectionHeaderStyle}>Summary</h4>
-                  <div>{summarySection}</div>
-
-                  <h4 style={cardSectionHeaderStyle}>Details</h4>
-                  <div>{detailSection}</div>
-
-                  <br/>
-                  <div>{sourceSection}</div>
-
-                  <div className={styles['suggestions-section']}>
-                    {suggestionsSection}
-                  </div>
-                  <div className={styles['links-section']}>
-                    {linksSection}
-                  </div>
-                  <h4 style={cardSectionHeaderStyle}>Type</h4>
-                  <div>{typeSection}</div>
-                </TerraCard>);
+                <Card variant='outlined' key={cardInd} className='decision-card alert-info'>
+                  <React.Fragment>
+                    <CardContent>
+                      <Typography style={cardSectionHeaderStyle} gutterBottom>
+                        Summary
+                      </Typography>
+                      <Typography variant="h5" component="div">
+                        {summarySection}
+                      </Typography>
+                      <br/>
+                      <Typography style={cardSectionHeaderStyle}gutterBottom>
+                        Details
+                      </Typography>
+                      <Typography variant="div">{detailSection}</Typography>
+                      <br/>
+                      <Typography variant="div" gutterBottom>
+                        {sourceSection}
+                      </Typography>
+                    </CardContent>
+                    <CardActions className={'links-section'}>
+                      {linksSection}
+                    </CardActions>
+                  </React.Fragment>
+                </Card>);
       
               renderedCards.push(builtCard);
             });
