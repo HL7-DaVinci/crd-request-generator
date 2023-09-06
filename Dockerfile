@@ -1,5 +1,5 @@
 FROM node:14-alpine
-WORKDIR /home/node/app/crd-request-generator
+WORKDIR /home/node/app/request-generator
 COPY --chown=node:node . .
 RUN npm install
 COPY --chown=node:node . .

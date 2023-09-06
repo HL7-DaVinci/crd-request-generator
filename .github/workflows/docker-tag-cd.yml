@@ -23,7 +23,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: codexrems/crd-request-generator
+          images: codexrems/request-generator
       -
         name: Login to DockerHub
         if: github.event_name != 'pull_request'

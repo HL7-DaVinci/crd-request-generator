@@ -27,4 +27,4 @@ jobs:
         context: .
         platforms: linux/amd64,linux/arm64
         push: true
-        tags: codexrems/crd-request-generator:REMSvCurrent
+        tags: codexrems/request-generator:REMSvCurrent

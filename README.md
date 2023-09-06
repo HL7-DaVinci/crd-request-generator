@@ -1,10 +1,10 @@
-# CRD Request Generator
-This subproject provides a small web application that is capable of generating CRD requests and displaying the CDS Hooks cards that are provided as a response. This project is written in JavaScript and runs in [node.js](https://nodejs.org/en/).  
+# Request Generator
+This subproject provides a small web application that is capable of generating requests and displaying the CDS Hooks cards that are provided as a response. This project is written in JavaScript and runs in [node.js](https://nodejs.org/en/).  
 
 ## Running the request generator standalone
 1. Install node.js
 2. Clone the repository
-  * `git clone https://github.com/mcode/crd-request-generator.git`
+  * `git clone https://github.com/mcode/request-generator.git`
 3. Install the dependencies
   * `cd request-generator`
   * `npm install`

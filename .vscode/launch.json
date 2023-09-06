@@ -7,11 +7,11 @@
         {
             "type": "chrome",
             "request": "launch",
-            "name": "Debug CRD-Request-Generator (Launch Docker)",
+            "name": "Debug Request-Generator (Launch Docker)",
             "url": "http://localhost:3000",
             "webRoot": "${workspaceFolder}",
             "sourceMapPathOverrides": {
-                "/home/node/app/crd-request-generator/*": "${webRoot}/*",
+                "/home/node/app/request-generator/*": "${webRoot}/*",
             },
             "runtimeArgs": [
                 "--remote-debugging-port=9222"
@@ -20,18 +20,18 @@
         {
             "type": "chrome",
             "request": "attach",
-            "name": "Debug CRD-Request-Generator (Attach Docker)",
+            "name": "Debug Request-Generator (Attach Docker)",
             "port": 9222,
             "urlFilter": "http://localhost:3000/*",
             "webRoot": "${workspaceFolder}",
             "sourceMapPathOverrides": {
-                "/home/node/app/crd-request-generator/*": "${webRoot}/*",
+                "/home/node/app/request-generator/*": "${webRoot}/*",
             }
         },
         {
             "type": "chrome",
             "request": "launch",
-            "name": "Debug CRD-Request-Generator (Launch Local)",
+            "name": "Debug Request-Generator (Launch Local)",
             "url": "http://localhost:3000",
             "webRoot": "${workspaceFolder}",
             "runtimeArgs": [
@@ -42,7 +42,7 @@
             "type": "chrome",
             "request": "attach",
             "port": 9222,
-            "name": "Debug CRD-Request-Generator (Attach Local)",
+            "name": "Debug Request-Generator (Attach Local)",
             "urlFilter": "http://localhost:3000/*",
             "webRoot": "${workspaceFolder}",
         }
