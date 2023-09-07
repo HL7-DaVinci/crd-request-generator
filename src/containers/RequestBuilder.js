@@ -330,7 +330,7 @@ export default class RequestBuilder extends Component {
       },
       cdsUrl: {
         type: "input",
-        display: "CRD Server",
+        display: "REMS Admin",
         value: this.state.cdsUrl,
         key: "cdsUrl",
       },
@@ -424,10 +424,6 @@ export default class RequestBuilder extends Component {
         value: this.clearQuestionnaireResponses,
         key: "clearQuestionnaireResponses",
       },
-      endSpacer: {
-        type: "line",
-        key: "endSpacer",
-      },
     };
 
     return (
@@ -464,10 +460,6 @@ export default class RequestBuilder extends Component {
           </button>
         </div>
 
-        {/* {this.state.ehrLaunch?
-                                    <SMARTBox exitSmart={this.exitSmart}>
-                                    <EHRLaunchBox></EHRLaunchBox>
-                                </SMARTBox>:null} */}
         <div className="form-group container left-form">
           <div id="settings-header"></div>
           {this.state.showSettings ? (
@@ -493,21 +485,6 @@ export default class RequestBuilder extends Component {
             />
           </div>
           <br />
-          {/* <button className={"submit-btn btn btn-class " + (!total ? "button-error" : total === 1 ? "button-ready" : "button-empty-fields")} onClick={this.startLoading}>
-                        Submit
-                    </button> */}
-          {/* 
-
-                    <CheckBox elementName="oauth" displayName="OAuth" updateCB={this.updateStateElement} />
-                    <CheckBox elementName="prefetch" displayName="Include Prefetch" updateCB={this.updateStateElement} />
-                    <div id="fse" className={"spinner " + (this.state.loading ? "visible" : "invisible")}>
-                        <Loader
-                            type="Oval"
-                            color="#222222"
-                            height="16"
-                            width="16"
-                        />
-                    </div> */}
 
           <ConsoleBox logs={this.state.logs} />
         </div>
