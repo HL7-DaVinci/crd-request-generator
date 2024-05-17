@@ -65,15 +65,81 @@ export default class RequestBox extends Component {
     return preppedResources;
   }
 
-  submit = () => {
+  submit = async () => {
     if (!_.isEmpty(this.state.request)) {
-      this.props.submitInfo(
+      let response = await this.props.submitInfo(
         this.prepPrefetch(),
         this.state.request,
         this.state.patient,
         "order-sign",
-        this.state.deidentifyRecords
+        this.state.deidentifyRecords,
+        true
       );
+    }
+  };
+
+  submitAction = async () => {
+    console.log("submitAction", this.state.request);
+    if (!_.isEmpty(this.state.request)) {
+      let response = await this.props.submitInfo(
+        this.prepPrefetch(),
+        this.state.request,
+        this.state.patient,
+        "order-sign",
+        this.state.deidentifyRecords,
+        false
+      );
+
+      console.log("submitAction response", response);
+
+      if (!!response.systemActions && response.systemActions.length > 0) {
+        console.log("submitAction systemActions", response.systemActions);
+        
+        // find a resource in the system actions with the CRD coverage information extension
+        let resource = null;
+        for (let action of response.systemActions) {
+
+          if (!action.resource || !action.resource.extension || action.resource.extension.length === 0) {
+            continue;
+          }
+          if (action.resource.extension.findIndex(e => e.url === "http://hl7.org/fhir/us/davinci-crd/StructureDefinition/ext-coverage-information") > -1) {
+            resource = action.resource;
+            break;
+          }
+        }
+
+        // check if doc-needed and questionnaire extensions are present in the resource of any action
+        if (resource) {
+          console.log("submitAction resource", resource);
+          let extension = resource.extension.find(e => e.url === "http://hl7.org/fhir/us/davinci-crd/StructureDefinition/ext-coverage-information");
+
+          if (extension?.extension.findIndex(e => e.url === "doc-needed") > -1) {
+            let questionnaire = extension.extension.find(e => e.url === "questionnaire");
+
+            if (!questionnaire) {
+              console.log("Questionnaire not found when doc-needed is present");
+              return;
+            }
+            
+            console.log("Questionnaire found", questionnaire);
+            console.log("Coverage:", resource.insurance[0]);
+
+            let launchLink = await this.buildLaunchLink(`&questionnaire=${questionnaire.valueCanonical}`);
+            console.log("launchLink", launchLink);
+            window.open(launchLink.url, "_blank");
+          }
+          else {
+            console.log("doc-needed extension not found");
+          }
+
+        }
+        else {
+          console.log("submitAction resource not found");
+        }
+      }
+      else {
+        console.log("No systemActions");
+      }
     }
   };
 
@@ -277,10 +343,10 @@ export default class RequestBox extends Component {
       });
   }
 
-  buildLaunchLink() {
+  buildLaunchLink(additionalContext = "") {
     // build appContext and URL encode it
     let appContext = "";
-    let order = undefined, coverage = undefined, response = undefined;
+    let order = undefined, coverage = undefined, response = undefined, questionnaire = undefined;
 
     if (!this.isOrderNotSelected()) {
       if (Object.keys(this.state.request).length > 0) {
@@ -308,6 +374,8 @@ export default class RequestBox extends Component {
     } else if (!order && response) {
       appContext += `response=${response}`
     } 
+
+    appContext += additionalContext;
 
     const link = {
       appContext: encodeURIComponent(appContext),
@@ -398,11 +466,14 @@ export default class RequestBox extends Component {
             </div>
           </div>
         </div>
-        <button className={"submit-btn btn btn-class "} onClick={this.relaunch} disabled={disableLaunchDTR}>
+        {/* <button className={"submit-btn btn btn-class "} onClick={this.relaunch} disabled={disableLaunchDTR}>
           Relaunch DTR
-        </button>
+        </button> */}
         <button className={"submit-btn btn btn-class "} onClick={this.submit} disabled={disableSendToCRD}>
-          Submit to CRD
+          Submit to CRD and Display Cards
+        </button>
+        <button className={"submit-btn btn btn-class "} onClick={this.submitAction} disabled={disableSendToCRD}>
+          Submit to CRD and Launch DTR
         </button>
       </div>
     );

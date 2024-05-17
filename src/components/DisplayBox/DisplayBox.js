@@ -104,7 +104,7 @@ export default class DisplayBox extends Component{
       }
 
       if (suggestion.label) {
-        if (suggestion.uuid) {
+        if (!!suggestion.uuid && !!url) {
           axios({
             method: 'POST',
             url: `${url}/analytics/${suggestion.uuid}`,
