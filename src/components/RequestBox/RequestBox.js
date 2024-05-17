@@ -79,7 +79,6 @@ export default class RequestBox extends Component {
   };
 
   submitAction = async () => {
-    console.log("submitAction", this.state.request);
     if (!_.isEmpty(this.state.request)) {
       let response = await this.props.submitInfo(
         this.prepPrefetch(),
@@ -92,7 +91,7 @@ export default class RequestBox extends Component {
 
       console.log("submitAction response", response);
 
-      if (!!response.systemActions && response.systemActions.length > 0) {
+      if (!!response && !!response.systemActions && response.systemActions.length > 0) {
         console.log("submitAction systemActions", response.systemActions);
         
         // find a resource in the system actions with the CRD coverage information extension

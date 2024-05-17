@@ -135,26 +135,6 @@ export default class RequestBuilder extends Component {
         });
         this.consoleLog("Fetching response from " + cdsUrl, types.info);
         try {
-            // fetch(cdsUrl, {
-            //     method: "POST",
-            //     headers: myHeaders,
-            //     body: JSON.stringify(json_request)
-            // }).then(response => {
-            //     this.consoleLog("Received response", types.info);
-            //     response.json().then((fhirResponse) => {
-            //         console.log(fhirResponse);
-            //         if (fhirResponse && fhirResponse.status) {
-            //             this.consoleLog("Server returned status "
-            //                 + fhirResponse.status + ": "
-            //                 + fhirResponse.error, types.error);
-            //             this.consoleLog(fhirResponse.message, types.error);
-            //         } else {
-            //             this.setState({ response: fhirResponse });
-            //         }
-            //         this.setState({ loading: false });
-            //     })
-            // }).catch(() => this.consoleLog("No response recieved from the server", types.error));
-
             try {
                 let response = await fetch(cdsUrl, {
                     method: "POST",
