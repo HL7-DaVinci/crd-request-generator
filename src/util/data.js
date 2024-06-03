@@ -41,12 +41,12 @@ const headers = {
     }, 
     "launchUrl" : {
         "display": "DTR Launch URL",
-        "value": (process.env.LAUNCH_URL ? process.env.LAUNCH_URL : config.launch_url),
+    "value": (process.env.REACT_APP_LAUNCH_URL ? process.env.REACT_APP_LAUNCH_URL : config.launch_url),
         "key": "launchUrl"
     },
     "responseExpirationDays" : {
         "display": "In Progress Form Expiration Days",
-        "value": (process.env.FORM_EXPIRATION_DAYS ? process.env.FORM_EXPIRATION_DAYS : config.response_expiration_days),
+        "value": (process.env.REACT_APP_FORM_EXPIRATION_DAYS ? process.env.REACT_APP_FORM_EXPIRATION_DAYS : config.response_expiration_days),
         "key": "responseExpirationDays"
     }
 }
