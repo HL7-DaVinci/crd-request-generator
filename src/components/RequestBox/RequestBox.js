@@ -171,14 +171,13 @@ export default class RequestBox extends Component {
   };
 
   getPatients = () => {
-    console.log(this.props.access_token.access_token);
+    console.log("getPatients::access_token:", this.props.access_token?.access_token);
     this.setState({ openPatient: true });
     const params = {serverUrl: this.props.ehrUrl};
-    console.log(this.props.access_token.access_token);
-    if (this.props.access_token.access_token) {
+    if (this.props.access_token?.access_token) {
         params["tokenResponse"] = {access_token: this.props.access_token.access_token}
     }
-    console.log(params);
+    console.log("getPatients::params", params);
     const client = FHIR.client(
       params
     );
