@@ -2,7 +2,7 @@
 This subproject provides a small web application that is capable of generating CRD requests and displaying the CDS Hooks cards that are provided as a response. This project is written in JavaScript and runs in [node.js](https://nodejs.org/en/).  
 
 ## Running the request generator standalone
-1. Install node.js
+1. Install [Node.js 16](https://nodejs.org) (Node 18+ not currently supported)
 2. Clone the repository
   * `git clone https://github.com/HL7-DaVinci/crd-request-generator.git`
 3. Install the dependencies

@@ -37,7 +37,7 @@ export default function buildRequest(request, patient, ehrUrl, token, prefetch, 
         "fhirServer": ehrUrl,
         "hook": hook,
         "fhirAuthorization": {
-            "access_token": token.access_token,
+            "access_token": token?.access_token,
             "token_type": "Bearer",
             "expires_in": 300,
             "scope": "patient/Patient.read patient/Observation.read",
