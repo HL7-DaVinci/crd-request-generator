@@ -312,3 +312,8 @@ input:not(:focus):not([value=""]):valid ~ .floating-label{
     border-bottom: 1px solid black;
     background-color: #005B94;
 }
+
+.banner {
+  margin-left: 15px;
+  margin-right: 15px;
+}

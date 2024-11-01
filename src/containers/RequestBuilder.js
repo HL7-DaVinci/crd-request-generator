@@ -68,7 +68,8 @@ export default class RequestBuilder extends Component {
         this.setState({ config });
         let ehr_base = (process.env.REACT_APP_EHR_BASE ? process.env.REACT_APP_EHR_BASE : config.ehr_base);
         let ehr_server = (process.env.REACT_APP_EHR_SERVER ? process.env.REACT_APP_EHR_SERVER : config.ehr_server);
-        this.setState({baseUrl: ehr_base ? ehr_base : ehr_server})
+        let banner = (process.env.REACT_APP_BANNER ? process.env.REACT_APP_BANNER : config.banner);
+        this.setState({baseUrl: ehr_base ? ehr_base : ehr_server, banner: banner});
         const callback = (keypair) => {
             this.setState({ keypair });
         }
@@ -341,6 +342,13 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
                     <button className={"btn btn-class settings " + (this.state.showSettings ? "active" : "not-active")} onClick={() => this.updateStateElement("showSettings", !this.state.showSettings)}><span className="glyphicon glyphicon-cog settings-icon" /></button>
 
                 </div>
+
+                {
+                    this.state.banner ? 
+                    <div className="alert alert-info banner">
+                        <span dangerouslySetInnerHTML={{__html: this.state.banner}}></span>
+                    </div> : null
+                }
 
                 {/* {this.state.ehrLaunch?
                                     <SMARTBox exitSmart={this.exitSmart}>
