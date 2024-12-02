@@ -9,7 +9,7 @@
     "classnames": "^2.2.6",
     "clone": "^2.1.2",
     "fhirclient": "^2.3.1",
-    "json-server": "^0.16.3",
+    "json-server": "^0.17.1",
     "jsrsasign": "^10.2.0",
     "keypair": "^1.0.1",
     "lodash": "^4.17.15",
