@@ -10,7 +10,7 @@
     "clone": "^2.1.2",
     "fhirclient": "^2.3.1",
     "json-server": "^0.16.3",
-    "jsrsasign": "^10.2.0",
+    "jsrsasign": "^10.5.25",
     "keypair": "^1.0.1",
     "lodash": "^4.17.15",
     "react": "^16.13.1",
