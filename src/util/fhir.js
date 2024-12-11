@@ -33,11 +33,11 @@ function getReference(ehrUrl, reference) {
 
 function login() {
 
-    const tokenUrl = (process.env.REACT_APP_AUTH ? process.env.REACT_APP_AUTH : this.state.config.auth) + "/realms/" + (process.env.REACT_APP_REALM ? process.env.REACT_APP_REALM : this.state.config.realm) + "/protocol/openid-connect/token"
+    const tokenUrl = (process.env.REACT_APP_TOKEN_URL ? process.env.REACT_APP_TOKEN_URL : this.state.config.token_url);
     let params = {
         grant_type: "password",
-        username: "user1",
-        password: "password",
+        username: (process.env.REACT_APP_USER ? process.env.REACT_APP_USER : this.state.config.user),
+        password: (process.env.REACT_APP_PASSWORD ? process.env.REACT_APP_PASSWORD : this.state.config.password),
         client_id: (process.env.REACT_APP_CLIENT ? process.env.REACT_APP_CLIENT : this.state.config.client)
     }
 

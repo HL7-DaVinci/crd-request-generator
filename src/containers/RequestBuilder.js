@@ -30,7 +30,7 @@ export default class RequestBuilder extends Component {
             keypair: null,
             config: {},
             ehrUrl: headers.ehrUrl.value,
-            authUrl: headers.authUrl.value,
+            tokenUrl: headers.tokenUrl.value,
             cdsUrl: headers.cdsUrl.value,
             orderSelect: headers.orderSelect.value,
             orderSign: headers.orderSign.value,
@@ -291,11 +291,11 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
                 "value": this.state.orderSign,
                 "key": "orderSign"
             },
-            "authUrl": {
+            "tokenUrl": {
                 "type": "input",
-                "display": "Auth Server",
-                "value": this.state.authUrl,
-                "key": "authUrl"
+                "display": "Auth Server Token URL",
+                "value": this.state.tokenUrl,
+                "key": "tokenUrl"
             },
             "baseUrl": {
                 "type": "input",

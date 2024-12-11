@@ -29,10 +29,10 @@ const headers = {
         "value": (process.env.REACT_APP_ORDER_SIGN ? process.env.REACT_APP_ORDER_SIGN : config.order_sign),
         "key":"orderSign"
     },
-    "authUrl": {
-        "display": "Auth Server",
-        "value": (process.env.REACT_APP_AUTH ? process.env.REACT_APP_AUTH : config.auth),
-        "key": "authUrl"
+    "tokenUrl": {
+        "display": "Auth Server Token URL",
+        "value": (process.env.REACT_APP_TOKEN_URL ? process.env.REACT_APP_TOKEN_URL : config.token_url),
+        "key": "tokenUrl"
     },
     "alternativeTherapy": {
         "display": "Alternative Therapy Cards Allowed",
