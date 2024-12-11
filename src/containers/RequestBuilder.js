@@ -131,6 +131,7 @@ export default class RequestBuilder extends Component {
         const jwt = "Bearer " + createJwt(this.state.keypair, baseUrl, cdsUrl);
         console.log(jwt);
         var myHeaders = new Headers({
+            "Accept": "application/json",
             "Content-Type": "application/json",
             "authorization": jwt
         });
