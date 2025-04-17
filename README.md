@@ -4,7 +4,7 @@ This subproject provides a small web application that is capable of generating C
 A live demo is hosted by [HL7 FHIR Foundry](https://foundry.hl7.org/products/8e206bce-f64d-492a-b7eb-e893cf6e949a), where you may also download curated configurations to run yourself.
 
 ## Running the request generator standalone
-1. Install [Node.js 16](https://nodejs.org) (Node 18+ not currently supported)
+1. Install [Node.js](https://nodejs.org) (tested with Node 22)
 2. Clone the repository
   * `git clone https://github.com/HL7-DaVinci/crd-request-generator.git`
 3. Install the dependencies

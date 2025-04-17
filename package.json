@@ -4,26 +4,26 @@
   "private": true,
   "homepage": "http://localhost:8080",
   "dependencies": {
-    "axios": "^0.18.0",
-    "base64url": "^3.0.0",
-    "classnames": "^2.2.6",
+    "axios": "^1.8.4",
+    "base64url": "^3.0.1",
+    "classnames": "^2.5.1",
     "clone": "^2.1.2",
-    "fhirclient": "^2.3.1",
-    "json-server": "^0.16.3",
-    "jsrsasign": "^10.2.0",
-    "keypair": "^1.0.1",
-    "lodash": "^4.17.15",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
-    "react-loader-spinner": "^2.1.0",
-    "react-markdown": "^4.3.1",
-    "react-scripts": "^3.4.1",
-    "sass": "^1.32.8",
-    "semantic-ui-react": "^0.82.3",
-    "terra-base": "^3.19.0",
-    "terra-button": "^2.19.0",
-    "terra-card": "^2.18.0",
-    "terra-text": "^2.18.0"
+    "fhirclient": "^2.5.5",
+    "json-server": "^1.0.0-beta.3",
+    "jsrsasign": "^11.1.0",
+    "keypair": "^1.0.4",
+    "lodash": "^4.17.21",
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0",
+    "react-loader-spinner": "^6.1.6",
+    "react-markdown": "^8.0.0",
+    "react-scripts": "^5.0.1",
+    "sass": "^1.86.3",
+    "semantic-ui-react": "^2.1.5",
+    "terra-base": "^5.54.0",
+    "terra-button": "^3.78.0",
+    "terra-card": "^3.49.0",
+    "terra-text": "^4.60.0"
   },
   "scripts": {
     "start": "concurrently --kill-others \"json-server --watch src/db.json -p 3001 --host 0.0.0.0\" \"react-scripts start\"",
@@ -34,9 +34,7 @@
     "eject": "react-scripts eject"
   },
   "devDependencies": {
-    "concurrently": "^4.1.0",
-    "fs": "0.0.1-security",
-    "jju": "^1.4.0"
+    "concurrently": "^9.1.2"
   },
   "browserslist": {
     "production": [

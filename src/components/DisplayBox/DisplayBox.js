@@ -245,7 +245,7 @@ export default class DisplayBox extends Component{
         return (
           <div className={styles['card-source']}>
             Source:
-            <a // eslint-disable-line jsx-a11y/anchor-is-valid
+            <a
               className={styles['source-link']}
               href="#"
               onClick={e => this.launchSource(e)}
