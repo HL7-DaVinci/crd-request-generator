@@ -1,9 +1,7 @@
 import React, {Component} from 'react';
 import FHIR from "fhirclient";
-import styles from './card-list.css';
-import Button from 'terra-button';
-import TerraCard from 'terra-card';
-import Text from 'terra-text';
+import './card-list.css';
+import { Button, Card, CardContent, Typography, Box } from '@mui/material';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import SMARTBox from '../SMARTBox/SMARTBox';
@@ -230,23 +228,21 @@ export default class DisplayBox extends Component{
    */
     renderSource(source) {
         if (!source.label) { return null; }
-        let icon;
-        if (source.icon) {
-          icon = <img className={styles['card-icon']} src={source.icon} alt="Could not fetch icon" width="100" height="100" />;
-        }
-        if (!this.props.isDemoCard) {
+        let icon;        if (source.icon) {
+          icon = <img className="card-icon" src={source.icon} alt="Could not fetch icon" width="100" height="100" />;
+        }if (!this.props.isDemoCard) {
           return (
-            <div className={styles['card-source']}>
-              Source: <a className={styles['source-link']} href={source.url || '#'} onClick={e => this.launchSource(e)}>{source.label}</a>
+            <div className="card-source">
+              Source: <a className="source-link" href={source.url || '#'} onClick={e => this.launchSource(e)}>{source.label}</a>
               {icon}
             </div>
           );
         }
         return (
-          <div className={styles['card-source']}>
+          <div className="card-source">
             Source:
             <a
-              className={styles['source-link']}
+              className="source-link"
               href="#"
               onClick={e => this.launchSource(e)}
             >
@@ -278,37 +274,31 @@ export default class DisplayBox extends Component{
             this.state.response.cards
             .sort((b, a) => indicators[a.indicator] - indicators[b.indicator])
             .forEach((c, cardInd) => {
-              const card = JSON.parse(JSON.stringify(c));
-      
-              // -- Summary --
-              const summarySection = <Text fontSize={18} weight={700} color={summaryColors[card.indicator]}>{card.summary}</Text>;
+              const card = JSON.parse(JSON.stringify(c));              // -- Summary --
+              const summarySection = <Typography variant="h6" component="div" style={{color: summaryColors[card.indicator], fontWeight: 'bold'}}>{card.summary}</Typography>;
 
               // -- Source --
-              const sourceSection = card.source && Object.keys(card.source).length ? this.renderSource(card.source) : '';
-
-              // -- Detail (ReactMarkdown supports Github-flavored markdown) --
-              const detailSection = card.detail ? <div style={{color: summaryColors.info}}><ReactMarkdown source={card.detail} /></div> : <Text color='grey'>None</Text>;
+              const sourceSection = card.source && Object.keys(card.source).length ? this.renderSource(card.source) : '';              // -- Detail (ReactMarkdown supports Github-flavored markdown) --
+              const detailSection = card.detail ? <div style={{color: summaryColors.info}}><ReactMarkdown>{card.detail}</ReactMarkdown></div> : <Typography color="text.secondary">None</Typography>;
       
               // -- Suggestions --
               let suggestionsSection = [];
               if (card.suggestions) {
                 card.suggestions.forEach((item, ind) => {
                   var buttonId = "suggestion_button-"+cardInd+"-"+ind;
-                  this.buttonList.push(buttonId);
-
-                  suggestionsSection.push(
+                  this.buttonList.push(buttonId);                  suggestionsSection.push(
                     <Button
                       key={ind}
                       onClick={() => this.takeSuggestion(item, card.serviceUrl, buttonId, card.suggestions.length, cardInd, card.selectionBehavior)}
-                      text={item.label}
-                      variant={Button.Opts.Variants.EMPHASIS}
+                      variant="contained"
                       id={buttonId}
-                    />
+                      sx={{ mr: 1, mb: 1 }}
+                    >
+                      {item.label}
+                    </Button>
                   );
                 });
-              }
-      
-              // -- Links --
+              }              // -- Links --
               let linksSection;
               if (card.links) {
                 card.links = this.modifySmartLaunchUrls(card) || card.links;
@@ -316,40 +306,43 @@ export default class DisplayBox extends Component{
                   <Button
                     key={ind}
                     onClick={e => this.launchLink(e, link)}
-                    text={link.label}
-                    variant={Button.Opts.Variants['DE-EMPHASIS']}
-                  />
+                    variant="outlined"
+                    sx={{ mr: 1, mb: 1 }}
+                  >
+                    {link.label}
+                  </Button>
                 ));
-              }
-
-              // -- Type --
+              }              // -- Type --
               var typeSection = "";
               if (card.source.hasOwnProperty("topic")) {
-                typeSection = card.source.topic.display ? <div style={{color: summaryColors.info}}><ReactMarkdown source={card.source.topic.display} /></div> : <Text color='grey'>None</Text>;
+                typeSection = card.source.topic.display ? <div style={{color: summaryColors.info}}><ReactMarkdown>{card.source.topic.display}</ReactMarkdown></div> : <Typography color="text.secondary">None</Typography>;
               }
     
-              const cardSectionHeaderStyle = { marginBottom: '2px', color: 'black' };
+              const cardSectionHeaderStyle = { marginBottom: '2px', color: 'black' };              const builtCard = (
+                <Card key={cardInd} className='decision-card alert-info' sx={{ mb: 2 }}>
+                  <CardContent>
+                    <Typography variant="h6" component="h4" gutterBottom sx={{ color: 'black', mb: 1 }}>
+                      Summary
+                    </Typography>
+                    <Box>{summarySection}</Box>
 
-              const builtCard = (
-                <TerraCard key={cardInd} className='decision-card alert-info'>
-                  <h4 style={cardSectionHeaderStyle}>Summary</h4>
-                  <div>{summarySection}</div>
+                    <Typography variant="h6" component="h4" gutterBottom sx={{ color: 'black', mt: 2, mb: 1 }}>
+                      Details
+                    </Typography>
+                    <Box>{detailSection}</Box>                    <Box sx={{ mt: 2 }}>{sourceSection}</Box>
 
-                  <h4 style={cardSectionHeaderStyle}>Details</h4>
-                  <div>{detailSection}</div>
-
-                  <br/>
-                  <div>{sourceSection}</div>
-
-                  <div className={styles['suggestions-section']}>
-                    {suggestionsSection}
-                  </div>
-                  <div className={styles['links-section']}>
-                    {linksSection}
-                  </div>
-                  <h4 style={cardSectionHeaderStyle}>Type</h4>
-                  <div>{typeSection}</div>
-                </TerraCard>);
+                    <Box className="suggestions-section">
+                      {suggestionsSection}
+                    </Box>
+                    <Box className="links-section">
+                      {linksSection}
+                    </Box>
+                    <Typography variant="h6" component="h4" gutterBottom sx={{ color: 'black', mt: 2, mb: 1 }}>
+                      Type
+                    </Typography>
+                    <Box>{typeSection}</Box>
+                  </CardContent>
+                </Card>);
       
               renderedCards.push(builtCard);
             });

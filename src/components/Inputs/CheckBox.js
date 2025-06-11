@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import { FormControlLabel, Switch } from '@mui/material';
 
 export default class CheckBox extends Component {
     constructor(props){
@@ -11,27 +12,24 @@ export default class CheckBox extends Component {
 
     }
     onInputChange(event){
-        if(this.state.toggle){
-            this.setState({toggle:false})
-            this.props.updateCB(this.props.elementName, false);
-        }else{
-            this.setState({toggle:true})
-            this.props.updateCB(this.props.elementName, true);
-
-        }
-
+        const newToggle = event.target.checked;
+        this.setState({toggle: newToggle})
+        this.props.updateCB(this.props.elementName, newToggle);
     }
+    
     render() {
-        const toggleClass = (this.state.toggle?"checkBoxClicked":"checkBox");
-        const indicatorClass = this.state.toggle?"onOffActive":"onOff";
         return (
-            <span>
-            <button
-            className={toggleClass +" btn-class btn " + this.props.extraClass}
-            name={this.props.elementName}
-            onClick={this.onInputChange}
-            >{this.props.displayName} <a className={indicatorClass + " onOffState " + this.props.extraInnerClass} ></a></button>
-            </span>
+            <FormControlLabel
+                control={
+                    <Switch
+                        checked={this.state.toggle}
+                        onChange={this.onInputChange}
+                        name={this.props.elementName}
+                        className={this.props.extraClass}
+                    />
+                }
+                label={this.props.displayName || ''}
+            />
         )
     }
 }

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './SettingsBox.css';
 import InputBox from '../Inputs/InputBox';
 import CheckBox from '../Inputs/CheckBox';
-import { StatisticValue } from 'semantic-ui-react';
+import { Typography, Box } from '@mui/material';
 export default class SettingsBox extends Component {
     constructor(props) {
         super(props);
@@ -18,44 +18,50 @@ export default class SettingsBox extends Component {
 
     updateCB(elementName, value) {
         this.props.updateCB(elementName, value);
-    }
-
-    render() {
+    }    render() {
         const headers = this.props.headers;
 
         return (
-            <div>
+            <Box>
                 {Object.keys(headers).map((header)=>{
                     let value = headers[header].value;
                     let type = headers[header].type;
                     switch(type) {
                         case "input":
-                            return <div key={header}>
-                                <p className="setting-header">{headers[header].display}</p>
+                            return <Box key={header} sx={{ mb: 2 }}>
+                                <Typography variant="body2" className="setting-header" sx={{ mb: 1, fontWeight: 'medium' }}>
+                                    {headers[header].display}
+                                </Typography>
                                 <InputBox 
                                     extraClass = "setting-input"
                                     value = {value}
                                     updateCB = {this.updateCB}
                                     elementName = {header}/>
-                            </div>
+                            </Box>
                         case "check":
-                            return <div key={header}>
-                                <p className="setting-header">{headers[header].display}
+                            return <Box key={header} sx={{ mb: 2 }}>
+                                <Typography variant="body2" className="setting-header" sx={{ mb: 1, fontWeight: 'medium' }}>
+                                    {headers[header].display}
+                                </Typography>
                                 <CheckBox
                                     extraClass = "setting-checkbox"
                                     extraInnerClass = "setting-inner-checkbox"
                                     toggle = {value}
                                     updateCB={this.updateCB}
-                                    elementName = {header} />
-                                    </p>
-                                <p>&nbsp;</p>
-                            </div>
+                                    elementName = {header}
+                                    displayName = ""
+                                />
+                            </Box>
                         default:
-                            return <div key={header}><p className="setting-header">{headers[header].display}</p></div>
+                            return <Box key={header} sx={{ mb: 2 }}>
+                                <Typography variant="body2" className="setting-header" sx={{ fontWeight: 'medium' }}>
+                                    {headers[header].display}
+                                </Typography>
+                            </Box>
                     }
                     
                 })}
-            </div>
+            </Box>
 
         )
     }

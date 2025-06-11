@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-
+import { TextField } from '@mui/material';
 
 export default class InputBox extends Component {
     constructor(props){
@@ -18,15 +18,16 @@ export default class InputBox extends Component {
     }
     render() {
         return (
-            <div>
-            <input
-            className={"form-control input-text " + this.props.extraClass}
-            name={this.props.elementName}
-            value={this.props.value}
-            onChange={this.onInputChange}
-
-            ></input>
-            </div>
+            <TextField
+                name={this.props.elementName}
+                value={this.props.value}
+                onChange={this.onInputChange}
+                variant="outlined"
+                size="small"
+                fullWidth
+                className={this.props.extraClass}
+                sx={{ mb: 1 }}
+            />
         )
     }
 }

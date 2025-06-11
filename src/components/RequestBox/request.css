@@ -100,9 +100,10 @@
 }
 
 .patient-box {
-    overflow-y:scroll;
-    height:800px;
-} 
+    /* Removed fixed height and overflow-y scroll to prevent double scrollbars */
+    /* The parent SMARTBox container handles scrolling */
+    width: 100%;
+}
   
 .patient-error {
     white-space:pre-wrap;

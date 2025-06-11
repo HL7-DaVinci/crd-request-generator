@@ -1,4 +1,7 @@
 import React, {Component} from 'react';
+import { Paper, IconButton, Box, Typography } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
 export default class ConsoleBox extends Component {
     constructor(props){
@@ -34,7 +37,6 @@ export default class ConsoleBox extends Component {
         this.setState({headerStatus:"showHeader"});
       }
   }
-
   render() {
 
     try{
@@ -44,20 +46,50 @@ export default class ConsoleBox extends Component {
 
     }
       let i = 0;
+      const isExpanded = this.state.showStatus === "showConsole";
     return (
-        <div>
-
-                <a className={this.state.headerStatus + " consoleHeader"} onClick={this.toggleConsole} >
-
-                </a>
-            <div id="your_div" className = {this.state.showStatus + " consoleMain resize"}>
-
+        <Box sx={{ mt: 2 }}>
+                <IconButton 
+                    onClick={this.toggleConsole}
+                    sx={{ 
+                        backgroundColor: 'black', 
+                        color: 'white',
+                        border: 3,
+                        borderColor: 'black',
+                        borderRadius: 0,
+                        width: isExpanded ? '100%' : 'auto',
+                        '&:hover': { color: '#CCCCCC' }
+                    }}
+                >
+                    {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                </IconButton>
+            <Paper 
+                id="your_div" 
+                className = {this.state.showStatus + " consoleMain resize"}
+                sx={{
+                    backgroundColor: '#333333',
+                    color: 'white',
+                    fontFamily: 'Courier New, monospace',
+                    p: 1,
+                    overflow: 'auto',
+                    maxHeight: isExpanded ? '200px' : '0px',
+                    transition: 'max-height 0.2s ease',
+                    wordBreak: 'break-all'
+                }}
+            >
                 {this.props.logs.map(element => {
                     i++;
-                    return <div key = {i}> > <span className={element.type}>{element.content}</span></div>
+                    const colorMap = {
+                        errorClass: '#dc3545',
+                        warningClass: '#ffc107',
+                        infoClass: '#17a2b8'
+                    };
+                    return <Typography key={i} variant="body2" sx={{ color: colorMap[element.type] || 'white' }}> 
+                        &gt; {element.content}
+                    </Typography>
                 }) }
-            </div>
-        </div>
+            </Paper>
+        </Box>
 
     )
   }

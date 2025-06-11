@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import { Box, Button, Alert, Typography } from '@mui/material';
+import SettingsIcon from '@mui/icons-material/Settings';
 
 import DisplayBox from '../components/DisplayBox/DisplayBox';
 import ConsoleBox from '../components/ConsoleBox/ConsoleBox';
@@ -326,47 +328,71 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
                 "display": "Alternative Therapy Cards Allowed",
                 "value": this.state.alternativeTherapy,
                 "key": "alternativeTherapy"
-            },
-            "sendPrefetch": {
+            },            "sendPrefetch": {
               "type": "check",
               "display": "Send Prefetch",
               "value": this.state.sendPrefetch,
               "key": "sendPrefetch"
           }
-        }
+        };
 
         return (
-            <div>
-                <div className="nav-header">
-                    <button className={"launch-button left-button btn btn-class " + (this.state.ehrLaunch ? "active" : "not-active")} onClick={() => this.updateStateElement("ehrLaunch", true)}>EHR Launch</button>
-                    <button className={"launch-button right-button btn btn-class " + (!this.state.ehrLaunch ? "active" : "not-active")} onClick={() => this.updateStateElement("ehrLaunch", false)}>Standalone</button>
-                    <button className={"btn btn-class settings " + (this.state.showSettings ? "active" : "not-active")} onClick={() => this.updateStateElement("showSettings", !this.state.showSettings)}><span className="glyphicon glyphicon-cog settings-icon" /></button>
+            <Box>
+                <Box className="nav-header" sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 2, borderBottom: 1, borderColor: 'divider', bgcolor: '#005B94' }}>
+                    <Button 
+                        variant={this.state.ehrLaunch ? "contained" : "outlined"}
+                        onClick={() => this.updateStateElement("ehrLaunch", true)}
+                        sx={{ 
+                            mr: 1,
+                            color: this.state.ehrLaunch ? 'white' : 'white',
+                            borderColor: 'white',
+                            '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' }
+                        }}
+                    >
+                        EHR Launch
+                    </Button>
+                    <Button 
+                        variant={!this.state.ehrLaunch ? "contained" : "outlined"}
+                        onClick={() => this.updateStateElement("ehrLaunch", false)}
+                        sx={{ 
+                            mr: 'auto',
+                            color: !this.state.ehrLaunch ? 'white' : 'white',
+                            borderColor: 'white',
+                            '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' }
+                        }}
+                    >
+                        Standalone
+                    </Button>
+                    <Button 
+                        variant={this.state.showSettings ? "contained" : "outlined"}
+                        onClick={() => this.updateStateElement("showSettings", !this.state.showSettings)}
+                        sx={{ 
+                            minWidth: 'auto',
+                            color: 'white',
+                            borderColor: 'white',
+                            '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' }
+                        }}
+                    >
+                        <SettingsIcon />
+                    </Button>
+                </Box>
 
-                </div>
-
-                {
-                    this.state.banner ? 
-                    <div className="alert alert-info banner">
+                {this.state.banner && (
+                    <Alert severity="info" sx={{ m: 2 }}>
                         <span dangerouslySetInnerHTML={{__html: this.state.banner}}></span>
-                    </div> : null
-                }
+                    </Alert>
+                )}
 
-                {/* {this.state.ehrLaunch?
-                                    <SMARTBox exitSmart={this.exitSmart}>
-                                    <EHRLaunchBox></EHRLaunchBox>
-                                </SMARTBox>:null} */}
-                <div className="form-group container left-form">
-                    <div id="settings-header">
-
-
-                    </div>
-                    {this.state.showSettings ?
+                <Box className="form-group container left-form" sx={{ width: '50%', float: 'left', mt: 3, pl: 2 }}>
+                    <Box id="settings-header" sx={{ mb: 2 }}>
+                    </Box>
+                    {this.state.showSettings && (
                         <SettingsBox
                             headers={header}
                             updateCB={this.updateStateElement}
-                        /> : null}
-                    <div>
-                        {/*for the ehr launch */}
+                        />
+                    )}
+                    <Box>
                         <RequestBox
                             ehrUrl={this.state.ehrUrl}
                             submitInfo={this.submit_info}
@@ -379,29 +405,10 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
                             responseExpirationDays={this.state.responseExpirationDays}
                             ref={this.requestBox}
                         />
+                    </Box>                    <ConsoleBox logs={this.state.logs} />
+                </Box>
 
-                    </div>
-                    <br />
-                    {/* <button className={"submit-btn btn btn-class " + (!total ? "button-error" : total === 1 ? "button-ready" : "button-empty-fields")} onClick={this.startLoading}>
-                        Submit
-                    </button> */}
-                    {/* 
-
-                    <CheckBox elementName="oauth" displayName="OAuth" updateCB={this.updateStateElement} />
-                    <CheckBox elementName="prefetch" displayName="Include Prefetch" updateCB={this.updateStateElement} />
-                    <div id="fse" className={"spinner " + (this.state.loading ? "visible" : "invisible")}>
-                        <Loader
-                            type="Oval"
-                            color="#222222"
-                            height="16"
-                            width="16"
-                        />
-                    </div> */}
-
-                    <ConsoleBox logs={this.state.logs} />
-                </div>
-
-                <div className="right-form">
+                <Box className="right-form" sx={{ float: 'right', width: '50%', mt: 6, pr: 2 }}>
                     <DisplayBox
                         response={this.state.response}
                         patientId={this.state.patient.id}
@@ -412,9 +419,9 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
                         access_token={this.state.token}
                         takeSuggestion={this.takeSuggestion}
                         retrieveLaunchContext={this.retrieveLaunchContext} />
-                </div>
+                </Box>
 
-            </div>
+            </Box>
         )
     }
 }

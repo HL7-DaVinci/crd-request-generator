@@ -1,10 +1,6 @@
 import React, {Component} from 'react';
-import {Dropdown} from 'semantic-ui-react';
+import { Autocomplete, TextField } from '@mui/material';
 import {stateOptions} from '../../util/data.js'
-
-
-
-let blackBorder = "blackBorder";
 
 export default class DropdownState extends Component {
   constructor(props){
@@ -12,28 +8,37 @@ export default class DropdownState extends Component {
     this.state = { currentValue: "MA"}
   };
 
-  handleChange = (e, { value }) => {
-    this.props.updateCB(this.props.elementName, value)
-    this.setState({ currentValue: value })
+  handleChange = (event, newValue) => {
+    if (newValue) {
+      this.props.updateCB(this.props.elementName, newValue.value);
+      this.setState({ currentValue: newValue.value });
+    } else {
+      this.props.updateCB(this.props.elementName, '');
+      this.setState({ currentValue: '' });
+    }
   }
 
   render() {
     const { currentValue } = this.props;
-    if(currentValue){
-        blackBorder = "blackBorder";
-    }else{
-        blackBorder = "";
-    }
+    const selectedOption = stateOptions.find(option => option.value === currentValue) || null;
+
     return (
-      <Dropdown
-      className={blackBorder}
-        options={stateOptions}
-        placeholder='Choose State'
-        search
-        selection
-        fluid
+      <Autocomplete
+        value={selectedOption}
         onChange={this.handleChange}
-        value={currentValue}
+        options={stateOptions}
+        getOptionLabel={(option) => option.text || ''}
+        isOptionEqualToValue={(option, value) => option.value === value.value}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            placeholder="Choose State"
+            variant="outlined"
+            size="small"
+            fullWidth
+          />
+        )}
+        sx={{ mb: 1 }}
       />
     )
   }

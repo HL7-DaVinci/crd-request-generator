@@ -1,4 +1,7 @@
 import React, { Component } from "react";
+import { Button, Box, Typography, Paper, Divider } from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 import FHIR from "fhirclient";
 import SMARTBox from "../SMARTBox/SMARTBox";
 import PatientBox from "../SMARTBox/PatientBox";
@@ -195,7 +198,6 @@ export default class RequestBox extends Component {
         });
       });
   };
-
   renderPatientInfo() {
     const patient = this.state.patient;
     let name;
@@ -207,61 +209,66 @@ export default class RequestBox extends Component {
       name = "N/A";
     }
     return (
-      <div className="demographics">
-        <div className="lower-border">
-          <span style={{ fontWeight: "bold" }}>Demographics</span>
-        </div>
-        <div className="info lower-border">Name: {name}</div>
-        <div className="info lower-border">
-          Age: {patient.birthDate ? getAge(patient.birthDate) : "N/A"}
-        </div>
-        <div className="info lower-border">
-          Gender: {patient.gender ? patient.gender : "N/A"}
-        </div>
-        <div className="info lower-border">
-          State: {this.state.patientState ? this.state.patientState : "N/A"}
-        </div>
+      <Box className="demographics" sx={{ width: '50%', float: 'left', pr: 2 }}>
+        <Typography variant="h6" sx={{ fontWeight: 'bold', borderBottom: 1, borderLeft: 5, borderColor: 'primary.main', pl: 1, mb: 1 }}>
+          Demographics
+        </Typography>
+        <Box sx={{ ml: 2 }}>
+          <Typography variant="body2" sx={{ mb: 0.5 }}>Name: {name}</Typography>
+          <Typography variant="body2" sx={{ mb: 0.5 }}>
+            Age: {patient.birthDate ? getAge(patient.birthDate) : "N/A"}
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 0.5 }}>
+            Gender: {patient.gender ? patient.gender : "N/A"}
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 0.5 }}>
+            State: {this.state.patientState ? this.state.patientState : "N/A"}
+          </Typography>
+        </Box>
         {this.renderOtherInfo()}
         {this.renderQRInfo()}
-      </div>
+      </Box>
     );
   }
-
   renderOtherInfo() {
     return (
-      <div className="other-info">
-        <div className="lower-border">
-          <span style={{ fontWeight: "bold" }}>Coding</span>
-        </div>
-        <div className="info lower-border">
-          Code: {this.state.code ? this.state.code : "N/A"}
-        </div>
-        <div className="info lower-border">
-          System:{" "}
-          {this.state.codeSystem ? shortNameMap[this.state.codeSystem] : "N/A"}
-        </div>
-        <div className="info lower-border">
-          Display: {this.state.display ? this.state.display : "N/A"}
-        </div>
-      </div>
+      <Box className="other-info" sx={{ mt: 2 }}>
+        <Typography variant="h6" sx={{ fontWeight: 'bold', borderBottom: 1, borderLeft: 5, borderColor: 'primary.main', pl: 1, mb: 1 }}>
+          Coding
+        </Typography>
+        <Box sx={{ ml: 2 }}>
+          <Typography variant="body2" sx={{ mb: 0.5 }}>
+            Code: {this.state.code ? this.state.code : "N/A"}
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 0.5 }}>
+            System: {this.state.codeSystem ? shortNameMap[this.state.codeSystem] : "N/A"}
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 0.5 }}>
+            Display: {this.state.display ? this.state.display : "N/A"}
+          </Typography>
+        </Box>
+      </Box>
     );
   }
-
   renderQRInfo() {
     const qrResponse = this.state.response;
     return (
-      <div className="questionnaire-response">
-        <div className="lower-border">
-          <span style={{ fontWeight: "bold" }}>In Progress Form</span>
-          </div>
-          <div className="info lower-border">Form: { qrResponse.questionnaire ? qrResponse.questionnaire : "N/A"}</div>
-          <div className="info lower-border">
+      <Box className="questionnaire-response" sx={{ mt: 2 }}>
+        <Typography variant="h6" sx={{ fontWeight: 'bold', borderBottom: 1, borderLeft: 5, borderColor: 'primary.main', pl: 1, mb: 1 }}>
+          In Progress Form
+        </Typography>
+        <Box sx={{ ml: 2 }}>
+          <Typography variant="body2" sx={{ mb: 0.5 }}>
+            Form: {qrResponse.questionnaire ? qrResponse.questionnaire : "N/A"}
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 0.5 }}>
             Author: {qrResponse.author ? qrResponse.author.reference : "N/A"}
-          </div>
-          <div className="info lower-border">
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 0.5 }}>
             Date: {qrResponse.authored ? qrResponse.authored : "N/A"}
-          </div>
-        </div>
+          </Typography>
+        </Box>
+      </Box>
     );
   }
 
@@ -271,7 +278,6 @@ export default class RequestBox extends Component {
       return this.renderRequestResources(prefetchMap);
     }
   }
-
   renderRequestResources(requestResources) {
     var renderedPrefetches = new Map();
     requestResources.forEach((resourceList, resourceKey) => {
@@ -286,18 +292,25 @@ export default class RequestBox extends Component {
     console.log(renderedPrefetches);
     console.log(Object.entries(renderedPrefetches));
     return (
-      <div className="prefetched">
-        <div className="prefetch-header">Prefetched</div>
+      <Box className="prefetched" sx={{ width: '50%', float: 'left', pr: 2, mt: 1 }}>
+        <Typography variant="h6" sx={{ textAlign: 'center', fontWeight: 'bold', borderBottom: 1, borderColor: 'divider', mb: 1 }}>
+          Prefetched
+        </Typography>
         {Array.from(renderedPrefetches.keys()).map((resourceKey) => {
           const currentRenderedPrefetch = renderedPrefetches.get(resourceKey);
           {console.log(currentRenderedPrefetch)};
-          return (<div><div className="prefetch-subheader">{resourceKey + " Resources"}</div>
-            {currentRenderedPrefetch}</div>);
+          return (
+            <Box key={resourceKey}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold', borderBottom: 0.5, borderColor: 'divider', mb: 1 }}>
+                {resourceKey + " Resources"}
+              </Typography>
+              <Box>{currentRenderedPrefetch}</Box>
+            </Box>
+          );
         })}
-      </div>
+      </Box>
     );
   }
-
   renderResource(resource) {
     let value = <div>N/A</div>;
     if (!resource.id) {
@@ -307,18 +320,22 @@ export default class RequestBox extends Component {
       var resourceId = resource.id;
       var resourceType = resource.resourceType;
       value = (
-        <div key={resourceId}>
-          <span style={{ textTransform: "capitalize" }}>{resourceType}</span>:{" "}
-          {resourceType}/{resourceId}{" "}
-          .....<span className="checkmark glyphicon glyphicon-ok"></span>
-        </div>
+        <Box key={resourceId} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: 0.5 }}>
+          <Typography variant="body2">
+            <span style={{ textTransform: "capitalize" }}>{resourceType}</span>:{" "}
+            {resourceType}/{resourceId}
+          </Typography>
+          <CheckCircleIcon color="success" fontSize="small" />
+        </Box>
       );
     } else {
       value = (
-        <div key={"UNKNOWN"}>
-          <span style={{ textTransform: "capitalize" }}>{"UNKNOWN"}</span>{" "}
-          .....<span className="remove glyphicon glyphicon-remove"></span>
-        </div>
+        <Box key={"UNKNOWN"} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: 0.5 }}>
+          <Typography variant="body2">
+            <span style={{ textTransform: "capitalize" }}>{"UNKNOWN"}</span>
+          </Typography>
+          <CancelIcon color="error" fontSize="small" />
+        </Box>
       );
     }
     return value;
@@ -407,12 +424,11 @@ export default class RequestBox extends Component {
         params['tokenResponse'] = {access_token: this.props.access_token.access_token};
     }
     const disableSendToCRD = this.isOrderNotSelected();
-    const disableLaunchDTR = this.isOrderNotSelected() && Object.keys(this.state.response).length === 0;
-    return (
-      <div>
-        <div className="request">
+    const disableLaunchDTR = this.isOrderNotSelected() && Object.keys(this.state.response).length === 0;    return (
+      <Box>
+        <Paper className="request" sx={{ p: 2, borderRadius: 1, border: 1, borderColor: 'divider' }}>
           {this.state.openPatient ? (
-            <div>
+            <Box>
               <SMARTBox exitSmart={this.exitSmart}>
                 <div className="patient-box">
                   {this.state.patientList instanceof Error
@@ -438,42 +454,58 @@ export default class RequestBox extends Component {
                       })}
                 </div>
               </SMARTBox>
-            </div>
+            </Box>
           ) : (
             ""
-          )}
-
-          <div>
-            <button className="select-button" onClick={this.getPatients}>
-              Patient Select:
-            </button>
-            <div className="request-header">
+          )}<Box>
+            <Button 
+              variant="contained"
+              onClick={this.getPatients}
+              sx={{ mr: 2, mb: 2 }}
+            >
+              Patient Select
+            </Button>
+            <Typography variant="h6" component="div" sx={{ display: 'inline-block', verticalAlign: 'top' }}>
               {this.state.patient.id ? this.state.patient.id : "N/A"}
-            </div>
-            <div>
+            </Typography>
+            <Box sx={{ mt: 2 }}>
               {this.renderPatientInfo()}
               {this.renderPrefetchedResources()}
-            </div>
-            <div>
-              <b>Deidentify Records</b>
+            </Box>
+            <Box sx={{ mt: 2, mb: 2 }}>
+              <Typography variant="body1" component="span" sx={{ fontWeight: 'bold', mr: 1 }}>
+                Deidentify Records
+              </Typography>
               <CheckBox
-                toggle = {this.state.deidentifyRecords}
+                toggle={this.state.deidentifyRecords}
                 updateCB={this.updateDeidentifyCheckbox}
-                elementName = "deidentifyCheckbox" 
-                />
-            </div>
-          </div>
-        </div>
-        {/* <button className={"submit-btn btn btn-class "} onClick={this.relaunch} disabled={disableLaunchDTR}>
-          Relaunch DTR
-        </button> */}
-        <button className={"submit-btn btn btn-class "} onClick={this.submit} disabled={disableSendToCRD}>
-          Submit to CRD and Display Cards
-        </button>
-        <button className={"submit-btn btn btn-class "} onClick={this.submitAction} disabled={disableSendToCRD}>
-          Submit to CRD and Launch DTR
-        </button>
-      </div>
+                elementName="deidentifyCheckbox" 
+              />
+            </Box>
+          </Box>
+        </Paper>
+        
+        <Box sx={{ mt: 2, display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
+          <Button 
+            variant="contained" 
+            color="primary"
+            onClick={this.submit} 
+            disabled={disableSendToCRD}
+            sx={{ minWidth: 200 }}
+          >
+            Submit to CRD and Display Cards
+          </Button>
+          <Button 
+            variant="contained" 
+            color="secondary"
+            onClick={this.submitAction} 
+            disabled={disableSendToCRD}
+            sx={{ minWidth: 200 }}
+          >
+            Submit to CRD and Launch DTR
+          </Button>
+        </Box>
+      </Box>
     );
   }
 }

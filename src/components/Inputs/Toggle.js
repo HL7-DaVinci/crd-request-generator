@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
-import { connect } from 'react-redux';
-
+import { Button, ButtonGroup } from '@mui/material';
 
 export default class Toggle extends Component {
     constructor(props){
@@ -31,26 +30,36 @@ export default class Toggle extends Component {
 
     }
     render() {
-        let option1class, option2class = "";
-        if(this.props.value==this.props.options.option1.value) {
-            option1class = "genderBlockMaleSelected";
-            option2class = "genderBlockFemaleUnselected"
-        }else if(this.props.value==this.props.options.option2.value){
-            option1class = "genderBlockMaleUnselected";
-            option2class = "genderBlockFemaleSelected";
-        }else{
-            option1class = "genderBlockMaleUnselected";
-            option2class = "genderBlockFemaleUnselected";
-        }
+        const isOption1Selected = this.props.value == this.props.options.option1.value;
+        const isOption2Selected = this.props.value == this.props.options.option2.value;
+        
         return (
-            <div>
-            <div
-            name={this.props.elementName}
-            >
-            <button onClick={this.clickedOption1} className={option1class+" genderBlockMale btn btn-class"}>{this.props.options.option1.text}</button>
-            <button onClick={this.clickedOption2} className={option2class+" genderBlockFemale btn btn-class"}>{this.props.options.option2.text}</button>
-            </div>
-            </div>
+            <ButtonGroup variant="outlined" sx={{ width: '100%' }}>
+                <Button 
+                    onClick={this.clickedOption1} 
+                    variant={isOption1Selected ? "contained" : "outlined"}
+                    sx={{ 
+                        flex: 1,
+                        borderTopRightRadius: 0,
+                        borderBottomRightRadius: 0,
+                        backgroundColor: isOption1Selected ? 'primary.main' : 'transparent'
+                    }}
+                >
+                    {this.props.options.option1.text}
+                </Button>
+                <Button 
+                    onClick={this.clickedOption2} 
+                    variant={isOption2Selected ? "contained" : "outlined"}
+                    sx={{ 
+                        flex: 1,
+                        borderTopLeftRadius: 0,
+                        borderBottomLeftRadius: 0,
+                        backgroundColor: isOption2Selected ? 'primary.main' : 'transparent'
+                    }}
+                >
+                    {this.props.options.option2.text}
+                </Button>
+            </ButtonGroup>
         )
 
     }
