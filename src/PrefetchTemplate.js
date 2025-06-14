@@ -30,8 +30,6 @@ export class PrefetchTemplate {
     const MEDICATION_DISPENSE_BUNDLE = new PrefetchTemplate(
       "MedicationDispense?_id={{context.medications.MedicationDispense.id}}"
       + "&_include=MedicationDispense:patient"
-      + "&_include=MedicationDispense:intended-dispenser"
-      + "&_include=MedicationDispense:requester:PractitionerRole"
       + "&_include=MedicationDispense:medication"
       + "&_include:iterate=PractitionerRole:organization"
       + "&_include:iterate=PractitionerRole:practitioner");

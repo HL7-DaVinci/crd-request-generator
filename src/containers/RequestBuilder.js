@@ -6,13 +6,13 @@ import DisplayBox from '../components/DisplayBox/DisplayBox';
 import ConsoleBox from '../components/ConsoleBox/ConsoleBox';
 import '../index.css';
 import '../components/ConsoleBox/consoleBox.css';
-import config from '../properties.json';
+import config from '../config.js';
 import { KEYUTIL } from 'jsrsasign';
 import SettingsBox from '../components/SettingsBox/SettingsBox';
 import RequestBox from '../components/RequestBox/RequestBox';
 import buildRequest from '../util/buildRequest.js';
 import { types, headers, defaultValues } from '../util/data.js';
-import { createJwt, login, setupKeys } from '../util/auth';
+import { createJwt, login, setupKeys, exchangeCodeForToken, checkOAuthCallbackError } from '../util/auth';
 import axios from 'axios';
 
 export default class RequestBuilder extends Component {
@@ -32,7 +32,6 @@ export default class RequestBuilder extends Component {
             keypair: null,
             config: {},
             ehrUrl: headers.ehrUrl.value,
-            tokenUrl: headers.tokenUrl.value,
             cdsUrl: headers.cdsUrl.value,
             orderSelect: headers.orderSelect.value,
             orderSign: headers.orderSign.value,
@@ -65,25 +64,62 @@ export default class RequestBuilder extends Component {
         this.takeSuggestion = this.takeSuggestion.bind(this);
         this.requestBox = React.createRef();
     }
-
-    componentDidMount() {
+    
+    async componentDidMount() {
         this.setState({ config });
         let ehr_base = (process.env.REACT_APP_EHR_BASE ? process.env.REACT_APP_EHR_BASE : config.ehr_base);
         let ehr_server = (process.env.REACT_APP_EHR_SERVER ? process.env.REACT_APP_EHR_SERVER : config.ehr_server);
         let banner = (process.env.REACT_APP_BANNER ? process.env.REACT_APP_BANNER : config.banner);
         this.setState({baseUrl: ehr_base ? ehr_base : ehr_server, banner: banner});
+        
         const callback = (keypair) => {
             this.setState({ keypair });
         }
 
         setupKeys(callback);
-
-        login().then((response) => { return response.json() }).then((token) => {
-            this.setState({ token })
-        }).catch((error) =>{
-            // fails when keycloak isn't running, add dummy token
-            this.setState({ token: {access_token: ""}})
-        })
+        
+        // Check if this is an OAuth callback
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        const state = urlParams.get('state');
+        
+        // Check for OAuth errors first
+        const oauthError = checkOAuthCallbackError(urlParams);
+        if (oauthError) {
+            // Handle OAuth error
+            console.error('OAuth authorization error:', oauthError);
+            this.consoleLog(`OAuth Error: ${oauthError.error} - ${oauthError.description}`, types.error);
+            this.setState({ token: {access_token: ""}});
+            // Clean up URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+            return;
+        }
+        
+        if (code && state) {
+            // Handle successful OAuth callback
+            try {
+                const response = await exchangeCodeForToken(code, state);
+                const token = await response.json();
+                this.setState({ token });
+                this.consoleLog("OAuth authentication successful", types.info);
+                // Clean up URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } catch (error) {
+                console.error('OAuth callback error:', error);
+                this.consoleLog(`OAuth token exchange failed: ${error.message}`, types.error);
+                this.setState({ token: {access_token: ""}});
+            }
+        } else {
+            // Normal login flow
+            try {
+                const response = await login();
+                const token = await response.json();
+                this.setState({ token });
+            } catch (error) {
+                // fails when auth server isn't running or auth fails, add dummy token
+                this.setState({ token: {access_token: ""}});
+            }
+        }
     }
 
     consoleLog(content, type) {
@@ -135,7 +171,7 @@ export default class RequestBuilder extends Component {
         var myHeaders = new Headers({
             "Accept": "application/json",
             "Content-Type": "application/json",
-            "authorization": jwt
+            "Authorization": jwt
         });
         this.consoleLog("Fetching response from " + cdsUrl, types.info);
         try {
@@ -292,12 +328,6 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
                 "display": "Order Sign Rest End Point",
                 "value": this.state.orderSign,
                 "key": "orderSign"
-            },
-            "tokenUrl": {
-                "type": "input",
-                "display": "Auth Server Token URL",
-                "value": this.state.tokenUrl,
-                "key": "tokenUrl"
             },
             "baseUrl": {
                 "type": "input",

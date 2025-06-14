@@ -1,6 +1,5 @@
 {
   "client": "app-login",
-  "token_url": "http://localhost:8180/auth/realms/ClientFhirServer/protocol/openid-connect/token",
   "server": "http://localhost:8090",
   "ehr_server": "http://localhost:8080/test-ehr/r4",
   "ehr_base": "http://localhost:8080/test-ehr/r4",

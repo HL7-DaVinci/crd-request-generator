@@ -20,7 +20,7 @@ module.exports = {
   devtool: isProduction ? 'source-map' : 'eval-source-map',
   devServer: {
     static: {
-      directory: path.join(__dirname, 'public'),
+      directory: path.join(__dirname, 'static'),
     },
     port: 3000,
     open: true,
@@ -70,8 +70,8 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: './public/index.html',
-      favicon: './public/favicon.ico',
+      template: './static/index.html',
+      favicon: './static/favicon.ico',
       minify: isProduction ? {
         removeComments: true,
         collapseWhitespace: true,
@@ -88,7 +88,7 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: 'public',
+          from: 'static',
           to: '.',
           globOptions: {
             ignore: ['**/index.html'],

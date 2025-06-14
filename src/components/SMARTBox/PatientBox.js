@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
 import AssignmentIcon from '@mui/icons-material/Assignment';
-import { getAge } from '../../util/fhir';
+import { getAge, resolveReference } from '../../util/fhir';
 import FHIR from 'fhirclient';
 import './smart.css';
 
@@ -33,9 +33,7 @@ export default class SMARTBox extends Component {
       isLoadingResponses: false,
       requestsError: null,
       responsesError: null,
-    };
-
-    this.handleRequestChange = this.handleRequestChange.bind(this);
+    };    this.handleRequestChange = this.handleRequestChange.bind(this);
 
     this.updatePrefetchRequest = this.updatePrefetchRequest.bind(this);
     this.getDeviceRequest = this.getDeviceRequest.bind(this);
@@ -44,11 +42,14 @@ export default class SMARTBox extends Component {
     this.getMedicationDispense = this.getMedicationDispense.bind(this);
     this.getRequests = this.getRequests.bind(this);
     this.getResponses = this.getResponses.bind(this);
-    this.makeQROption = this.makeQROption.bind(this);
-    this.handleResponseChange = this.handleResponseChange.bind(this);
-  }
-
-  getCoding(request) {
+    this.makeQROption = this.makeQROption.bind(this);    this.handleResponseChange = this.handleResponseChange.bind(this);    this.resolveMedicationReference = this.resolveMedicationReference.bind(this);
+    this.resolveReference = this.resolveReference.bind(this);
+    this.preResolveMedicationReferences = this.preResolveMedicationReferences.bind(this);
+    this.resolveAndCacheReference = this.resolveAndCacheReference.bind(this);
+    this.preResolveReferences = this.preResolveReferences.bind(this);
+    this.resolveAndCacheReference = this.resolveAndCacheReference.bind(this);
+    this.preResolveReferences = this.preResolveReferences.bind(this);
+  }  getCoding(request) {
     let code = null;
     if (request.resourceType === 'DeviceRequest') {
       code = request.codeCodeableConcept.coding[0];
@@ -58,7 +59,15 @@ export default class SMARTBox extends Component {
       request.resourceType === 'MedicationRequest' ||
       request.resourceType === 'MedicationDispense'
     ) {
-      code = request.medicationCodeableConcept.coding[0];
+      // Try medicationCodeableConcept first
+      if (request.medicationCodeableConcept) {
+        code = request.medicationCodeableConcept.coding[0];
+      } else if (request.medicationReference) {
+        // Check if we have a pre-resolved medication
+        if (request._resolvedMedication && request._resolvedMedication.code && request._resolvedMedication.code.coding) {
+          code = request._resolvedMedication.code.coding[0];
+        }
+      }
     }
     if (code) {
       if (!code.code) {
@@ -71,12 +80,110 @@ export default class SMARTBox extends Component {
         code.system = 'Unknown';
       }
     } else {
-      code.code = 'Unknown';
-      code.display = 'Unknown';
-      code.system = 'Unknown';
+      code = {
+        code: 'Unknown',
+        display: 'Unknown',
+        system: 'Unknown'
+      };
     }
     return code;
+  }  /**
+   * General-purpose FHIR reference resolver (using utility function)
+   * @param {Object} parentResource - The parent resource containing the reference
+   * @param {Object|string} reference - The reference object or reference string
+   * @param {string} expectedResourceType - The expected resource type (optional)
+   * @returns {Promise<Object|null>} - The resolved resource or null
+   */
+  async resolveReference(parentResource, reference, expectedResourceType = null) {
+    const baseUrl = this.props.ehrUrl || this.props.params?.serverUrl;
+    
+    // Build headers with optional Authorization
+    const headers = {};
+    if (this.props.params?.tokenResponse?.access_token) {
+      headers['Authorization'] = `Bearer ${this.props.params.tokenResponse.access_token}`;
+    }
+    
+    return await resolveReference(parentResource, reference, baseUrl, headers, expectedResourceType);
   }
+
+  /**
+   * Resolve a medication reference, supporting both contained and external resources
+   * @param {Object} parentResource - The parent resource (MedicationRequest/MedicationDispense)
+   * @param {Object} medicationReference - The medication reference object
+   * @returns {Promise<Object|null>} - The resolved Medication resource or null
+   */
+  async resolveMedicationReference(parentResource, medicationReference) {
+    return await this.resolveReference(parentResource, medicationReference, 'Medication');
+  }
+
+  /**
+   * Generic method to resolve and cache any FHIR reference
+   * @param {Object} parentResource - The parent resource containing the reference
+   * @param {string} referenceField - The field name containing the reference (e.g., 'medicationReference', 'practitionerReference')
+   * @param {string} expectedResourceType - The expected resource type
+   * @param {string} cacheField - The field name to cache the resolved resource (e.g., '_resolvedMedication', '_resolvedPractitioner')
+   * @returns {Promise<Object|null>} - The resolved resource or null
+   */
+  async resolveAndCacheReference(parentResource, referenceField, expectedResourceType, cacheField) {
+    // Check if already cached
+    if (parentResource[cacheField]) {
+      return parentResource[cacheField];
+    }
+
+    // Get the reference from the parent resource
+    const reference = parentResource[referenceField];
+    if (!reference) {
+      return null;
+    }
+
+    try {
+      const resolvedResource = await this.resolveReference(parentResource, reference, expectedResourceType);
+      if (resolvedResource) {
+        // Cache the resolved resource
+        parentResource[cacheField] = resolvedResource;
+      }
+      return resolvedResource;
+    } catch (error) {
+      console.error(`Error resolving ${referenceField}:`, error);
+      return null;
+    }
+  }
+
+  /**
+   * Pre-resolve any type of references in a collection of resources
+   * @param {Array} resources - Array of FHIR resources
+   * @param {Array} referenceSpecs - Array of {referenceField, expectedResourceType, cacheField} objects
+   * @returns {Promise<Array>} - Array of resources with resolved references
+   */
+  async preResolveReferences(resources, referenceSpecs) {
+    if (!Array.isArray(resources)) {
+      return resources;
+    }
+
+    const resolvedResources = await Promise.all(
+      resources.map(async (resource) => {
+        // Process each reference specification
+        for (const spec of referenceSpecs) {
+          if (resource[spec.referenceField] && !resource[spec.cacheField]) {
+            try {
+              await this.resolveAndCacheReference(
+                resource, 
+                spec.referenceField, 
+                spec.expectedResourceType, 
+                spec.cacheField
+              );
+            } catch (error) {
+              console.error(`Error pre-resolving ${spec.referenceField} for ${resource.resourceType}/${resource.id}:`, error);
+            }
+          }
+        }
+        return resource;
+      })
+    );
+
+    return resolvedResources;
+  }
+
 
   makeOption(request, options) {
     let code = this.getCoding(request);
@@ -135,8 +242,20 @@ export default class SMARTBox extends Component {
     );
     queries.forEach((query, queryKey) => {
       const urlQuery = this.props.ehrUrl + '/' + query;
+      
+      // Build headers with optional Authorization
+      const headers = {
+        'Accept': 'application/fhir+json'
+      };
+      
+      // Add Authorization header if token is available
+      if (this.props.params?.tokenResponse?.access_token) {
+        headers['Authorization'] = `Bearer ${this.props.params.tokenResponse.access_token}`;
+      }
+      
       fetch(urlQuery, {
         method: 'GET',
+        headers: headers
       })
         .then((response) => {
           const responseJson = response.json();
@@ -190,6 +309,21 @@ export default class SMARTBox extends Component {
         console.error('Error fetching service requests:', error);
         throw error;
       });
+  }  /**
+   * Pre-resolve medication references in a collection of requests using the generic method
+   * @param {Array} requests - Array of FHIR request resources
+   * @returns {Promise<Array>} - Array of requests with resolved medication references
+   */
+  async preResolveMedicationReferences(requests) {
+    const medicationSpecs = [
+      {
+        referenceField: 'medicationReference',
+        expectedResourceType: 'Medication',
+        cacheField: '_resolvedMedication'
+      }
+    ];
+
+    return await this.preResolveReferences(requests, medicationSpecs);
   }
 
   getMedicationRequest(patientId, client) {
@@ -199,7 +333,11 @@ export default class SMARTBox extends Component {
         graph: false,
         flat: true,
       })
-      .then((result) => {
+      .then(async (result) => {
+        // Pre-resolve medication references
+        if (result.data) {
+          result.data = await this.preResolveMedicationReferences(result.data);
+        }
         this.setState({ medicationRequests: result });
         return result;
       })
@@ -216,7 +354,11 @@ export default class SMARTBox extends Component {
         graph: false,
         flat: true,
       })
-      .then((result) => {
+      .then(async (result) => {
+        // Pre-resolve medication references
+        if (result.data) {
+          result.data = await this.preResolveMedicationReferences(result.data);
+        }
         this.setState({ medicationDispenses: result });
         return result;
       })

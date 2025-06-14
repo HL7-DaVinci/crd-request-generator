@@ -1,4 +1,4 @@
-import config from '../properties.json';
+import config from '../config.js';
 
 
 const types = {
@@ -27,18 +27,12 @@ const headers = {
     "orderSign": {
         "display": "Order Sign Rest End Point",
         "value": (process.env.REACT_APP_ORDER_SIGN ? process.env.REACT_APP_ORDER_SIGN : config.order_sign),
-        "key":"orderSign"
-    },
-    "tokenUrl": {
-        "display": "Auth Server Token URL",
-        "value": (process.env.REACT_APP_TOKEN_URL ? process.env.REACT_APP_TOKEN_URL : config.token_url),
-        "key": "tokenUrl"
-    },
+        "key":"orderSign"    },
     "alternativeTherapy": {
         "display": "Alternative Therapy Cards Allowed",
         "value": (process.env.REACT_APP_ALTERNATIVE_THERAPY? process.env.REACT_APP_ALTERNATIVE_THERAPY : config.alt_drug),
         "key": "alternativeTherapy"
-    }, 
+    },
     "launchUrl" : {
         "display": "DTR Launch URL",
     "value": (process.env.REACT_APP_LAUNCH_URL ? process.env.REACT_APP_LAUNCH_URL : config.launch_url),
