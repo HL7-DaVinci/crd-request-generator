@@ -1,5 +1,6 @@
 import KJUR, { KEYUTIL } from 'jsrsasign';
 import config from '../config.js';
+import { getConfigValue } from './data.js';
 
 function makeid() {
     var text = [];
@@ -79,7 +80,7 @@ async function discoverSmartEndpoints(fhirBaseUrl) {
 async function checkAuthRequired(ehrServer) {
     try {
         // Try to access the Patient endpoint without authentication
-        const response = await fetch(`${ehrServer}/Patient`, {
+        const response = await fetch(`${ehrServer}/Patient?_summary=count`, {
             method: "GET",
             headers: {
                 "Accept": "application/fhir+json"
@@ -113,8 +114,8 @@ function generateCodeChallenge(codeVerifier) {
 }
 
 async function performOAuthAuthorizationFlow() {
-    const ehrServer = (process.env.REACT_APP_EHR_SERVER ? process.env.REACT_APP_EHR_SERVER : config.ehr_server);
-    const clientId = (process.env.REACT_APP_CLIENT ? process.env.REACT_APP_CLIENT : config.client);
+    const ehrServer = getConfigValue('ehrUrl', 'REACT_APP_EHR_SERVER', 'ehr_server');
+    const clientId = getConfigValue('client', 'REACT_APP_CLIENT', 'client');
     
     try {
         // Discover SMART endpoints from the FHIR server
@@ -156,7 +157,7 @@ async function performOAuthAuthorizationFlow() {
 }
 
 async function exchangeCodeForToken(code, state) {
-    const clientId = (process.env.REACT_APP_CLIENT ? process.env.REACT_APP_CLIENT : config.client);
+    const clientId = getConfigValue('client', 'REACT_APP_CLIENT', 'client');
     const redirectUri = window.location.origin;
     
     // Verify state matches
@@ -199,7 +200,7 @@ async function exchangeCodeForToken(code, state) {
 }
 
 async function login() {
-    const ehrServer = (process.env.REACT_APP_EHR_SERVER ? process.env.REACT_APP_EHR_SERVER : config.ehr_server);
+    const ehrServer = getConfigValue('ehrUrl', 'REACT_APP_EHR_SERVER', 'ehr_server');
     
     // First check if authentication is required
     const authRequired = await checkAuthRequired(ehrServer);
@@ -218,13 +219,13 @@ function createJwt(keypair, baseUrl, cdsUrl) {
     console.log("creating jwt");
     const currentTime = KJUR.jws.IntDate.get('now');
     const endTime = KJUR.jws.IntDate.get('now + 1day');
-    const kid = KJUR.jws.JWS.getJWKthumbprint(keypair.public)
+    const kid = KJUR.jws.JWS.getJWKthumbprint(keypair.public);
 
     const header = {
         "alg": "RS256",
         "typ": "JWT",
         "kid": kid,
-        "jku": (process.env.REACT_APP_PUBLIC_KEYS ? process.env.REACT_APP_PUBLIC_KEYS : config.public_keys)
+        "jku": getConfigValue('publicKeys', 'REACT_APP_PUBLIC_KEYS', 'public_keys')
     };
 
     const body = {
@@ -256,7 +257,7 @@ function setupKeys(callback) {
     "id": kid
   };
 
-  fetch(`${(process.env.REACT_APP_PUBLIC_KEYS ? process.env.REACT_APP_PUBLIC_KEYS : config.public_keys)}/`, {
+  fetch(`${getConfigValue('publicKeys', 'REACT_APP_PUBLIC_KEYS', 'public_keys')}/`, {
     "body": JSON.stringify(pubPem),
     "headers": {
         "Content-Type": "application/json"

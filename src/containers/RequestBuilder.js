@@ -11,7 +11,7 @@ import { KEYUTIL } from 'jsrsasign';
 import SettingsBox from '../components/SettingsBox/SettingsBox';
 import RequestBox from '../components/RequestBox/RequestBox';
 import buildRequest from '../util/buildRequest.js';
-import { types, headers, defaultValues } from '../util/data.js';
+import { types, headers, defaultValues, getConfigValue } from '../util/data.js';
 import { createJwt, login, setupKeys, exchangeCodeForToken, checkOAuthCallbackError } from '../util/auth';
 import axios from 'axios';
 
@@ -31,10 +31,10 @@ export default class RequestBuilder extends Component {
             logs: [],
             keypair: null,
             config: {},
-            ehrUrl: headers.ehrUrl.value,
-            cdsUrl: headers.cdsUrl.value,
-            orderSelect: headers.orderSelect.value,
-            orderSign: headers.orderSign.value,
+            ehrUrl: null,
+            cdsUrl: null,
+            orderSelect: null,
+            orderSign: null,
             showSettings: false,
             ehrLaunch: false,
             patientList: [],
@@ -42,35 +42,39 @@ export default class RequestBuilder extends Component {
             patient: {},
             codeValues: defaultValues,
             currentPatient: null,
-            baseUrl: null,
             serviceRequests: {},
             currentServiceRequest: null,
             includeConfig: true,
-            alternativeTherapy: headers.alternativeTherapy.value,
-            launchUrl: headers.launchUrl.value,
-            responseExpirationDays: headers.responseExpirationDays.value
+            alternativeTherapy: null,
+            launchUrl: null,
+            responseExpirationDays: headers.responseExpirationDays.value,
+            publicKeys: null,
+            client: null,
+            hasUnsavedChanges: false
         };
         this.validateMap = {
             age: (foo => { return isNaN(foo) }),
             gender: (foo => { return foo !== "male" && foo !== "female" }),
             code: (foo => { return !foo.match(/^[a-z0-9]+$/i) })
         };
-
         this.updateStateElement = this.updateStateElement.bind(this);
         this.startLoading = this.startLoading.bind(this);
         this.submit_info = this.submit_info.bind(this);
         this.consoleLog = this.consoleLog.bind(this);
         this.exitSmart = this.exitSmart.bind(this);
         this.takeSuggestion = this.takeSuggestion.bind(this);
+        this.saveConfigurationChanges = this.saveConfigurationChanges.bind(this);
+        this.resetConfigurationToDefaults = this.resetConfigurationToDefaults.bind(this);
         this.requestBox = React.createRef();
     }
-    
-    async componentDidMount() {
+      async componentDidMount() {
         this.setState({ config });
-        let ehr_base = (process.env.REACT_APP_EHR_BASE ? process.env.REACT_APP_EHR_BASE : config.ehr_base);
-        let ehr_server = (process.env.REACT_APP_EHR_SERVER ? process.env.REACT_APP_EHR_SERVER : config.ehr_server);
+        
+        // Refresh configuration values from localStorage, environment, and config file
+        this.refreshConfigFromSources();
+        
         let banner = (process.env.REACT_APP_BANNER ? process.env.REACT_APP_BANNER : config.banner);
-        this.setState({baseUrl: ehr_base ? ehr_base : ehr_server, banner: banner});
+        this.setState({banner: banner});
         
         const callback = (keypair) => {
             this.setState({ keypair });
@@ -132,9 +136,57 @@ export default class RequestBuilder extends Component {
             logs: [...prevState.logs, jsonContent]
         }))
     }
-
     updateStateElement = (elementName, text) => {
         this.setState({ [elementName]: text });
+        // Mark that there are unsaved configuration changes
+        const configKeys = ['ehrUrl', 'cdsUrl', 'orderSelect', 'orderSign', 'launchUrl', 'responseExpirationDays', 'alternativeTherapy', 'publicKeys', 'client'];
+        if (configKeys.includes(elementName)) {
+            this.setState({ hasUnsavedChanges: true });
+        }
+    }
+    
+    // Refresh configuration values from localStorage, environment, and config file
+    refreshConfigFromSources = () => {
+        this.setState({
+            ehrUrl: getConfigValue('ehrUrl', 'REACT_APP_EHR_SERVER', 'ehr_server'),
+            cdsUrl: getConfigValue('cdsUrl', 'REACT_APP_CDS_SERVICE', 'cds_service'),
+            orderSelect: getConfigValue('orderSelect', 'REACT_APP_ORDER_SELECT', 'order_select'),
+            orderSign: getConfigValue('orderSign', 'REACT_APP_ORDER_SIGN', 'order_sign'),
+            launchUrl: getConfigValue('launchUrl', 'REACT_APP_LAUNCH_URL', 'launch_url'),
+            responseExpirationDays: getConfigValue('responseExpirationDays', 'REACT_APP_FORM_EXPIRATION_DAYS', 'response_expiration_days'),
+            alternativeTherapy: getConfigValue('alternativeTherapy', 'REACT_APP_ALTERNATIVE_THERAPY', 'alt_drug'),
+            publicKeys: getConfigValue('publicKeys', 'REACT_APP_PUBLIC_KEYS', 'public_keys'),            client: getConfigValue('client', 'REACT_APP_CLIENT', 'client')
+        });
+    }
+
+    // Save configuration values to localStorage and refresh the page
+    saveConfigurationChanges = () => {
+        var configKeys = ['ehrUrl', 'cdsUrl', 'orderSelect', 'orderSign', 'launchUrl', 'responseExpirationDays', 'alternativeTherapy', 'publicKeys', 'client'];
+        
+        // Save current state values to localStorage
+        configKeys.forEach(key => {
+            if (this.state[key] !== null && this.state[key] !== undefined) {
+                localStorage.setItem(key, this.state[key]);
+            }
+        });
+        
+        // Clear unsaved changes flag and refresh the page
+        this.setState({ hasUnsavedChanges: false }, () => {
+            // Refresh the page to reload configuration from all sources
+            window.location.reload();
+        });    }
+
+    // Clear all configuration from localStorage and refresh the page
+    resetConfigurationToDefaults = () => {
+        const configKeys = ['ehrUrl', 'cdsUrl', 'orderSelect', 'orderSign', 'launchUrl', 'responseExpirationDays', 'alternativeTherapy', 'publicKeys', 'client'];
+        
+        // Remove all configuration values from localStorage
+        configKeys.forEach(key => {
+            localStorage.removeItem(key);
+        });
+        
+        // Refresh the page to reload configuration from environment/config file
+        window.location.reload();
     }
 
     onInputChange(event) {
@@ -165,8 +217,8 @@ export default class RequestBuilder extends Component {
             this.consoleLog("ERROR: unknown hook type: '", hook, "'");
             return;
         }
-        let baseUrl = this.state.baseUrl;
-        const jwt = this.state.keypair ? "Bearer " + createJwt(this.state.keypair, baseUrl, cdsUrl) : null;
+        let ehrUrl = this.state.ehrUrl;
+        const jwt = this.state.keypair ? "Bearer " + createJwt(this.state.keypair, ehrUrl, cdsUrl) : null;
         console.log(jwt);
         var myHeaders = new Headers({
             "Accept": "application/json",
@@ -329,12 +381,6 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
                 "value": this.state.orderSign,
                 "key": "orderSign"
             },
-            "baseUrl": {
-                "type": "input",
-                "display": "Base EHR",
-                "value": this.state.baseUrl,
-                "key": "baseUrl"
-            },
             "launchUrl": {
                 "type": "input",
                 "display": "DTR Launch URL",
@@ -346,6 +392,18 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
                 "display": "In Progress Form Expiration Days",
                 "value": this.state.responseExpirationDays,
                 "key": "responseExpirationDays"
+            },
+            "publicKeys": {
+                "type": "input",
+                "display": "Public Keys URL",
+                "value": this.state.publicKeys,
+                "key": "publicKeys"
+            },
+            "client": {
+                "type": "input",
+                "display": "Client ID",
+                "value": this.state.client,
+                "key": "client"
             },
             "includeConfig": {
                 "type": "check",
@@ -417,17 +475,43 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
                     <Box id="settings-header" sx={{ mb: 2 }}>
                     </Box>
                     {this.state.showSettings && (
-                        <SettingsBox
-                            headers={header}
-                            updateCB={this.updateStateElement}
-                        />
+                        <>
+                            <SettingsBox
+                                headers={header}
+                                updateCB={this.updateStateElement}
+                            />
+                            <Box sx={{ mt: 2, mb: 2 }}>
+                                <Button 
+                                    variant="contained" 
+                                    color="primary"
+                                    onClick={this.saveConfigurationChanges}
+                                    disabled={!this.state.hasUnsavedChanges}
+                                    sx={{ mr: 2 }}
+                                >
+                                    Save Configuration
+                                </Button>
+                                <Button 
+                                    variant="outlined" 
+                                    color="secondary"
+                                    onClick={this.resetConfigurationToDefaults}
+                                    sx={{ mr: 2 }}
+                                >
+                                    Reset to Defaults
+                                </Button>
+                                {this.state.hasUnsavedChanges && (
+                                    <Typography variant="body2" color="warning.main" component="span">
+                                        You have unsaved changes
+                                    </Typography>
+                                )}
+                            </Box>
+                        </>
                     )}
                     <Box>
                         <RequestBox
                             ehrUrl={this.state.ehrUrl}
                             submitInfo={this.submit_info}
                             access_token={this.state.token}
-                            fhirServerUrl={this.state.baseUrl}
+                            fhirServerUrl={this.state.ehrUrl}
                             fhirVersion={'r4'}
                             patientId={this.state.patient.id}
                             retrieveLaunchContext={this.retrieveLaunchContext}
@@ -443,7 +527,7 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
                         response={this.state.response}
                         patientId={this.state.patient.id}
                         ehrLaunch={true}
-                        fhirServerUrl={this.state.baseUrl}
+                        fhirServerUrl={this.state.ehrUrl}
                         fhirVersion={'r4'}
                         ehrUrl={this.state.ehrUrl}
                         access_token={this.state.token}

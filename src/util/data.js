@@ -1,5 +1,76 @@
 import config from '../config.js';
 
+// Helper function to resolve configuration values with priority:
+// 1. localStorage
+// 2. environment variable
+// 3. config file
+function getConfigValue(localStorageKey, envVarName, configProperty) {
+    // First check localStorage
+    const localStorageValue = localStorage.getItem(localStorageKey);
+    if (localStorageValue !== null && localStorageValue !== '') {
+        return localStorageValue;
+    }
+    
+    // Then check environment variable
+    const envValue = process.env[envVarName];
+    if (envValue) {
+        return envValue;
+    }
+    
+    // Finally fallback to config file
+    return config[configProperty];
+}
+
+// Helper function to get the source of a configuration value for debugging
+function getConfigSource(localStorageKey, envVarName, configProperty) {
+    // First check localStorage
+    const localStorageValue = localStorage.getItem(localStorageKey);
+    if (localStorageValue !== null && localStorageValue !== '') {
+        return 'localStorage';
+    }
+    
+    // Then check environment variable
+    const envValue = process.env[envVarName];
+    if (envValue) {
+        return 'environment';
+    }
+    
+    // Finally fallback to config file
+    return 'config file';
+}
+
+// Helper function to clear all configuration values from localStorage
+function clearConfigFromLocalStorage() {
+    const configKeys = ['ehrUrl', 'cdsUrl', 'orderSelect', 'orderSign', 'launchUrl', 'responseExpirationDays', 'alternativeTherapy', 'publicKeys', 'client'];
+    configKeys.forEach(key => {
+        localStorage.removeItem(key);
+    });
+}
+
+// Helper function to get all configuration sources for debugging
+function getAllConfigSources() {    const configMappings = [
+        { key: 'ehrUrl', env: 'REACT_APP_EHR_SERVER', config: 'ehr_server', display: 'EHR Server' },
+        { key: 'cdsUrl', env: 'REACT_APP_CDS_SERVICE', config: 'cds_service', display: 'CRD Server' },
+        { key: 'orderSelect', env: 'REACT_APP_ORDER_SELECT', config: 'order_select', display: 'Order Select' },
+        { key: 'orderSign', env: 'REACT_APP_ORDER_SIGN', config: 'order_sign', display: 'Order Sign' },
+        { key: 'launchUrl', env: 'REACT_APP_LAUNCH_URL', config: 'launch_url', display: 'Launch URL' },
+        { key: 'responseExpirationDays', env: 'REACT_APP_FORM_EXPIRATION_DAYS', config: 'response_expiration_days', display: 'Form Expiration Days' },
+        { key: 'alternativeTherapy', env: 'REACT_APP_ALTERNATIVE_THERAPY', config: 'alt_drug', display: 'Alternative Therapy' },
+        { key: 'publicKeys', env: 'REACT_APP_PUBLIC_KEYS', config: 'public_keys', display: 'Public Keys URL' },
+        { key: 'client', env: 'REACT_APP_CLIENT', config: 'client', display: 'Client ID' }
+    ];
+    
+    return configMappings.map(mapping => {
+        return {
+            key: mapping.key,
+            env: mapping.env,
+            config: mapping.config,
+            display: mapping.display,
+            value: getConfigValue(mapping.key, mapping.env, mapping.config),
+            source: getConfigSource(mapping.key, mapping.env, mapping.config)
+        };
+    });
+}
 
 const types = {
     error: "errorClass",
@@ -11,37 +82,46 @@ const types = {
 const headers = {
     "ehrUrl": {
         "display": "EHR Server",
-        "value": (process.env.REACT_APP_EHR_SERVER ? process.env.REACT_APP_EHR_SERVER : config.ehr_server),
+        "value": getConfigValue('ehrUrl', 'REACT_APP_EHR_SERVER', 'ehr_server'),
         "key": "ehrUrl"
     },
     "cdsUrl": {
         "display": "CRD Server",
-        "value": (process.env.REACT_APP_CDS_SERVICE ? process.env.REACT_APP_CDS_SERVICE : config.cds_service),
+        "value": getConfigValue('cdsUrl', 'REACT_APP_CDS_SERVICE', 'cds_service'),
         "key":"cdsUrl"
     },
     "orderSelect": {
         "display": "Order Select Rest End Point",
-        "value": (process.env.REACT_APP_ORDER_SELECT ? process.env.REACT_APP_ORDER_SELECT : config.order_select),
+        "value": getConfigValue('orderSelect', 'REACT_APP_ORDER_SELECT', 'order_select'),
         "key":"orderSelect"
     },
     "orderSign": {
         "display": "Order Sign Rest End Point",
-        "value": (process.env.REACT_APP_ORDER_SIGN ? process.env.REACT_APP_ORDER_SIGN : config.order_sign),
+        "value": getConfigValue('orderSign', 'REACT_APP_ORDER_SIGN', 'order_sign'),
         "key":"orderSign"    },
     "alternativeTherapy": {
         "display": "Alternative Therapy Cards Allowed",
-        "value": (process.env.REACT_APP_ALTERNATIVE_THERAPY? process.env.REACT_APP_ALTERNATIVE_THERAPY : config.alt_drug),
+        "value": getConfigValue('alternativeTherapy', 'REACT_APP_ALTERNATIVE_THERAPY', 'alt_drug'),
         "key": "alternativeTherapy"
     },
     "launchUrl" : {
         "display": "DTR Launch URL",
-    "value": (process.env.REACT_APP_LAUNCH_URL ? process.env.REACT_APP_LAUNCH_URL : config.launch_url),
+    "value": getConfigValue('launchUrl', 'REACT_APP_LAUNCH_URL', 'launch_url'),
         "key": "launchUrl"
-    },
-    "responseExpirationDays" : {
+    },    "responseExpirationDays" : {
         "display": "In Progress Form Expiration Days",
-        "value": (process.env.REACT_APP_FORM_EXPIRATION_DAYS ? process.env.REACT_APP_FORM_EXPIRATION_DAYS : config.response_expiration_days),
+        "value": getConfigValue('responseExpirationDays', 'REACT_APP_FORM_EXPIRATION_DAYS', 'response_expiration_days'),
         "key": "responseExpirationDays"
+    },
+    "publicKeys": {
+        "display": "Public Keys URL",
+        "value": getConfigValue('publicKeys', 'REACT_APP_PUBLIC_KEYS', 'public_keys'),
+        "key": "publicKeys"
+    },
+    "client": {
+        "display": "Client ID",
+        "value": getConfigValue('client', 'REACT_APP_CLIENT', 'client'),
+        "key": "client"
     }
 }
 
@@ -128,11 +208,15 @@ const shortNameMap = {
     "http://hl7.org/fhir/sid/ndc": "NDC"
 }
 
-  export {
-      defaultValues,
-      genderOptions,
-      headers,
-      shortNameMap,
-      stateOptions,
-      types,
-  }
+export {
+    clearConfigFromLocalStorage,
+    defaultValues,
+    genderOptions,
+    getConfigValue,
+    getConfigSource,
+    headers,
+    shortNameMap,
+    stateOptions,
+    types,
+    getAllConfigSources
+}

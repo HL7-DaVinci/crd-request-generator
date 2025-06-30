@@ -1,10 +1,9 @@
-import React, {Component} from 'react';
+import {Component} from 'react';
 import FHIR from "fhirclient";
 import './card-list.css';
 import { Button, Card, CardContent, Typography, Box } from '@mui/material';
 import PropTypes from 'prop-types';
 import axios from 'axios';
-import SMARTBox from '../SMARTBox/SMARTBox';
 import ReactMarkdown from 'react-markdown';
 import './displayBox.css';
 
@@ -177,6 +176,7 @@ export default class DisplayBox extends Component{
    * @param {*} link - Link object that contains the URL and any error state to catch
    */
   launchLink(e, link) {
+    console.log("launching link: ", link);
     if (!this.props.isDemoCard) {
       e.preventDefault();
       if (link.error) {
