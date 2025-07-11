@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Box, Button, Alert, Typography } from '@mui/material';
+import { Alert, Box, Button, Grid, Typography } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 
 import DisplayBox from '../components/DisplayBox/DisplayBox';
@@ -155,7 +155,8 @@ export default class RequestBuilder extends Component {
             launchUrl: getConfigValue('launchUrl', 'REACT_APP_LAUNCH_URL', 'launch_url'),
             responseExpirationDays: getConfigValue('responseExpirationDays', 'REACT_APP_FORM_EXPIRATION_DAYS', 'response_expiration_days'),
             alternativeTherapy: getConfigValue('alternativeTherapy', 'REACT_APP_ALTERNATIVE_THERAPY', 'alt_drug'),
-            publicKeys: getConfigValue('publicKeys', 'REACT_APP_PUBLIC_KEYS', 'public_keys'),            client: getConfigValue('client', 'REACT_APP_CLIENT', 'client')
+            publicKeys: getConfigValue('publicKeys', 'REACT_APP_PUBLIC_KEYS', 'public_keys'),
+            client: getConfigValue('client', 'REACT_APP_CLIENT', 'client')
         });
     }
 
@@ -425,6 +426,7 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
         };
 
         return (
+            <>
             <Box>
                 <Box className="nav-header" sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 2, borderBottom: 1, borderColor: 'divider', bgcolor: '#005B94' }}>
                     <Button 
@@ -470,8 +472,10 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
                         <span dangerouslySetInnerHTML={{__html: this.state.banner}}></span>
                     </Alert>
                 )}
+            </Box>
 
-                <Box className="form-group container left-form" sx={{ width: '50%', float: 'left', mt: 3, pl: 2 }}>
+            <Grid container spacing={2} sx={{ m: 2 }}>
+                <Grid size={6}>
                     <Box id="settings-header" sx={{ mb: 2 }}>
                     </Box>
                     {this.state.showSettings && (
@@ -520,9 +524,9 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
                             ref={this.requestBox}
                         />
                     </Box>                    <ConsoleBox logs={this.state.logs} />
-                </Box>
-
-                <Box className="right-form" sx={{ float: 'right', width: '50%', mt: 6, pr: 2 }}>
+                </Grid>
+                
+                <Grid size={6}>
                     <DisplayBox
                         response={this.state.response}
                         patientId={this.state.patient.id}
@@ -533,9 +537,10 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
                         access_token={this.state.token}
                         takeSuggestion={this.takeSuggestion}
                         retrieveLaunchContext={this.retrieveLaunchContext} />
-                </Box>
+                </Grid>
 
-            </Box>
+            </Grid>
+            </>
         )
     }
 }

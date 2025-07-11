@@ -72,7 +72,8 @@ export default class ConsoleBox extends Component {
                     fontFamily: 'Courier New, monospace',
                     p: 1,
                     overflow: 'auto',
-                    maxHeight: isExpanded ? '200px' : '0px',
+                    minHeight: '5vh',
+                    maxHeight: isExpanded ? '200px' : '5vh',
                     transition: 'max-height 0.2s ease',
                     wordBreak: 'break-all'
                 }}
