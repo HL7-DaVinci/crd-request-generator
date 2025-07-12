@@ -19,9 +19,21 @@ const theme = createTheme({
 
 const container = document.getElementById('root');
 const root = createRoot(container);
-root.render(
-  <ThemeProvider theme={theme}>
-    <CssBaseline />
-    <App />
-  </ThemeProvider>
-);
+
+function renderApp() {
+  root.render(
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <App />
+    </ThemeProvider>
+  );
+}
+
+renderApp();
+
+// Hot Module Replacement
+if (module.hot) {
+  module.hot.accept('./components/App', () => {
+    renderApp();
+  });
+}

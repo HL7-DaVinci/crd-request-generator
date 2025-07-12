@@ -63,3 +63,5 @@ typings/
 # local build files
 build/
 package-lock.json
+
+db.json

@@ -1,5 +1,4 @@
 import KJUR, { KEYUTIL } from 'jsrsasign';
-import config from '../config.js';
 import { getConfigValue } from './data.js';
 
 function makeid() {

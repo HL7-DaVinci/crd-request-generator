@@ -11,8 +11,10 @@
     "axios": "^1.9.0",
     "clone": "^2.1.2",
     "core-js": "^3.43.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.19.2",
     "fhirclient": "^2.6.0",
-    "json-server": "^1.0.0-beta.3",
     "jsrsasign": "^11.1.0",
     "lodash": "^4.17.21",
     "react": "^19.1.0",
@@ -21,9 +23,10 @@
     "sass": "^1.89.2"
   },
   "scripts": {
-    "start": "concurrently --kill-others \"json-server src/db.json -p 3001\" \"webpack serve --mode development\"",
-    "production": "json-server src/db.json -p 3000 --static build",
-    "dev": "webpack serve --mode development",
+    "start": "node server.js",
+    "production": "NODE_ENV=production node server.js",
+    "dev": "node server.js",
+    "server": "node server.js",
     "build": "NODE_ENV=production webpack --mode production",
     "build:analyze": "NODE_ENV=production webpack --mode production --analyze",
     "knip": "knip"
@@ -36,19 +39,21 @@
     "@types/node": "^24.0.0",
     "@types/prop-types": "^15.7.15",
     "babel-loader": "^10.0.0",
-    "concurrently": "^9.1.2",
     "copy-webpack-plugin": "^13.0.0",
     "css-loader": "^7.1.2",
     "dotenv-webpack": "^8.1.0",
     "html-webpack-plugin": "^5.6.3",
     "knip": "^5.60.2",
     "mini-css-extract-plugin": "^2.9.2",
+    "nodemon": "^3.0.1",
     "sass-loader": "^16.0.5",
     "style-loader": "^4.0.0",
     "typescript": "^5.8.3",
     "webpack": "^5.99.9",
     "webpack-cli": "^6.0.1",
-    "webpack-dev-server": "^5.2.2"
+    "webpack-dev-middleware": "^7.4.2",
+    "webpack-dev-server": "^5.2.2",
+    "webpack-hot-middleware": "^2.26.1"
   },
   "browserslist": {
     "production": [

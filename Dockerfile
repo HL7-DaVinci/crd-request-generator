@@ -36,7 +36,10 @@ RUN npm ci --only=production && npm cache clean --force
 
 # Copy built application from builder stage
 COPY --from=builder --chown=appuser:nodejs /app/build ./build
-COPY --from=builder --chown=appuser:nodejs /app/src/db.json ./src/db.json
+COPY --from=builder --chown=appuser:nodejs /app/server.js ./server.js
+
+# Create default db.json file
+RUN echo '{}' > db.json && chown appuser:nodejs db.json
 
 # Switch to non-root user
 USER appuser
@@ -46,7 +49,7 @@ EXPOSE 3000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/ || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
 
 # Start only the backend (frontend is already built)
 CMD ["npm", "run", "production"]

@@ -1,8 +1,9 @@
 import config from '../config.js';
+import { getRuntimeEnvVar, isRuntimeConfigLoaded } from './runtime-config.js';
 
 // Helper function to resolve configuration values with priority:
 // 1. localStorage
-// 2. environment variable
+// 2. runtime environment variable (from server)
 // 3. config file
 function getConfigValue(localStorageKey, envVarName, configProperty) {
     // First check localStorage
@@ -11,10 +12,12 @@ function getConfigValue(localStorageKey, envVarName, configProperty) {
         return localStorageValue;
     }
     
-    // Then check environment variable
-    const envValue = process.env[envVarName];
-    if (envValue) {
-        return envValue;
+    // Then check runtime environment variable (from server)
+    if (isRuntimeConfigLoaded()) {
+        const runtimeEnvValue = getRuntimeEnvVar(envVarName);
+        if (runtimeEnvValue) {
+            return runtimeEnvValue;
+        }
     }
     
     // Finally fallback to config file
@@ -29,10 +32,12 @@ function getConfigSource(localStorageKey, envVarName, configProperty) {
         return 'localStorage';
     }
     
-    // Then check environment variable
-    const envValue = process.env[envVarName];
-    if (envValue) {
-        return 'environment';
+    // Then check runtime environment variable (from server)
+    if (isRuntimeConfigLoaded()) {
+        const runtimeEnvValue = getRuntimeEnvVar(envVarName);
+        if (runtimeEnvValue) {
+            return 'runtime environment';
+        }
     }
     
     // Finally fallback to config file
