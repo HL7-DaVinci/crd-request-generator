@@ -7,7 +7,7 @@ export class PrefetchTemplate {
     const prefetchMap = new Map();
 
     const COVERAGE_PREFETCH_QUERY = new PrefetchTemplate(
-      "Coverage?patient={{context.patientId}}");
+      "Coverage?patient={{context.patientId}}&status=active");
 
     const DEVICE_REQUEST_BUNDLE = new PrefetchTemplate(
       "DeviceRequest?_id={{context.draftOrders.DeviceRequest.id}}"

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Alert, Box, Button, Grid, Typography } from '@mui/material';
+import { Alert, Box, Button, Typography } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 
 import DisplayBox from '../components/DisplayBox/DisplayBox';
@@ -13,6 +13,7 @@ import RequestBox from '../components/RequestBox/RequestBox';
 import buildRequest from '../util/buildRequest.js';
 import { types, headers, defaultValues, getConfigValue } from '../util/data.js';
 import { createJwt, login, setupKeys, exchangeCodeForToken, checkOAuthCallbackError } from '../util/auth';
+import { isOperationOutcome, extractErrorMessages, getHighestSeverity } from '../util/operationOutcome';
 import axios from 'axios';
 
 export default class RequestBuilder extends Component {
@@ -24,6 +25,7 @@ export default class RequestBuilder extends Component {
             code: null,
             codeSystem: null,
             response: null,
+            operationOutcome: null,
             token: null,
             oauth: false,
             sendPrefetch: true,
@@ -227,6 +229,7 @@ export default class RequestBuilder extends Component {
             "Authorization": jwt
         });
         this.consoleLog("Fetching response from " + cdsUrl, types.info);
+        this.setState({ response: null, operationOutcome: null });
         try {
             try {
                 let response = await fetch(cdsUrl, {
@@ -235,18 +238,30 @@ export default class RequestBuilder extends Component {
                     body: JSON.stringify(json_request)
                 });
                 let fhirResponse = await response.json();
-                
-                if (fhirResponse && fhirResponse.status) {
-                    this.consoleLog("Server returned status "
-                        + fhirResponse.status + ": "
-                        + fhirResponse.error, types.error);
-                    this.consoleLog(fhirResponse.message, types.error);
-                } else {
-                    if (setResponseState) {
-                        this.setState({ response: fhirResponse });
-                    }
-                    return fhirResponse;
+
+                if (isOperationOutcome(fhirResponse)) {
+                    const errorMessages = extractErrorMessages(fhirResponse);
+                    const severity = getHighestSeverity(fhirResponse);
+                    errorMessages.forEach(msg => {
+                        this.consoleLog(msg, severity === 'warning' ? types.warning : types.error);
+                    });
+                    this.setState({ operationOutcome: fhirResponse });
+                    return;
                 }
+
+                if (!response.ok) {
+                    this.consoleLog("Server returned status " + response.status, types.error);
+                    if (fhirResponse && fhirResponse.status) {
+                        this.consoleLog(fhirResponse.status + ": " + fhirResponse.error, types.error);
+                        this.consoleLog(fhirResponse.message, types.error);
+                    }
+                    return;
+                }
+
+                if (setResponseState) {
+                    this.setState({ response: fhirResponse });
+                }
+                return fhirResponse;
             } catch (error) {
                 this.consoleLog("No response recieved from the server", types.error);
             } finally {
@@ -256,7 +271,6 @@ export default class RequestBuilder extends Component {
         } catch (error) {
             this.setState({ loading: false });
             this.consoleLog("Unexpected error occured", types.error)
-            // this.consoleLog(e.,types.error);
             if (error instanceof TypeError) {
                 this.consoleLog(error.name + ": " + error.message, types.error);
             }
@@ -474,10 +488,8 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
                 )}
             </Box>
 
-            <Grid container spacing={2} sx={{ m: 2 }}>
-                <Grid size={6}>
-                    <Box id="settings-header" sx={{ mb: 2 }}>
-                    </Box>
+            <Box sx={{ display: 'flex', gap: 2, m: 2, alignItems: 'flex-start' }}>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
                     {this.state.showSettings && (
                         <>
                             <SettingsBox
@@ -485,8 +497,8 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
                                 updateCB={this.updateStateElement}
                             />
                             <Box sx={{ mt: 2, mb: 2 }}>
-                                <Button 
-                                    variant="contained" 
+                                <Button
+                                    variant="contained"
                                     color="primary"
                                     onClick={this.saveConfigurationChanges}
                                     disabled={!this.state.hasUnsavedChanges}
@@ -494,8 +506,8 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
                                 >
                                     Save Configuration
                                 </Button>
-                                <Button 
-                                    variant="outlined" 
+                                <Button
+                                    variant="outlined"
                                     color="secondary"
                                     onClick={this.resetConfigurationToDefaults}
                                     sx={{ mr: 2 }}
@@ -510,25 +522,25 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
                             </Box>
                         </>
                     )}
-                    <Box>
-                        <RequestBox
-                            ehrUrl={this.state.ehrUrl}
-                            submitInfo={this.submit_info}
-                            access_token={this.state.token}
-                            fhirServerUrl={this.state.ehrUrl}
-                            fhirVersion={'r4'}
-                            patientId={this.state.patient.id}
-                            retrieveLaunchContext={this.retrieveLaunchContext}
-                            launchUrl={this.state.launchUrl}
-                            responseExpirationDays={this.state.responseExpirationDays}
-                            ref={this.requestBox}
-                        />
-                    </Box>                    <ConsoleBox logs={this.state.logs} />
-                </Grid>
-                
-                <Grid size={6}>
+                    <RequestBox
+                        ehrUrl={this.state.ehrUrl}
+                        submitInfo={this.submit_info}
+                        access_token={this.state.token}
+                        fhirServerUrl={this.state.ehrUrl}
+                        fhirVersion={'r4'}
+                        patientId={this.state.patient.id}
+                        retrieveLaunchContext={this.retrieveLaunchContext}
+                        launchUrl={this.state.launchUrl}
+                        responseExpirationDays={this.state.responseExpirationDays}
+                        ref={this.requestBox}
+                    />
+                    <ConsoleBox logs={this.state.logs} />
+                </Box>
+
+                <Box sx={{ flex: 1, minWidth: 0 }}>
                     <DisplayBox
                         response={this.state.response}
+                        operationOutcome={this.state.operationOutcome}
                         patientId={this.state.patient.id}
                         ehrLaunch={true}
                         fhirServerUrl={this.state.ehrUrl}
@@ -536,10 +548,13 @@ retrieveLaunchContext(link, accessToken, patientId, fhirBaseUrl, fhirVersion) {
                         ehrUrl={this.state.ehrUrl}
                         access_token={this.state.token}
                         takeSuggestion={this.takeSuggestion}
-                        retrieveLaunchContext={this.retrieveLaunchContext} />
-                </Grid>
-
-            </Grid>
+                        retrieveLaunchContext={this.retrieveLaunchContext}
+                        launchUrl={this.state.launchUrl}
+                        buildLaunchLink={this.requestBox.current ? this.requestBox.current.buildLaunchLink : null}
+                        patient={this.state.patient}
+                    />
+                </Box>
+            </Box>
             </>
         )
     }

@@ -52,15 +52,19 @@ export default class SMARTBox extends Component {
   }  getCoding(request) {
     let code = null;
     if (request.resourceType === 'DeviceRequest') {
-      code = request.codeCodeableConcept.coding[0];
+      if (request.codeCodeableConcept && request.codeCodeableConcept.coding) {
+        code = request.codeCodeableConcept.coding[0];
+      }
     } else if (request.resourceType === 'ServiceRequest') {
-      code = request.code.coding[0];
+      if (request.code && request.code.coding) {
+        code = request.code.coding[0];
+      }
     } else if (
       request.resourceType === 'MedicationRequest' ||
       request.resourceType === 'MedicationDispense'
     ) {
       // Try medicationCodeableConcept first
-      if (request.medicationCodeableConcept) {
+      if (request.medicationCodeableConcept && request.medicationCodeableConcept.coding) {
         code = request.medicationCodeableConcept.coding[0];
       } else if (request.medicationReference) {
         // Check if we have a pre-resolved medication

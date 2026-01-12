@@ -1,103 +1,139 @@
-import {Component} from 'react';
-import FHIR from "fhirclient";
+import { Component } from 'react';
+import FHIR from 'fhirclient';
 import './card-list.css';
-import { Button, Card, CardContent, Typography, Box } from '@mui/material';
+import { Button, Card, CardContent, Typography, Box, Collapse, IconButton } from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import './displayBox.css';
+import RequestBox from '../RequestBox/RequestBox';
 
 const propTypes = {
-    /**
-     * A boolean to determine if the context of this component is under the Demo Card feature of the Sandbox, or in the actual
-     * hook views that render cards themselves. This flag is necessary to make links and suggestions unactionable in the Card Demo view.
-     */
-    isDemoCard: PropTypes.bool,
-    /**
-     * The FHIR access token retrieved from the authorization server. Used to retrieve a launch context for a SMART app
-     */
-    fhirAccessToken: PropTypes.object,
-    /**
-     * Function callback to take a specific suggestion from a card
-     */
-    takeSuggestion: PropTypes.func.isRequired,
-    /**
-     * Identifier of the Patient resource for the patient in context
-     */
-    patientId: PropTypes.string,
-    /**
-     * The FHIR server URL in context
-     */
-    fhirServerUrl: PropTypes.string,
-    /**
-     * The FHIR version in use
-     */
-    fhirVersion: PropTypes.string,
-    /**
-     * JSON response from a CDS service containing potential cards to display
-     */
-    cardResponses: PropTypes.object,
-  };
+  /**
+   * A boolean to determine if the context of this component is under the Demo Card feature of the Sandbox, or in the actual
+   * hook views that render cards themselves. This flag is necessary to make links and suggestions unactionable in the Card Demo view.
+   */
+  isDemoCard: PropTypes.bool,
+  /**
+   * The FHIR access token retrieved from the authorization server. Used to retrieve a launch context for a SMART app
+   */
+  fhirAccessToken: PropTypes.object,
+  /**
+   * Function callback to take a specific suggestion from a card
+   */
+  takeSuggestion: PropTypes.func.isRequired,
+  /**
+   * Identifier of the Patient resource for the patient in context
+   */
+  patientId: PropTypes.string,
+  /**
+   * The FHIR server URL in context
+   */
+  fhirServerUrl: PropTypes.string,
+  /**
+   * The FHIR version in use
+   */
+  fhirVersion: PropTypes.string,
+  /**
+   * JSON response from a CDS service containing potential cards to display
+   */
+  cardResponses: PropTypes.object,
+  /**
+   * OperationOutcome resource from a failed CDS service call
+   */
+  operationOutcome: PropTypes.object,
+};
 
-export default class DisplayBox extends Component{
-    constructor(props){
-        super(props);
-        this.launchLink = this.launchLink.bind(this);
-        this.launchSource = this.launchSource.bind(this);
-        this.renderSource = this.renderSource.bind(this);
-        this.modifySmartLaunchUrls = this.modifySmartLaunchUrls.bind(this);
-        this.exitSmart = this.exitSmart.bind(this);
-        this.state={
-            value: "",
-            smartLink: "",
-            response: {}
-        };
-    }
+export default class DisplayBox extends Component {
+  constructor(props) {
+    super(props);
+    this.launchLink = this.launchLink.bind(this);
+    this.launchSource = this.launchSource.bind(this);
+    this.renderSource = this.renderSource.bind(this);
+    this.modifySmartLaunchUrls = this.modifySmartLaunchUrls.bind(this);
+    this.exitSmart = this.exitSmart.bind(this);
+    this.launchDTR = this.launchDTR.bind(this);
+    this.state = {
+      value: '',
+      smartLink: '',
+      response: {},
+      operationOutcome: null,
+      expandedActions: {},
+    };
+    this.toggleActionExpand = this.toggleActionExpand.bind(this);
+  }
 
-    static getDerivedStateFromProps(nextProps, prevState) {
-        if(JSON.stringify(nextProps.response) !== JSON.stringify(prevState.response)) {
-            return {"response":nextProps.response}
-        }else{ 
-            return null;
-        }
-    }
-
-    shouldComponentUpdate(nextProps, prevState) {
-        if(JSON.stringify(nextProps.response) !== JSON.stringify(this.state.response) || this.state.smartLink !== prevState.smartLink) {
-            return true;
-        }else{
-            return false;
-        }
-    }
-
-    supportedRequesType(resource) {
-      let resourceType = resource.resourceType.toUpperCase();
-      if ( (resourceType === "DEVICEREQUEST") 
-        || (resourceType === "SERVICEREQUEST") 
-        || (resourceType === "MEDICATIONREQUEST")
-        || (resourceType === "MEDICATIONDISPENSE") ) {
-          return true;
+  toggleActionExpand(index) {
+    this.setState(prevState => ({
+      expandedActions: {
+        ...prevState.expandedActions,
+        [index]: !prevState.expandedActions[index]
       }
+    }));
+  }
+
+  static getDerivedStateFromProps(nextProps, prevState) {
+    const updates = {};
+    if (JSON.stringify(nextProps.response) !== JSON.stringify(prevState.response)) {
+      updates.response = nextProps.response;
     }
+    if (JSON.stringify(nextProps.operationOutcome) !== JSON.stringify(prevState.operationOutcome)) {
+      updates.operationOutcome = nextProps.operationOutcome;
+    }
+    return Object.keys(updates).length > 0 ? updates : null;
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    if (
+      JSON.stringify(nextProps.response) !== JSON.stringify(this.state.response) ||
+      JSON.stringify(nextProps.operationOutcome) !== JSON.stringify(this.state.operationOutcome) ||
+      this.state.smartLink !== nextState.smartLink ||
+      JSON.stringify(this.state.expandedActions) !== JSON.stringify(nextState.expandedActions)
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  supportedRequesType(resource) {
+    let resourceType = resource.resourceType.toUpperCase();
+    if (
+      resourceType === 'DEVICEREQUEST' ||
+      resourceType === 'SERVICEREQUEST' ||
+      resourceType === 'MEDICATIONREQUEST' ||
+      resourceType === 'MEDICATIONDISPENSE'
+    ) {
+      return true;
+    }
+  }
   /**
    * Take a suggestion from a CDS service based on action on from a card. Also pings the analytics endpoint (if any) of the
    * CDS service to notify that a suggestion was taken
    * @param {*} suggestion - CDS service-defined suggestion to take based on CDS Hooks specification
    * @param {*} url - CDS service endpoint URL
    */
-  takeSuggestion(suggestion, url, buttonId, suggestionCount, cardNum, selectionBehavior) {
+  takeSuggestion(
+    suggestion,
+    url,
+    buttonId,
+    suggestionCount,
+    cardNum,
+    selectionBehavior
+  ) {
     if (!this.props.isDemoCard) {
-      console.log("taking suggestion");
+      console.log('taking suggestion');
 
       if (selectionBehavior === 'at-most-one') {
         // disable all suggestion buttons for this card
         for (var i = 0; i < suggestionCount; i++) {
-          let bId = "suggestion_button-"+cardNum+"-"+i;
-          document.getElementById(bId).setAttribute("disabled", "true");
+          let bId = 'suggestion_button-' + cardNum + '-' + i;
+          document.getElementById(bId).setAttribute('disabled', 'true');
         }
       } else {
         // disable this suggestion button if any are allowed
-        document.getElementById(buttonId).setAttribute("disabled", "true");
+        document.getElementById(buttonId).setAttribute('disabled', 'true');
       }
 
       if (suggestion.label) {
@@ -118,19 +154,18 @@ export default class DisplayBox extends Component{
 
         // handle each action from the suggestion
         suggestion.actions.forEach((action) => {
-          if (action.type.toUpperCase() === "DELETE") {
-            var uri = action.resource.resourceType + "/" + action.resource.id;
-            console.log("completing suggested action DELETE: " + uri);
+          if (action.type.toUpperCase() === 'DELETE') {
+            var uri = action.resource.resourceType + '/' + action.resource.id;
+            console.log('completing suggested action DELETE: ' + uri);
             client.delete(uri).then((result) => {
-              console.log("suggested action DELETE result:");
+              console.log('suggested action DELETE result:');
               console.log(result);
             });
-
-          } else if (action.type.toUpperCase() === "CREATE") {
+          } else if (action.type.toUpperCase() === 'CREATE') {
             var uri = action.resource.resourceType;
-            console.log("completing suggested action CREATE: " + uri);
+            console.log('completing suggested action CREATE: ' + uri);
             client.create(action.resource).then((result) => {
-              console.log("suggested action CREATE result:");
+              console.log('suggested action CREATE result:');
               console.log(result);
 
               if (this.supportedRequesType(result)) {
@@ -138,20 +173,17 @@ export default class DisplayBox extends Component{
                 this.props.takeSuggestion(result);
               }
             });
-
-          } else if (action.type.toUpperCase() === "UPDATE") {
-            var uri = action.resource.resourceType + "/" + action.resource.id;
-            console.log("completing suggested action UPDATE: " + uri);
+          } else if (action.type.toUpperCase() === 'UPDATE') {
+            var uri = action.resource.resourceType + '/' + action.resource.id;
+            console.log('completing suggested action UPDATE: ' + uri);
             client.update(action.resource).then((result) => {
-              console.log("suggested action UPDATE result:");
+              console.log('suggested action UPDATE result:');
               console.log(result);
             });
-
           } else {
-            console.log("WARNING: unknown action");
+            console.log('WARNING: unknown action');
           }
         });
-
       } else {
         console.error('There was no label on this suggestion', suggestion);
       }
@@ -167,8 +199,28 @@ export default class DisplayBox extends Component{
   }
 
   exitSmart(e) {
-    this.setState({"smartLink":""});
+    this.setState({ smartLink: '' });
   }
+
+  /**
+   * Launch DTR with the specified questionnaire
+   * @param {*} e - Event emitted when link is clicked
+   * @param {*} questionnaireUrl - The canonical URL of the questionnaire
+   */
+  async launchDTR(e, questionnaireUrl) {
+    e.preventDefault();
+    if (!this.props.isDemoCard && this.props.buildLaunchLink) {
+      try {
+        const launchLink = await this.props.buildLaunchLink(
+          `&questionnaire=${questionnaireUrl}`
+        );
+        window.open(launchLink.url, '_blank');
+      } catch (error) {
+        console.error('Error launching DTR:', error);
+      }
+    }
+  }
+
   /**
    * Open the absolute or SMART link in a new tab and display an error if a SMART link does not have
    * appropriate launch context if used against a secured FHIR endpoint.
@@ -176,15 +228,14 @@ export default class DisplayBox extends Component{
    * @param {*} link - Link object that contains the URL and any error state to catch
    */
   launchLink(e, link) {
-    console.log("launching link: ", link);
+    console.log('launching link: ', link);
     if (!this.props.isDemoCard) {
       e.preventDefault();
       if (link.error) {
         // TODO: Create an error modal to display for SMART link that cannot be launched securely
         return;
       }
-        window.open(link.url, '_blank');
-
+      window.open(link.url, '_blank');
     }
   }
 
@@ -199,14 +250,23 @@ export default class DisplayBox extends Component{
       return card.links.map((link) => {
         let linkCopy = Object.assign({}, link);
 
-        if (link.type === 'smart' && (this.props.fhirAccessToken || this.props.ehrLaunch) && !this.state.smartLink) {
-          this.props.retrieveLaunchContext(
-            linkCopy, this.props.fhirAccessToken,
-            this.props.patientId, this.props.fhirServerUrl, this.props.fhirVersion
-          ).then((result) => {
-            linkCopy = result;
-            return linkCopy;
-          });
+        if (
+          link.type === 'smart' &&
+          (this.props.fhirAccessToken || this.props.ehrLaunch) &&
+          !this.state.smartLink
+        ) {
+          this.props
+            .retrieveLaunchContext(
+              linkCopy,
+              this.props.fhirAccessToken,
+              this.props.patientId,
+              this.props.fhirServerUrl,
+              this.props.fhirVersion
+            )
+            .then((result) => {
+              linkCopy = result;
+              return linkCopy;
+            });
         } else if (link.type === 'smart') {
           if (link.url.indexOf('?') < 0) {
             linkCopy.url += '?';
@@ -226,140 +286,428 @@ export default class DisplayBox extends Component{
    * Helper function to build out the UI for the source of the Card
    * @param {*} source - Object as part of the card to build the UI for
    */
-    renderSource(source) {
-        if (!source.label) { return null; }
-        let icon;        if (source.icon) {
-          icon = <img className="card-icon" src={source.icon} alt="Could not fetch icon" width="100" height="100" />;
-        }if (!this.props.isDemoCard) {
-          return (
-            <div className="card-source">
-              Source: <a className="source-link" href={source.url || '#'} onClick={e => this.launchSource(e)}>{source.label}</a>
-              {icon}
-            </div>
-          );
-        }
+  renderSource(source) {
+    if (!source.label) {
+      return null;
+    }
+    let icon;
+    if (source.icon) {
+      icon = (
+        <img
+          className='card-icon'
+          src={source.icon}
+          alt='Could not fetch icon'
+          width='100'
+          height='100'
+        />
+      );
+    }
+    if (!this.props.isDemoCard) {
+      return (
+        <div className='card-source'>
+          Source:{' '}
+          <a
+            className='source-link'
+            href={source.url || '#'}
+            onClick={(e) => this.launchSource(e)}
+          >
+            {source.label}
+          </a>
+          {icon}
+        </div>
+      );
+    }
+    return (
+      <div className='card-source'>
+        Source:
+        <a
+          className='source-link'
+          href='#'
+          onClick={(e) => this.launchSource(e)}
+        >
+          {source.label}
+        </a>
+        {icon}
+      </div>
+    );
+  }
+
+  renderOperationOutcome() {
+    const { operationOutcome } = this.state;
+    if (!operationOutcome || !operationOutcome.issue) {
+      return null;
+    }
+
+    const severityColors = {
+      fatal: '#c00',
+      error: '#c00',
+      warning: '#ffae42',
+      information: '#0079be',
+    };
+
+    const issueCards = operationOutcome.issue.map((issue, idx) => {
+      const severity = issue.severity || 'error';
+      const message = issue.details?.text || issue.diagnostics || issue.code || 'Unknown error';
+
+      return (
+        <Box key={idx} sx={{ mb: 1, p: 1.5, bgcolor: '#fff', borderRadius: 1, borderLeft: `4px solid ${severityColors[severity]}` }}>
+          <Typography variant='subtitle2' sx={{ color: severityColors[severity], fontWeight: 'bold', textTransform: 'uppercase' }}>
+            {severity}
+          </Typography>
+          <Typography variant='body2' sx={{ mt: 0.5 }}>
+            {message}
+          </Typography>
+          {issue.expression && (
+            <Typography variant='caption' sx={{ color: 'text.secondary', display: 'block', mt: 0.5 }}>
+              Location: {Array.isArray(issue.expression) ? issue.expression.join(', ') : issue.expression}
+            </Typography>
+          )}
+        </Box>
+      );
+    });
+
+    return (
+      <Card sx={{ mb: 2, bgcolor: '#fef2f2', border: '1px solid #fecaca' }}>
+        <CardContent>
+          <Typography variant='h6' component='h4' gutterBottom sx={{ color: '#991b1b', mb: 2 }}>
+            Error Response
+          </Typography>
+          {issueCards}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  renderSystemActions() {
+    const { response } = this.state;
+    if (!response || !response.systemActions || response.systemActions.length === 0) {
+      return null;
+    }
+
+    const actionTypeColors = {
+      create: '#166534',
+      update: '#1e40af',
+      delete: '#991b1b',
+    };
+
+    const actionItems = response.systemActions.map((action, idx) => {
+      const isExpanded = this.state.expandedActions[idx];
+      const resourceType = action.resource?.resourceType || 'Unknown';
+      const actionType = action.type || 'unknown';
+
+      return (
+        <Box key={idx} sx={{ mb: 1, border: '1px solid #e5e7eb', borderRadius: 1, overflow: 'hidden' }}>
+          <Box
+            sx={{
+              p: 1.5,
+              bgcolor: '#f9fafb',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              cursor: 'pointer',
+            }}
+            onClick={() => this.toggleActionExpand(idx)}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography
+                variant='caption'
+                sx={{
+                  px: 1,
+                  py: 0.5,
+                  bgcolor: actionTypeColors[actionType] || '#6b7280',
+                  color: 'white',
+                  borderRadius: 0.5,
+                  fontWeight: 'bold',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {actionType}
+              </Typography>
+              <Typography variant='body2' sx={{ fontWeight: 'medium' }}>
+                {resourceType}
+              </Typography>
+              {action.description && (
+                <Typography variant='body2' sx={{ color: 'text.secondary' }}>
+                  - {action.description}
+                </Typography>
+              )}
+            </Box>
+            <IconButton size='small'>
+              {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            </IconButton>
+          </Box>
+          <Collapse in={isExpanded}>
+            <Box sx={{ p: 2, bgcolor: '#1e293b', maxHeight: 300, overflow: 'auto' }}>
+              <pre style={{ margin: 0, color: '#e2e8f0', fontSize: '12px', whiteSpace: 'pre-wrap' }}>
+                {JSON.stringify(action.resource, null, 2)}
+              </pre>
+            </Box>
+          </Collapse>
+        </Box>
+      );
+    });
+
+    return (
+      <Card sx={{ mb: 2, bgcolor: '#f8fafc', border: '1px solid #e2e8f0' }}>
+        <CardContent>
+          <Typography variant='h6' component='h4' gutterBottom sx={{ color: '#334155', mb: 2 }}>
+            System Actions ({response.systemActions.length})
+          </Typography>
+          {actionItems}
+        </CardContent>
+      </Card>
+    );
+  }
+
+  render() {
+    this.buttonList = [];
+    const indicators = {
+      info: 0,
+      warning: 1,
+      'hard-stop': 2,
+      error: 3,
+    };
+
+    const summaryColors = {
+      info: '#0079be',
+      warning: '#ffae42',
+      'hard-stop': '#c00',
+      error: '#333',
+    };
+
+    // Extract questionnaires from response using the static utility function
+    const questionnaires = this.state.response
+      ? RequestBox.extractQuestionnairesFromCoverageInfo(this.state.response)
+      : [];
+
+    // Build DTR launch links section
+    let dtrLinksSection = null;
+    if (questionnaires.length > 0 && this.props.buildLaunchLink) {
+      const dtrButtons = questionnaires.map((q, idx) => {
+        // Extract a display name from the questionnaire URL
+        const displayName =
+          q.questionnaireUrl.split('/').pop() || 'Questionnaire';
         return (
-          <div className="card-source">
-            Source:
-            <a
-              className="source-link"
-              href="#"
-              onClick={e => this.launchSource(e)}
+          <div key={idx}>
+            <Button
+              key={idx}
+              onClick={(e) => this.launchDTR(e, q.questionnaireUrl)}
+              variant='contained'
+              color='secondary'
+              sx={{ mr: 1, mb: 1 }}
             >
-              {source.label}
-            </a>
-            {icon}
+              Complete {displayName} in DTR
+            </Button>
           </div>
         );
-      }
+      });
 
-    render() {
-        this.buttonList = [];
-        const indicators = {
-            info: 0,
-            warning: 1,
-            'hard-stop': 2,
-            error: 3,
-          };
-      
-          const summaryColors = {
-            info: '#0079be',
-            warning: '#ffae42',
-            'hard-stop': '#c00',
-            error: '#333',
-          };
-          const renderedCards = [];
-          // Iterate over each card in the cards array
-          if(this.state.response!=null && this.state.response.cards!=null){
-            this.state.response.cards
-            .sort((b, a) => indicators[a.indicator] - indicators[b.indicator])
-            .forEach((c, cardInd) => {
-              const card = JSON.parse(JSON.stringify(c));              // -- Summary --
-              const summarySection = <Typography variant="h6" component="div" style={{color: summaryColors[card.indicator], fontWeight: 'bold'}}>{card.summary}</Typography>;
+      dtrLinksSection = (
+        <Card sx={{ mb: 2, bgcolor: '#f5f5f5' }}>
+          <CardContent>
+            <Typography
+              variant='h6'
+              component='h4'
+              gutterBottom
+              sx={{ color: 'black', mb: 1 }}
+            >
+              Documentation Required
+            </Typography>
+            <Typography variant='body2' sx={{ mb: 2, color: 'text.secondary' }}>
+              Launch DTR to complete the required questionnaire(s):
+            </Typography>
+            <Box>{dtrButtons}</Box>
+          </CardContent>
+        </Card>
+      );
+    }
 
-              // -- Source --
-              const sourceSection = card.source && Object.keys(card.source).length ? this.renderSource(card.source) : '';              // -- Detail (ReactMarkdown supports Github-flavored markdown) --
-              const detailSection = card.detail ? <div style={{color: summaryColors.info}}><ReactMarkdown>{card.detail}</ReactMarkdown></div> : <Typography color="text.secondary">None</Typography>;
-      
-              // -- Suggestions --
-              let suggestionsSection = [];
-              if (card.suggestions) {
-                card.suggestions.forEach((item, ind) => {
-                  var buttonId = "suggestion_button-"+cardInd+"-"+ind;
-                  this.buttonList.push(buttonId);                  suggestionsSection.push(
-                    <Button
-                      key={ind}
-                      onClick={() => this.takeSuggestion(item, card.serviceUrl, buttonId, card.suggestions.length, cardInd, card.selectionBehavior)}
-                      variant="contained"
-                      id={buttonId}
-                      sx={{ mr: 1, mb: 1 }}
-                    >
-                      {item.label}
-                    </Button>
-                  );
-                });
-              }              // -- Links --
-              let linksSection;
-              if (card.links) {
-                card.links = this.modifySmartLaunchUrls(card) || card.links;
-                linksSection = card.links.map((link, ind) => (
-                  <Button
-                    key={ind}
-                    onClick={e => this.launchLink(e, link)}
-                    variant="outlined"
-                    sx={{ mr: 1, mb: 1 }}
-                  >
-                    {link.label}
-                  </Button>
-                ));
-              }              // -- Type --
-              var typeSection = "";
-              if (card.source.hasOwnProperty("topic")) {
-                typeSection = card.source.topic.display ? <div style={{color: summaryColors.info}}><ReactMarkdown>{card.source.topic.display}</ReactMarkdown></div> : <Typography color="text.secondary">None</Typography>;
-              }
-    
-              const cardSectionHeaderStyle = { marginBottom: '2px', color: 'black' };              const builtCard = (
-                <Card key={cardInd} className='decision-card alert-info' sx={{ mb: 2 }}>
-                  <CardContent>
-                    <Typography variant="h6" component="h4" gutterBottom sx={{ color: 'black', mb: 1 }}>
-                      Summary
-                    </Typography>
-                    <Box>{summarySection}</Box>
+    const renderedCards = [];
+    // Iterate over each card in the cards array
+    if (this.state.response != null && this.state.response.cards != null) {
+      this.state.response.cards
+        .sort((b, a) => indicators[a.indicator] - indicators[b.indicator])
+        .forEach((c, cardInd) => {
+          const card = JSON.parse(JSON.stringify(c));
+          console.log('Rendering card: ', card, c);
 
-                    <Typography variant="h6" component="h4" gutterBottom sx={{ color: 'black', mt: 2, mb: 1 }}>
-                      Details
-                    </Typography>
-                    <Box>{detailSection}</Box>                    <Box sx={{ mt: 2 }}>{sourceSection}</Box>
+          // -- Summary --
+          const summarySection = (
+            <Typography
+              variant='h6'
+              component='div'
+              style={{
+                color: summaryColors[card.indicator],
+                fontWeight: 'bold',
+              }}
+            >
+              {card.summary}
+            </Typography>
+          );
 
-                    <Box className="suggestions-section">
-                      {suggestionsSection}
-                    </Box>
-                    <Box className="links-section">
-                      {linksSection}
-                    </Box>
-                    <Typography variant="h6" component="h4" gutterBottom sx={{ color: 'black', mt: 2, mb: 1 }}>
-                      Type
-                    </Typography>
-                    <Box>{typeSection}</Box>
-                  </CardContent>
-                </Card>);
-      
-              renderedCards.push(builtCard);
+          // -- Source --
+          const sourceSection =
+            card.source && Object.keys(card.source).length
+              ? this.renderSource(card.source)
+              : ''; // -- Detail (ReactMarkdown supports Github-flavored markdown) --
+          const detailSection = card.detail ? (
+            <div style={{ color: summaryColors.info }}>
+              <ReactMarkdown>{card.detail}</ReactMarkdown>
+            </div>
+          ) : (
+            <Typography color='text.secondary'>None</Typography>
+          );
+
+          // -- Suggestions --
+          let suggestionsSection = [];
+          if (card.suggestions) {
+            card.suggestions.forEach((item, ind) => {
+              var buttonId = 'suggestion_button-' + cardInd + '-' + ind;
+              this.buttonList.push(buttonId);
+              suggestionsSection.push(
+                <Button
+                  key={ind}
+                  onClick={() =>
+                    this.takeSuggestion(
+                      item,
+                      card.serviceUrl,
+                      buttonId,
+                      card.suggestions.length,
+                      cardInd,
+                      card.selectionBehavior
+                    )
+                  }
+                  variant='contained'
+                  id={buttonId}
+                  sx={{ mr: 1, mb: 1 }}
+                >
+                  {item.label}
+                </Button>
+              );
             });
+          } // -- Links --
+          let linksSection;
+          if (card.links) {
+            card.links = this.modifySmartLaunchUrls(card) || card.links;
+            linksSection = card.links.map((link, ind) => (
+              <Button
+                key={ind}
+                onClick={(e) => this.launchLink(e, link)}
+                variant='outlined'
+                sx={{ mr: 1, mb: 1 }}
+              >
+                {link.label}
+              </Button>
+            ));
+          } // -- Type --
+          var typeSection = '';
+          if (card.source.hasOwnProperty('topic')) {
+            typeSection = card.source.topic.display ? (
+              <div style={{ color: summaryColors.info }}>
+                <ReactMarkdown>{card.source.topic.display}</ReactMarkdown>
+              </div>
+            ) : (
+              <Typography color='text.secondary'>None</Typography>
+            );
           }
-          if (renderedCards.length === 0) { return <div><div className='decision-card alert-warning'>No Cards</div></div>; }
-          return <div>
-                  <div>
-                  {renderedCards}
-                  </div>
-                </div>;
-        }
 
-        componentDidUpdate() {
-          // clear the suggestion buttons
-          console.log(this.buttonList);
-          this.buttonList.forEach((requestButton, id) => {
-            document.getElementById(requestButton).removeAttribute("disabled");
-          });
-        }
-      }
+          const cardSectionHeaderStyle = {
+            marginBottom: '2px',
+            color: 'black',
+          };
+          const builtCard = (
+            <Card
+              key={cardInd}
+              className='decision-card alert-info'
+              sx={{ mb: 2 }}
+            >
+              <CardContent>
+                <Typography
+                  variant='h6'
+                  component='h4'
+                  gutterBottom
+                  sx={{ color: 'black', mb: 1 }}
+                >
+                  Summary
+                </Typography>
+                <Box>{summarySection}</Box>
+                <Typography
+                  variant='h6'
+                  component='h4'
+                  gutterBottom
+                  sx={{ color: 'black', mt: 2, mb: 1 }}
+                >
+                  Details
+                </Typography>
+                <Box>{detailSection}</Box>{' '}
+                <Box sx={{ mt: 2 }}>{sourceSection}</Box>
+                <Box className='suggestions-section'>{suggestionsSection}</Box>
+                <Box className='links-section'>{linksSection}</Box>
+                <Typography
+                  variant='h6'
+                  component='h4'
+                  gutterBottom
+                  sx={{ color: 'black', mt: 2, mb: 1 }}
+                >
+                  Type
+                </Typography>
+                <Box>{typeSection}</Box>
+              </CardContent>
+            </Card>
+          );
+
+          renderedCards.push(builtCard);
+        });
+    }
+    const operationOutcomeSection = this.renderOperationOutcome();
+
+    if (operationOutcomeSection) {
+      return (
+        <div>
+          {operationOutcomeSection}
+        </div>
+      );
+    }
+
+    const hasReceivedResponse = this.state.response && 'cards' in this.state.response;
+
+    const systemActionsSection = this.renderSystemActions();
+
+    if (renderedCards.length === 0 && !dtrLinksSection && hasReceivedResponse) {
+      return (
+        <div>
+          <Card sx={{ mb: 2, bgcolor: '#f0fdf4', border: '1px solid #bbf7d0' }}>
+            <CardContent>
+              <Typography variant='h6' component='h4' gutterBottom sx={{ color: '#166534' }}>
+                No Cards Returned
+              </Typography>
+              <Typography variant='body2' sx={{ color: '#15803d' }}>
+                Your request was processed successfully. However, no cards were returned in the response.
+              </Typography>
+            </CardContent>
+          </Card>
+          {systemActionsSection}
+        </div>
+      );
+    }
+
+    if (!hasReceivedResponse && !operationOutcomeSection) {
+      return null;
+    }
+    return (
+      <div>
+        <div>{dtrLinksSection}</div>
+        <div>{renderedCards}</div>
+        {systemActionsSection}
+      </div>
+    );
+  }
+
+  componentDidUpdate() {
+    // clear the suggestion buttons
+    console.log(this.buttonList);
+    this.buttonList.forEach((requestButton, id) => {
+      document.getElementById(requestButton).removeAttribute('disabled');
+    });
+  }
+}
